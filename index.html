@@ -5,7 +5,7 @@
   <title>DLsiteおすすめ共有</title>
   <style>
     /* ===================================
-      基本スタイル & 全体レイアウト
+       基本スタイル & 全体レイアウト
     ====================================== */
     * { 
       box-sizing: border-box;
@@ -37,7 +37,7 @@
     }
 
     /* ===================================
-      操作コントロール (ボタン、入力欄)
+       操作コントロール (ボタン、入力欄)
     ====================================== */
     .controls { 
       display: flex; 
@@ -63,27 +63,20 @@
     }
 
     /* 各ボタンの個別スタイル */
-    #addBtn, #adminAddBtn { background: #28a745; }
-    #addBtn:disabled, #adminAddBtn:disabled { opacity: .6; cursor: default; }
-    #adminToggle { background: #f57c00; }
-    #manageTagsBtn { background: #6a1b9a; }
+    #addBtn { background: #28a745; }
+    #addBtn:disabled { opacity: .6; cursor: default; }
     #hideBadBtn { background: #6c757d; }
     #hideBadBtn.active { background: #f44336; font-weight: bold; }
     #mosaicToggleBtn { background: #8e44ad; }
-    /* タグ絞り込みボタンを緑色に変更 */
     #filterByTagsBtn, #resetFilterBtn { background: #4CAF50; } 
     #filterByTagsBtn.active { background: #2E7D32; font-weight: bold;} 
 
-    .admin-add-genre-selector button { background-color: #aaa; border: 1px solid #999; padding: 0.3rem 0.6rem; font-size: 0.8rem; }
-    .admin-add-genre-selector button.active { background-color: #2980b9; border-color: #206694; }
-
     /* お問い合わせボタンのスタイル */
     #contactBtn { 
-      background-color: #007bff; /* 青系の色 */
+      background-color: #007bff;
       color: white;
     }
-    /* #viewContactsBtn は公開版では存在しない */
-
+    
     /* 追加ボタンのローディングアニメーション */
     .loading { position: relative; }
     .loading::after { 
@@ -102,7 +95,7 @@
     @keyframes spin { to { transform: rotate(360deg); } }
 
     /* ===================================
-      タブ & コンテンツエリア
+       タブ & コンテンツエリア
     ====================================== */
     .tabs input[type="radio"] { display: none; }
     .tabs label { 
@@ -127,7 +120,7 @@
     #tab-new:checked ~ #new, #tab-ranking:checked ~ #ranking { display: block; }
     
     /* ===================================
-      グリッド & カード表示
+       グリッド & カード表示
     ====================================== */
     .grid { 
       display: grid; 
@@ -209,80 +202,6 @@
     }
     #rankingGrid .score-display { visibility: visible; }
 
-    /* カード上の管理者ボタン (削除、タグ追加、並び替え) */
-    /* 公開版ではタグ追加ボタン・削除ボタンは表示しない */
-    .item.admin .delete-btn, .item.admin .add-tag-btn, .item.admin .order-buttons { display: flex; }
-    .item:not(.admin) .delete-btn, .item:not(.admin) .add-tag-btn, .item:not(.admin) .order-buttons { display: none; }
-    
-    /* タグ追加ボタンを丸形に (公開版では hidden になるが定義は残す) */
-    .add-tag-btn { 
-      background: #2196f3; 
-      color: white;
-      border: none;
-      border-radius: 50%; 
-      width: 24px; 
-      height: 24px; 
-      line-height: 24px; 
-      text-align: center; 
-      font-size: 1rem;
-      cursor: pointer;
-      padding: 0;
-      position: relative; 
-    }
-    .add-tag-btn::before {
-        content: '+';
-        position: absolute;
-        top: 50%;
-        left: 50%;
-        transform: translate(-50%, -50%);
-    }
-
-    /* 削除ボタンを丸形に (公開版では hidden になるが定義は残す) */
-    .delete-btn { 
-      background: #e53935; 
-      color: white;
-      border: none;
-      border-radius: 50%; 
-      width: 20px; 
-      height: 20px; 
-      line-height: 20px; 
-      text-align: center; 
-      font-size: 0.8rem;
-      cursor: pointer;
-      padding: 0;
-      position: absolute; 
-      top: 6px; 
-      right: 6px; 
-    }
-    .delete-btn::before {
-        content: '×';
-        position: absolute;
-        top: 50%;
-        left: 50%;
-        transform: translate(-50%, -50%);
-    }
-
-
-    /* 並び替えボタン (公開版では hidden になるが定義は残す) */
-    .order-buttons {
-        display: flex;
-        gap: 4px;
-    }
-    .order-btn {
-        background: #007bff; 
-        color: white;
-        padding: 4px 8px;
-        font-size: 0.8rem;
-        border-radius: 4px;
-        border: none;
-        cursor: pointer;
-    }
-    .order-btn:disabled {
-        opacity: 0.5;
-        cursor: default;
-    }
-
-
     /* 管理者おすすめグリッドの高さ固定 */
     #adminMangaGrid,
     #adminGameGrid {
@@ -291,7 +210,7 @@
     }
     
     /* ===================================
-      ページネーション
+       ページネーション
     ====================================== */
     .pagination { 
       display: flex; 
@@ -310,7 +229,7 @@
     .pagination button:disabled { opacity: .5; cursor: default; }
 
     /* ===================================
-      モーダル & オーバーレイ
+       モーダル & オーバーレイ
     ====================================== */
     .overlay { 
       position: fixed; 
@@ -346,17 +265,8 @@
       overflow-y: auto; 
       padding: 1rem; 
     }
-    
-    /* モーダル内フォーム要素 */
-    .modal-body .form-row { display: flex; align-items: center; gap: 0.5rem; margin-bottom: 1rem; }
-    .modal-body .form-row label { flex-shrink: 0; }
-    .modal-body .form-row input[type="text"] { flex: 1; min-width: 50px; }
-    .modal-body .category-group { margin-top: 1rem; border-top: 1px solid #eee; padding-top: 1rem; }
-    .modal-body .category-title { font-weight: bold; margin-bottom: 0.5rem; }
-    .modal-body .tag-list-display { list-style-type: none; padding: 0; margin: 0; columns: 3; column-gap: 1rem; }
-    .modal-body .tag-list-display li { padding: 2px 0; font-size: 0.9rem; }
-    
-    /* タグ選択パネル個別スタイル (openTagPanel と openTagFilterModal で共通利用) */
+        
+    /* タグ選択パネル個別スタイル (タグ絞り込みモーダルで使用) */
     .tag-panel .modal-body { padding: 0; }
     .tag-panel .tag-search-input { width: 100%; padding: .75rem; font-size: 1rem; border: none; border-bottom: 1px solid #ddd; }
     .tag-panel .category-tabs { display: flex; flex-wrap: wrap; gap: .5rem; padding: .75rem; border-bottom: 1px solid #ddd; background: #f7f7f7; }
@@ -387,11 +297,12 @@
     .modal-footer button:hover { opacity: 0.85; }
     #modal-close-btn, #tag-panel-reset { background-color: #6c757d; color: white; }
     #tag-panel-confirm { background-color: #ff9800; color: white; }
+    
     /* タグ絞り込みモーダル専用フッターボタン */
-    #filter-mode-select-buttons { 
+    #filter-mode-select-buttons {
         display: flex;
         gap: 0.5rem;
-        margin-right: auto; 
+        margin-right: auto; /* 左寄せ */
     }
     #filter-mode-select-buttons button {
         padding: 0.4rem 0.8rem;
@@ -401,12 +312,12 @@
         color: white;
     }
     #filter-mode-select-buttons button.active {
-        background-color: #28a745; 
+        background-color: #28a745; /* アクティブなモードの色 */
     }
 
 
     /* ===================================
-      その他 (トースト、モザイク)
+       その他 (トースト、モザイク)
     ====================================== */
     .toast { 
       position: fixed; 
@@ -431,112 +342,29 @@
     }
 
     /* ===================================
-   お問い合わせフォーム & 一覧
-====================================== */
-/* フォームのモーダル */
-.contact-form .form-group {
-    margin-bottom: 1rem;
-}
-.contact-form .form-group label {
-    display: block;
-    margin-bottom: 0.25rem;
-    font-weight: bold;
-    font-size: 0.9rem;
-}
-.contact-form .form-group input,
-.contact-form .form-group textarea {
-    width: 100%;
-    padding: 0.6rem;
-    border: 1px solid #ccc;
-    border-radius: 4px;
-    font-size: 1rem;
-}
-.contact-form .form-group textarea {
-    min-height: 120px;
-    resize: vertical;
-}
-
-/* 一覧表示のモーダル (公開版では存在しない) */
-.contacts-view .contact-list {
-    list-style-type: none;
-    padding: 0;
-    margin: 0;
-}
-.contacts-view .contact-item {
-    padding: 0.75rem 1rem;
-    border-bottom: 1px solid #eee;
-    cursor: pointer;
-    transition: background-color 0.2s;
-}
-.contacts-view .contact-item:hover {
-    background-color: #f9f9f9;
-}
-.contacts-view .contact-item.unread {
-    font-weight: bold;
-    background-color: #fffbe5;
-}
-.contacts-view .contact-item-header {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    margin-bottom: 0.5rem; 
-}
-.contacts-view .contact-date {
-    font-size: 0.8rem;
-    color: #888;
-}
-
-/* お問い合わせ詳細エリアの調整 (公開版では存在しない) */
-.contacts-view .contact-detail {
-    display: none; 
-    position: relative; 
-    padding: 0.75rem;
-    background-color: #f5f5f5;
-    border-radius: 4px;
-    white-space: pre-wrap; 
-    word-wrap: break-word;
-    padding-bottom: 40px; 
-    margin-top: 0.5rem; 
-}
-
-/* メールアドレス行の調整 (公開版では存在しない) */
-.contacts-view .contact-detail .contact-email-wrapper {
-    font-size: 0.9rem;
-    line-height: 1.4; 
-    max-height: 2.8em; 
-    overflow: hidden; 
-    text-overflow: ellipsis; 
-    white-space: normal; 
-    margin-bottom: 0.25rem; 
-}
-.contacts-view .contact-detail .contact-email-wrapper strong {
-    white-space: nowrap; 
-}
-
-/* お問い合わせ内容のテキスト部分の調整 (公開版では存在しない) */
-.contacts-view .contact-detail .contact-content-text {
-    font-size: 0.95rem; 
-    line-height: 1.5;
-    min-height: 80px; 
-    max-height: 180px; 
-    overflow-y: auto; 
-    padding-right: 10px; 
-    text-align: left; 
-}
-
-/* 削除ボタンの配置 (公開版では存在しない) */
-.contacts-view .contact-detail .delete-contact-btn {
-    background-color: #dc3545; 
-    color: white;
-    border: none;
-    padding: 5px 10px;
-    border-radius: 4px;
-    cursor: pointer;
-    font-size: 0.8rem;
-    position: absolute; 
-    bottom: 10px; 
-    right: 10px; 
-}
+       お問い合わせフォーム
+    ====================================== */
+    .contact-form .form-group {
+        margin-bottom: 1rem;
+    }
+    .contact-form .form-group label {
+        display: block;
+        margin-bottom: 0.25rem;
+        font-weight: bold;
+        font-size: 0.9rem;
+    }
+    .contact-form .form-group input,
+    .contact-form .form-group textarea {
+        width: 100%;
+        padding: 0.6rem;
+        border: 1px solid #ccc;
+        border-radius: 4px;
+        font-size: 1rem;
+    }
+    .contact-form .form-group textarea {
+        min-height: 120px;
+        resize: vertical;
+    }
   </style>
 </head>
 <body>
@@ -550,14 +378,14 @@
 
     <div class="controls">
       <button id="contactBtn">お問い合わせ</button>
-      <button id="filterByTagsBtn">タグで絞り込み</button>
-      <button id="resetFilterBtn" class="hidden">絞り込み解除</button>
+      <button id="filterByTagsBtn">タグで絞り込み</button> 
+      <button id="resetFilterBtn" class="hidden">絞り込み解除</button> 
       <button id="hideBadBtn">Bad評価を非表示</button>
       <button id="mosaicToggleBtn">モザイク ON</button>
     </div>
 
     <hr>
-    <h2>管理者のおすすめ</h2>
+    <h2>管理人のおすすめ</h2>
     <div class="tabs">
         <input type="radio" id="tab-admin_manga" name="admin_tab" checked>
         <label for="tab-admin_manga">漫画</label>
@@ -621,13 +449,11 @@
     // --- モジュールのインポート ---
     import { initializeApp } from "https://www.gstatic.com/firebasejs/11.10.0/firebase-app.js";
     import { getDatabase, ref, query, onChildAdded, onChildChanged, onChildRemoved, onValue, push, set, remove, serverTimestamp, get, update } from "https://www.gstatic.com/firebasejs/11.10.0/firebase-database.js";
-    // Firebase Authenticationは不要なので排除
-    // import { getAuth, onAuthStateChanged, signInWithEmailAndPassword, signOut } from "https://www.gstatic.com/firebasejs/11.10.0/firebase-auth.js"; 
-
+    
     // --- 定数定義 (アプリケーション全体の設定) ---
     const CONSTANTS = {
       PAGE_SIZES: { user: 40, admin: 10 },
-      DL_AFFILIATE_ID: "sukumizuyoujo", 
+      DL_AFFILIATE_ID: "sukumizuyoujo", // あなたのアフィリエイトID
       FIREBASE_CONFIG: {
         apiKey: "AIzaSyByYU-ZNJEDO0Z4LdXyI3Pn_vHhmOqa3Go",
         authDomain: "dlsite-share.firebaseapp.com",
@@ -643,7 +469,6 @@
 
     // --- 状態管理 (アプリケーションの状態を保持する変数) ---
     const state = {
-      user: null, // 公開版では常にnull
       works: {}, adminPicks: {}, tags: {}, tagNameToDataMap: new Map(), categories: {},
       sortedWorkIds: { new: [], ranking: [] },
       sortedAdminIds: { manga: [], game: [] },
@@ -651,17 +476,14 @@
       clientId: null,
       hideBadlyRated: false,
       mosaicActive: false,
-      highlightTagIds: new Set(), 
-      hideTagIds: new Set(),      
-      currentTagEditMode: 'highlight', 
+      highlightTagIds: new Set(),
+      hideTagIds: new Set(),
+      currentTagEditMode: 'highlight',
     };
 
     // --- DOM要素のキャッシュ ---
     const dom = {
-
-      urlInput: document.getElementById("dlsiteUrl"), 
-      addBtn: document.getElementById("addBtn"), 
-      
+      urlInput: document.getElementById("dlsiteUrl"), addBtn: document.getElementById("addBtn"),
       grids: { new: document.getElementById("newGrid"), ranking: document.getElementById("rankingGrid"), admin_manga: document.getElementById("adminMangaGrid"), admin_game: document.getElementById("adminGameGrid") },
       paginations: {
         new: { prev: document.getElementById("newPrev"), next: document.getElementById("newNext"), current: document.getElementById("newCurrent"), total: document.getElementById("newTotal") },
@@ -711,9 +533,9 @@
       const data = source[workId];
       if (!data) return document.createElement('div');
       const { title, coverUrl, pageUrl, tags = {}, votes = {}, score = 0 } = data;
-      const userVote = (votes[state.clientId] || 0); // ユーザー評価機能は残す
+      const userVote = source === state.works ? (votes[state.clientId] || 0) : 0;
       const card = document.createElement("article");
-      card.className = `item`; // 管理者クラスは不要
+      card.className = "item";
       card.dataset.id = workId;
       card.innerHTML = `
         <img src="${coverUrl}" alt="${title}" loading="lazy">
@@ -727,16 +549,15 @@
             <button class="rating-btn bad${userVote === -1 ? ' active' : ''}" data-score="-1">Bad</button>
             <span class="score-display">${score}</span>
           </div>
-          </div>
+        </div>
       `;
       card.addEventListener("click", (e) => { if(e.target.closest('button')) return; window.open(pageUrl, "_blank"); });
-      // 投票機能のイベントリスナーは残す
-      if (source === state.works) { // ユーザー投稿作品にのみ評価機能
+      
+      if (source === state.works) {
         card.querySelectorAll(".rating-btn").forEach(btn => { btn.addEventListener("click", (e) => { e.stopPropagation(); handleVote(workId, btn); }); });
-      } else { // 管理者作品からは評価ボタンを隠す（UI上の設定）
-         card.querySelector('.rating-buttons')?.classList.add('hidden');
+      } else {
+        card.querySelector('.rating-buttons')?.classList.add('hidden'); // 管理者作品には評価ボタン非表示
       }
-      // card.querySelectorAll('.order-btn').forEach(btn => { ... }); // 排除
       return card;
     }
 
@@ -753,15 +574,12 @@
           sortedIds = state.sortedWorkIds[type] || [];
       }
       
-      let filteredIds = [...sortedIds]; 
+      let filteredIds = [...sortedIds];
       
-      // Bad評価を非表示にするフィルター（管理者セクション以外に適用）
-      // ユーザーがGood/Bad投票できるので、この機能は残る
       if (state.hideBadlyRated && !isAdminSection) { 
         filteredIds = filteredIds.filter(id => (state.works[id]?.votes?.[state.clientId] || 0) !== -1); 
       }
 
-      // タグによる絞り込みフィルター（管理者セクション以外に適用）
       if (!isAdminSection && (state.highlightTagIds.size > 0 || state.hideTagIds.size > 0)) {
         const worksMap = {};
         for (const id of filteredIds) {
@@ -778,11 +596,11 @@
             const hasHighlightTag = util.hasAnyOfTags(work, state.highlightTagIds);
 
             if (hasHideTag) {
-                hiddenByTags.add(workId); 
+                hiddenByTags.add(workId);
             } else if (hasHighlightTag) {
-                highlightedByTags.add(workId); 
+                highlightedByTags.add(workId);
             } else {
-                others.add(workId); 
+                others.add(workId);
             }
         }
         
@@ -833,10 +651,10 @@
     function openTagFilterModal() {
       dom.modalOverlay.classList.remove("hidden");
       const modal = dom.modalContent;
-      modal.className = 'modal tag-panel'; 
+      modal.className = 'modal tag-panel';
       
-      let currentHighlightTagIds = new Set(state.highlightTagIds); 
-      let currentHideTagIds = new Set(state.hideTagIds);         
+      let currentHighlightTagIds = new Set(state.highlightTagIds);
+      let currentHideTagIds = new Set(state.hideTagIds);
       
       modal.innerHTML = `
         <div class="modal-header">タグで絞り込み</div>
@@ -877,7 +695,7 @@
         categoryTags.filter(([, tag]) => tag.name.toLowerCase().includes(searchInput.value.toLowerCase())).forEach(([tagId, tag]) => {
             const label = document.createElement('label'); const checkbox = document.createElement('input');
             checkbox.type = 'checkbox'; checkbox.value = tagId; 
-            checkbox.checked = currentEditingTagSet.has(tagId); 
+            checkbox.checked = currentEditingTagSet.has(tagId);
 
             checkbox.onchange = () => { 
                 checkbox.checked ? currentEditingTagSet.add(tagId) : currentEditingTagSet.delete(tagId); 
@@ -896,7 +714,6 @@
           });
       };
 
-      // モード切り替えボタンのイベントリスナー
       modeSelectButtons.querySelectorAll('button').forEach(btn => {
         btn.addEventListener('click', () => {
           state.currentTagEditMode = btn.dataset.mode;
@@ -910,11 +727,11 @@
       modal.querySelector('#tag-panel-reset').onclick = () => { currentEditingTagSet.clear(); renderTagList(); };
       
       modal.querySelector('#tag-panel-confirm').onclick = () => {
-        state.highlightTagIds = new Set(currentHighlightTagIds); 
-        state.hideTagIds = new Set(currentHideTagIds);           
+        state.highlightTagIds = new Set(currentHighlightTagIds);
+        state.hideTagIds = new Set(currentHideTagIds);
 
-        renderPage('new'); 
-        renderPage('ranking'); 
+        renderPage('new');
+        renderPage('ranking');
         dom.modalOverlay.classList.add("hidden");
       };
       
@@ -923,9 +740,44 @@
       renderTagList();
     }
 
-    /** お問い合わせフォームを送信する */
+    /** お問い合わせフォームのモーダルを表示する */
+    function openContactModal() {
+      dom.modalOverlay.classList.remove("hidden");
+      const modal = dom.modalContent;
+      modal.className = 'modal contact-form';
+      modal.innerHTML = `
+          <div class="modal-header">お問い合わせ</div>
+          <form id="contactForm" class="modal-body">
+              <div class="form-group">
+                  <label for="contactName">お名前<span style="color:red">*</span></label>
+                  <input type="text" id="contactName" placeholder="名前またはニックネーム" required>
+              </div>
+              <div class="form-group">
+                  <label for="contactEmail">メール<span style="color:red">*</span></label>
+                  <input type="email" id="contactEmail" placeholder="例: info@example.com" required>
+              </div>
+              <div class="form-group">
+                  <label for="contactTitle">タイトル</label>
+                  <input type="text" id="contactTitle">
+              </div>
+              <div class="form-group">
+                  <label for="contactContent">お問い合わせ内容<span style="color:red">*</span></label>
+                  <textarea id="contactContent" placeholder="コメントまたはメッセージ" required></textarea>
+              </div>
+          </form>
+          <div class="modal-footer">
+              <button id="modal-close-btn">閉じる</button>
+              <button id="contact-submit-btn" type="submit" form="contactForm" style="background-color: #28a745; color: white;">送信</button>
+          </div>
+      `;
+    modal.querySelector('#modal-close-btn').onclick = () => dom.modalOverlay.classList.add("hidden");
+    modal.querySelector('#contactForm').onsubmit = handleContactSubmit;
+    }
+    
+    // --- データベース操作 & ロジック ---
+    /** お問い合わせを送信する */
     async function handleContactSubmit(event) {
-        event.preventDefault(); 
+        event.preventDefault();
         const btn = document.getElementById('contact-submit-btn');
         const name = document.getElementById('contactName').value.trim();
         const email = document.getElementById('contactEmail').value.trim();
@@ -940,12 +792,9 @@
         btn.textContent = '送信中...';
 
         const contactData = {
-            name,
-            email,
-            title,
-            content,
+            name, email, title, content,
             timestamp: serverTimestamp(),
-            isRead: false, 
+            isRead: false,
         };
 
         try {
@@ -959,20 +808,21 @@
         }
     }
 
-    /** 作品をデータベースに追加する (ユーザー投稿用) */
-    async function addWork(url, targetDbPath) { // manualGenreは管理者用なので削除
+    /** 作品をデータベースに追加する */
+    async function addWork(url) {
         const originalUrl = url.trim();
         if (!originalUrl.includes("dlsite.com")) return util.showToast("有効なDLsiteのURLを入力してください");
-        const targetState = targetDbPath === CONSTANTS.DB_PATHS.ADMIN_PICKS ? state.adminPicks : state.works;
-        if (Object.values(targetState).some(w => w.pageUrl.startsWith(originalUrl.split('?')[0]))) {
+        
+        if (Object.values(state.works).some(w => w.pageUrl.startsWith(originalUrl.split('?')[0]))) {
             return util.showToast("この作品は既に追加されています");
         }
         let finalUrl = originalUrl.split('?')[0];
         if (CONSTANTS.DL_AFFILIATE_ID) {
             finalUrl += `/?dmai=${CONSTANTS.DL_AFFILIATE_ID}`;
         }
-        const btn = dom.addBtn; // addBtnのみ使用 (adminAddBtnは排除)
-        const input = dom.urlInput; // urlInputのみ使用 (adminUrlInputは排除)
+        
+        const btn = dom.addBtn;
+        const input = dom.urlInput;
         btn.disabled = true; btn.classList.add('loading');
         try {
             const proxyUrl = `https://api.allorigins.win/raw?url=${encodeURIComponent(originalUrl)}`;
@@ -983,19 +833,22 @@
             const title = doc.querySelector('meta[property="og:title"]')?.content || "";
             const coverUrl = doc.querySelector('meta[property="og:image"]')?.content || "";
             if (!title || !coverUrl) throw new Error("タイトル・画像の取得に失敗");
-            let workType = 'unknown'; 
-                        
-            // ユーザー投稿ではtagsとvotesは空で初期化
-            const newWorkData = { title: title.replace(/\[DLsite.*\]/, '').trim(), coverUrl, pageUrl: finalUrl, workType, timestamp: serverTimestamp(), tags: {}, votes: {} };
+            let workType = 'unknown'; let extractedTagNames = [];
+            const jsonLdElement = doc.querySelector('script[type="application/ld+json"]');
+            if (jsonLdElement) { try { const data = JSON.parse(jsonLdElement.textContent); workType = data["@type"] || 'unknown'; if (data.keywords) { extractedTagNames = data.keywords.split(',').map(k => k.trim()); } } catch(e){} }
+            const matchedTags = {};
+            [...new Set(extractedTagNames)].filter(Boolean).forEach(tagName => { if (state.tagNameToDataMap.has(tagName)) { const foundTag = state.tagNameToDataMap.get(tagName); matchedTags[foundTag.id] = foundTag.name; } });
+            
+            const newWorkData = { title: title.replace(/\[DLsite.*\]/, '').trim(), coverUrl, pageUrl: finalUrl, workType, timestamp: serverTimestamp(), tags: matchedTags, votes: {} };
 
-            await push(ref(getDatabase(), CONSTANTS.DB_PATHS.WORKS), newWorkData); // 常にWORKSに投稿
+            await push(ref(getDatabase(), CONSTANTS.DB_PATHS.WORKS), newWorkData);
             util.showToast(`作品を追加しました`);
             input.value = "";
         } catch (err) { util.showToast(`エラー: ${err.message}`);
         } finally { btn.disabled = false; btn.classList.remove('loading'); }
     }
-
-    /** 投票を処理する (ユーザー用) */
+    
+    /** 投票を処理する */
     async function handleVote(workId, btn) {
         const score = Number(btn.dataset.score);
         const currentVote = state.works[workId]?.votes?.[state.clientId] || 0;
@@ -1009,7 +862,6 @@
         } catch (error) { util.showToast(`投票エラー: ${error.message}`); ratingButtons.querySelector('.active')?.classList.remove('active'); if (currentVote !== 0) { ratingButtons.querySelector(`[data-score="${currentVote}"]`).classList.add('active'); } }
     }
 
-
     /** 作品リストをソートする */
     function updateSortedArrays() {
       const workValues = Object.values(state.works);
@@ -1019,9 +871,8 @@
       const adminPickValues = Object.values(state.adminPicks).sort((a, b) => {
           const orderA = a.order ?? a.timestamp;
           const orderB = b.order ?? b.timestamp;
-
           if (orderA !== undefined && orderB !== undefined) {
-              return orderA - orderB; 
+              return orderA - orderB;
           }
           return 0; 
       });
@@ -1032,14 +883,11 @@
     // --- リアルタイムリスナー (データベースの変更を監視) ---
     function initializeListeners() {
         const db = getDatabase();
-        // カテゴリとタグは読み取り専用なので残す
         onValue(ref(db, CONSTANTS.DB_PATHS.CATEGORIES), (snap) => { state.categories = snap.val() || {}; });
         onValue(ref(db, CONSTANTS.DB_PATHS.TAGS), (snap) => { state.tags = snap.val() || {}; state.tagNameToDataMap.clear(); Object.entries(state.tags).forEach(([id, data]) => { state.tagNameToDataMap.set(data.name, { id, ...data }); }); });
         
-        // works と adminPicks の読み取りは残す (ユーザーが閲覧するため)
         const worksQuery = query(ref(db, CONSTANTS.DB_PATHS.WORKS));
         const refreshUserSection = () => { updateSortedArrays(); renderPage('new'); renderPage('ranking'); };
-        // ユーザーによる投稿、評価でデータが追加・変更されるので、これらのリスナーは残す
         const userWorkChange = (snap) => { state.works[snap.key] = { id: snap.key, ...snap.val(), score: Object.values(snap.val()?.votes || {}).reduce((s,v)=>s+v,0) }; refreshUserSection(); };
         onChildAdded(worksQuery, userWorkChange);
         onChildChanged(worksQuery, userWorkChange);
@@ -1047,7 +895,6 @@
 
         const adminPicksQuery = query(ref(db, CONSTANTS.DB_PATHS.ADMIN_PICKS));
         const refreshAdminSection = () => { updateSortedArrays(); renderPage('admin_manga'); renderPage('admin_game'); };
-        // 管理者によるadminPicksの更新もユーザーが閲覧するためリスナーは残す
         const adminWorkChange = (snap) => { state.adminPicks[snap.key] = { id: snap.key, ...snap.val() }; refreshAdminSection(); };
         onChildAdded(adminPicksQuery, adminWorkChange);
         onChildChanged(adminPicksQuery, adminWorkChange);
@@ -1056,8 +903,7 @@
 
     // --- イベントリスナー設定 (ボタンクリックなどの処理) ---
     function setupEventListeners() {
-      // ユーザーによる作品投稿機能は残す
-      dom.addBtn.addEventListener("click", () => addWork(dom.urlInput.value.trim(), CONSTANTS.DB_PATHS.WORKS));
+      dom.addBtn.addEventListener("click", () => addWork(dom.urlInput.value.trim()));
 
       Object.keys(dom.paginations).forEach(type => {
         const pagination = dom.paginations[type];
@@ -1066,14 +912,13 @@
           const isAdmin = type.startsWith('admin_'); let ids;
           if(isAdmin) { ids = state.sortedAdminIds[type.split('_')[1]]; }
           else { ids = state.sortedWorkIds[type]; }
-          // Bad評価非表示のフィルタリングはクライアント側で実行されるため、ロジック自体は残す
           if (state.hideBadlyRated && !isAdmin) { ids = ids.filter(id => (state.works[id]?.votes?.[state.clientId] || 0) !== -1); }
           const pageSize = isAdmin ? CONSTANTS.PAGE_SIZES.admin : CONSTANTS.PAGE_SIZES.user;
           const totalPages = util.calculateTotalPages(ids.length, pageSize);
           if (state.currentPage[type] < totalPages) { state.currentPage[type]++; renderPage(type); }
         });
       });
-
+      
       dom.modalOverlay.addEventListener("click", (e) => { if (e.target === dom.modalOverlay) { dom.modalOverlay.classList.add("hidden"); } });
       dom.hideBadBtn.addEventListener("click", () => {
         state.hideBadlyRated = !state.hideBadlyRated;
@@ -1095,12 +940,14 @@
         renderPage('new');
         renderPage('ranking');
       });
+
+      dom.contactBtn.addEventListener('click', openContactModal);
     }
 
     // --- アプリケーション初期化 ---
     function main() {
       initializeApp(CONSTANTS.FIREBASE_CONFIG);
-
+      
       const savedMosaic = localStorage.getItem('mosaicActive');
       if (savedMosaic === 'true') {
         state.mosaicActive = true;
@@ -1110,8 +957,7 @@
 
       state.clientId = util.getClientId();
       initializeListeners();
-      setupEventListeners(); 
-      dom.contactBtn.addEventListener('click', openContactModal);
+      setupEventListeners();
     }
     
     main();

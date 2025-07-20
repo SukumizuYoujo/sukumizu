@@ -5,7 +5,7 @@
   <title>DLsiteおすすめ共有</title>
   <style>
     /* ===================================
-       基本スタイル & 全体レイアウト
+      基本スタイル & 全体レイアウト
     ====================================== */
     * { 
       box-sizing: border-box;
@@ -37,7 +37,7 @@
     }
 
     /* ===================================
-       操作コントロール (ボタン、入力欄)
+      操作コントロール (ボタン、入力欄)
     ====================================== */
     .controls { 
       display: flex; 
@@ -70,13 +70,8 @@
     #mosaicToggleBtn { background: #8e44ad; }
     #filterByTagsBtn, #resetFilterBtn { background: #4CAF50; } 
     #filterByTagsBtn.active { background: #2E7D32; font-weight: bold;} 
+    #contactBtn { background-color: #007bff; color: white; }
 
-    /* お問い合わせボタンのスタイル */
-    #contactBtn { 
-      background-color: #007bff;
-      color: white;
-    }
-    
     /* 追加ボタンのローディングアニメーション */
     .loading { position: relative; }
     .loading::after { 
@@ -95,7 +90,7 @@
     @keyframes spin { to { transform: rotate(360deg); } }
 
     /* ===================================
-       タブ & コンテンツエリア
+      タブ & コンテンツエリア
     ====================================== */
     .tabs input[type="radio"] { display: none; }
     .tabs label { 
@@ -120,7 +115,7 @@
     #tab-new:checked ~ #new, #tab-ranking:checked ~ #ranking { display: block; }
     
     /* ===================================
-       グリッド & カード表示
+      グリッド & カード表示
     ====================================== */
     .grid { 
       display: grid; 
@@ -201,16 +196,15 @@
       margin-left: 0.5rem; 
     }
     #rankingGrid .score-display { visibility: visible; }
+    #adminMangaGrid .rating-buttons, #adminGameGrid .rating-buttons { display: none; }
 
-    /* 管理者おすすめグリッドの高さ固定 */
-    #adminMangaGrid,
-    #adminGameGrid {
+    #adminMangaGrid, #adminGameGrid {
         min-height: calc(320px * 2 + 1rem);
         align-content: start;
     }
     
     /* ===================================
-       ページネーション
+      ページネーション
     ====================================== */
     .pagination { 
       display: flex; 
@@ -229,7 +223,7 @@
     .pagination button:disabled { opacity: .5; cursor: default; }
 
     /* ===================================
-       モーダル & オーバーレイ
+      モーダル & オーバーレイ
     ====================================== */
     .overlay { 
       position: fixed; 
@@ -265,8 +259,8 @@
       overflow-y: auto; 
       padding: 1rem; 
     }
-        
-    /* タグ選択パネル個別スタイル (タグ絞り込みモーダルで使用) */
+    
+    /* タグ選択パネル個別スタイル */
     .tag-panel .modal-body { padding: 0; }
     .tag-panel .tag-search-input { width: 100%; padding: .75rem; font-size: 1rem; border: none; border-bottom: 1px solid #ddd; }
     .tag-panel .category-tabs { display: flex; flex-wrap: wrap; gap: .5rem; padding: .75rem; border-bottom: 1px solid #ddd; background: #f7f7f7; }
@@ -297,12 +291,10 @@
     .modal-footer button:hover { opacity: 0.85; }
     #modal-close-btn, #tag-panel-reset { background-color: #6c757d; color: white; }
     #tag-panel-confirm { background-color: #ff9800; color: white; }
-    
-    /* タグ絞り込みモーダル専用フッターボタン */
     #filter-mode-select-buttons {
         display: flex;
         gap: 0.5rem;
-        margin-right: auto; /* 左寄せ */
+        margin-right: auto;
     }
     #filter-mode-select-buttons button {
         padding: 0.4rem 0.8rem;
@@ -312,12 +304,11 @@
         color: white;
     }
     #filter-mode-select-buttons button.active {
-        background-color: #28a745; /* アクティブなモードの色 */
+        background-color: #28a745;
     }
 
-
     /* ===================================
-       その他 (トースト、モザイク)
+      その他 (トースト、モザイク)
     ====================================== */
     .toast { 
       position: fixed; 
@@ -341,36 +332,20 @@
         filter: blur(0);
     }
 
-    /* ===================================
-       お問い合わせフォーム
+    /* ======================================
+      お問い合わせフォーム
     ====================================== */
-    .contact-form .form-group {
-        margin-bottom: 1rem;
-    }
-    .contact-form .form-group label {
-        display: block;
-        margin-bottom: 0.25rem;
-        font-weight: bold;
-        font-size: 0.9rem;
-    }
+    .contact-form .form-group { margin-bottom: 1rem; }
+    .contact-form .form-group label { display: block; margin-bottom: 0.25rem; font-weight: bold; font-size: 0.9rem; }
     .contact-form .form-group input,
-    .contact-form .form-group textarea {
-        width: 100%;
-        padding: 0.6rem;
-        border: 1px solid #ccc;
-        border-radius: 4px;
-        font-size: 1rem;
-    }
-    .contact-form .form-group textarea {
-        min-height: 120px;
-        resize: vertical;
-    }
+    .contact-form .form-group textarea { width: 100%; padding: 0.6rem; border: 1px solid #ccc; border-radius: 4px; font-size: 1rem; }
+    .contact-form .form-group textarea { min-height: 120px; resize: vertical; }
   </style>
 </head>
 <body>
     <div class="container">
     <header style="text-align: center; margin-bottom: 2rem;">
-      <h1 style="font-size: 3.0rem; margin-bottom: 0.5rem;">DLsiteのおすすめ教えてくれ</h1>
+      <h1 style="font-size: 2.5rem; margin-bottom: 0.5rem;">DLsiteのおすすめ教えてくれ</h1>
       <p style="font-size: 0.8rem; color: #888;">
         当サイトで追加されたリンクは、アフィリエイトプログラムを利用している場合があります。
       </p>
@@ -385,7 +360,7 @@
     </div>
 
     <hr>
-    <h2>管理人のおすすめ</h2>
+    <h2>管理者のおすすめ</h2>
     <div class="tabs">
         <input type="radio" id="tab-admin_manga" name="admin_tab" checked>
         <label for="tab-admin_manga">漫画</label>
@@ -483,8 +458,14 @@
 
     // --- DOM要素のキャッシュ ---
     const dom = {
-      urlInput: document.getElementById("dlsiteUrl"), addBtn: document.getElementById("addBtn"),
-      grids: { new: document.getElementById("newGrid"), ranking: document.getElementById("rankingGrid"), admin_manga: document.getElementById("adminMangaGrid"), admin_game: document.getElementById("adminGameGrid") },
+      urlInput: document.getElementById("dlsiteUrl"), 
+      addBtn: document.getElementById("addBtn"),
+      grids: { 
+          new: document.getElementById("newGrid"), 
+          ranking: document.getElementById("rankingGrid"), 
+          admin_manga: document.getElementById("adminMangaGrid"), 
+          admin_game: document.getElementById("adminGameGrid") 
+      },
       paginations: {
         new: { prev: document.getElementById("newPrev"), next: document.getElementById("newNext"), current: document.getElementById("newCurrent"), total: document.getElementById("newTotal") },
         ranking: { prev: document.getElementById("rankPrev"), next: document.getElementById("rankNext"), current: document.getElementById("rankCurrent"), total: document.getElementById("rankTotal") },
@@ -492,7 +473,8 @@
         admin_game: { prev: document.getElementById("adminGamePrev"), next: document.getElementById("adminGameNext"), current: document.getElementById("adminGameCurrent"), total: document.getElementById("adminGameTotal") },
       },
       toast: document.getElementById("toast"),
-      modalOverlay: document.getElementById("modalOverlay"), modalContent: document.getElementById("modalContent"),
+      modalOverlay: document.getElementById("modalOverlay"), 
+      modalContent: document.getElementById("modalContent"),
       contactBtn: document.getElementById("contactBtn"),
       hideBadBtn: document.getElementById("hideBadBtn"),
       mosaicToggleBtn: document.getElementById("mosaicToggleBtn"),
@@ -535,7 +517,7 @@
       const { title, coverUrl, pageUrl, tags = {}, votes = {}, score = 0 } = data;
       const userVote = source === state.works ? (votes[state.clientId] || 0) : 0;
       const card = document.createElement("article");
-      card.className = "item";
+      card.className = `item`;
       card.dataset.id = workId;
       card.innerHTML = `
         <img src="${coverUrl}" alt="${title}" loading="lazy">
@@ -555,8 +537,6 @@
       
       if (source === state.works) {
         card.querySelectorAll(".rating-btn").forEach(btn => { btn.addEventListener("click", (e) => { e.stopPropagation(); handleVote(workId, btn); }); });
-      } else {
-        card.querySelector('.rating-buttons')?.classList.add('hidden'); // 管理者作品には評価ボタン非表示
       }
       return card;
     }
@@ -574,7 +554,7 @@
           sortedIds = state.sortedWorkIds[type] || [];
       }
       
-      let filteredIds = [...sortedIds];
+      let filteredIds = [...sortedIds]; 
       
       if (state.hideBadlyRated && !isAdminSection) { 
         filteredIds = filteredIds.filter(id => (state.works[id]?.votes?.[state.clientId] || 0) !== -1); 
@@ -582,9 +562,7 @@
 
       if (!isAdminSection && (state.highlightTagIds.size > 0 || state.hideTagIds.size > 0)) {
         const worksMap = {};
-        for (const id of filteredIds) {
-            worksMap[id] = state.works[id];
-        }
+        for (const id of filteredIds) { worksMap[id] = state.works[id]; }
 
         const hiddenByTags = new Set();
         const highlightedByTags = new Set();
@@ -595,27 +573,14 @@
             const hasHideTag = util.hasAnyOfTags(work, state.hideTagIds);
             const hasHighlightTag = util.hasAnyOfTags(work, state.highlightTagIds);
 
-            if (hasHideTag) {
-                hiddenByTags.add(workId);
-            } else if (hasHighlightTag) {
-                highlightedByTags.add(workId);
-            } else {
-                others.add(workId);
-            }
+            if (hasHideTag) { hiddenByTags.add(workId);
+            } else if (hasHighlightTag) { highlightedByTags.add(workId);
+            } else { others.add(workId); }
         }
         
         const finalDisplayedIds = [];
-        
-        for (const id of sortedIds) {
-            if (highlightedByTags.has(id)) {
-                finalDisplayedIds.push(id);
-            }
-        }
-        for (const id of sortedIds) {
-            if (others.has(id)) {
-                finalDisplayedIds.push(id);
-            }
-        }
+        for (const id of sortedIds) { if (highlightedByTags.has(id)) { finalDisplayedIds.push(id); } }
+        for (const id of sortedIds) { if (others.has(id)) { finalDisplayedIds.push(id); } }
         filteredIds = finalDisplayedIds;
       }
       
@@ -646,12 +611,12 @@
         dom.resetFilterBtn.classList.add('hidden');
       }
     }
-    
+
     /** タグで絞り込むモーダルを表示する */
     function openTagFilterModal() {
       dom.modalOverlay.classList.remove("hidden");
       const modal = dom.modalContent;
-      modal.className = 'modal tag-panel';
+      modal.className = 'modal tag-panel'; 
       
       let currentHighlightTagIds = new Set(state.highlightTagIds);
       let currentHideTagIds = new Set(state.hideTagIds);
@@ -696,10 +661,7 @@
             const label = document.createElement('label'); const checkbox = document.createElement('input');
             checkbox.type = 'checkbox'; checkbox.value = tagId; 
             checkbox.checked = currentEditingTagSet.has(tagId);
-
-            checkbox.onchange = () => { 
-                checkbox.checked ? currentEditingTagSet.add(tagId) : currentEditingTagSet.delete(tagId); 
-            };
+            checkbox.onchange = () => { checkbox.checked ? currentEditingTagSet.add(tagId) : currentEditingTagSet.delete(tagId); };
             label.appendChild(checkbox); label.append(` ${tag.name}`);
             tagListContainer.appendChild(label);
         });
@@ -725,11 +687,9 @@
 
       searchInput.oninput = () => { renderTagList(); };
       modal.querySelector('#tag-panel-reset').onclick = () => { currentEditingTagSet.clear(); renderTagList(); };
-      
       modal.querySelector('#tag-panel-confirm').onclick = () => {
         state.highlightTagIds = new Set(currentHighlightTagIds);
         state.hideTagIds = new Set(currentHideTagIds);
-
         renderPage('new');
         renderPage('ranking');
         dom.modalOverlay.classList.add("hidden");
@@ -770,10 +730,10 @@
               <button id="contact-submit-btn" type="submit" form="contactForm" style="background-color: #28a745; color: white;">送信</button>
           </div>
       `;
-    modal.querySelector('#modal-close-btn').onclick = () => dom.modalOverlay.classList.add("hidden");
-    modal.querySelector('#contactForm').onsubmit = handleContactSubmit;
+      modal.querySelector('#modal-close-btn').onclick = () => dom.modalOverlay.classList.add("hidden");
+      modal.querySelector('#contactForm').onsubmit = handleContactSubmit;
     }
-    
+
     // --- データベース操作 & ロジック ---
     /** お問い合わせを送信する */
     async function handleContactSubmit(event) {
@@ -787,15 +747,10 @@
         if (!name || !email || !content) {
             return util.showToast("必須項目をすべて入力してください");
         }
-
         btn.disabled = true;
         btn.textContent = '送信中...';
 
-        const contactData = {
-            name, email, title, content,
-            timestamp: serverTimestamp(),
-            isRead: false,
-        };
+        const contactData = { name, email, title, content, timestamp: serverTimestamp(), isRead: false };
 
         try {
             await push(ref(getDatabase(), CONSTANTS.DB_PATHS.CONTACTS), contactData);
@@ -808,17 +763,20 @@
         }
     }
 
-    /** 作品をデータベースに追加する */
+    /** 作品を「みんなの投稿」に追加する */
     async function addWork(url) {
         const originalUrl = url.trim();
         if (!originalUrl.includes("dlsite.com")) return util.showToast("有効なDLsiteのURLを入力してください");
-        
-        if (Object.values(state.works).some(w => w.pageUrl.startsWith(originalUrl.split('?')[0]))) {
-            return util.showToast("この作品は既に追加されています");
+
+        const workIdMatch = originalUrl.match(/(RJ|VJ|BJ)\d{6,}/i);
+        if (!workIdMatch) {
+            return util.showToast("URLから有効な作品IDが見つかりませんでした。");
         }
-        let finalUrl = originalUrl.split('?')[0];
-        if (CONSTANTS.DL_AFFILIATE_ID) {
-            finalUrl += `/?dmai=${CONSTANTS.DL_AFFILIATE_ID}`;
+        const workId = workIdMatch[0].toUpperCase();
+        const affiliateUrl = `https://dlaf.jp/maniax/dlaf/=/t/n/link/work/aid/${CONSTANTS.DL_AFFILIATE_ID}/id/${workId}.html`;
+
+        if (Object.values(state.works).some(w => w.pageUrl === affiliateUrl)) {
+            return util.showToast("この作品は既に追加されています");
         }
         
         const btn = dom.addBtn;
@@ -833,13 +791,22 @@
             const title = doc.querySelector('meta[property="og:title"]')?.content || "";
             const coverUrl = doc.querySelector('meta[property="og:image"]')?.content || "";
             if (!title || !coverUrl) throw new Error("タイトル・画像の取得に失敗");
+            
             let workType = 'unknown'; let extractedTagNames = [];
             const jsonLdElement = doc.querySelector('script[type="application/ld+json"]');
             if (jsonLdElement) { try { const data = JSON.parse(jsonLdElement.textContent); workType = data["@type"] || 'unknown'; if (data.keywords) { extractedTagNames = data.keywords.split(',').map(k => k.trim()); } } catch(e){} }
             const matchedTags = {};
             [...new Set(extractedTagNames)].filter(Boolean).forEach(tagName => { if (state.tagNameToDataMap.has(tagName)) { const foundTag = state.tagNameToDataMap.get(tagName); matchedTags[foundTag.id] = foundTag.name; } });
             
-            const newWorkData = { title: title.replace(/\[DLsite.*\]/, '').trim(), coverUrl, pageUrl: finalUrl, workType, timestamp: serverTimestamp(), tags: matchedTags, votes: {} };
+            const newWorkData = { 
+                title: title.replace(/\[DLsite.*\]/, '').trim(), 
+                coverUrl, 
+                pageUrl: affiliateUrl, 
+                workType, 
+                timestamp: serverTimestamp(), 
+                tags: matchedTags, 
+                votes: {} 
+            };
 
             await push(ref(getDatabase(), CONSTANTS.DB_PATHS.WORKS), newWorkData);
             util.showToast(`作品を追加しました`);
@@ -861,7 +828,7 @@
             await (newVote === 0 ? remove(voteRef) : set(voteRef, newVote));
         } catch (error) { util.showToast(`投票エラー: ${error.message}`); ratingButtons.querySelector('.active')?.classList.remove('active'); if (currentVote !== 0) { ratingButtons.querySelector(`[data-score="${currentVote}"]`).classList.add('active'); } }
     }
-
+    
     /** 作品リストをソートする */
     function updateSortedArrays() {
       const workValues = Object.values(state.works);
@@ -871,16 +838,14 @@
       const adminPickValues = Object.values(state.adminPicks).sort((a, b) => {
           const orderA = a.order ?? a.timestamp;
           const orderB = b.order ?? b.timestamp;
-          if (orderA !== undefined && orderB !== undefined) {
-              return orderA - orderB;
-          }
+          if (orderA !== undefined && orderB !== undefined) { return orderA - orderB; }
           return 0; 
       });
       state.sortedAdminIds.manga = adminPickValues.filter(w => util.classifyWork(w) === 'manga').map(w => w.id);
       state.sortedAdminIds.game = adminPickValues.filter(w => util.classifyWork(w) === 'game').map(w => w.id);
     }
     
-    // --- リアルタイムリスナー (データベースの変更を監視) ---
+    // --- リアルタイムリスナー ---
     function initializeListeners() {
         const db = getDatabase();
         onValue(ref(db, CONSTANTS.DB_PATHS.CATEGORIES), (snap) => { state.categories = snap.val() || {}; });
@@ -901,10 +866,10 @@
         onChildRemoved(adminPicksQuery, (snap) => { delete state.adminPicks[snap.key]; refreshAdminSection(); });
     }
 
-    // --- イベントリスナー設定 (ボタンクリックなどの処理) ---
+    // --- イベントリスナー設定 ---
     function setupEventListeners() {
       dom.addBtn.addEventListener("click", () => addWork(dom.urlInput.value.trim()));
-
+      
       Object.keys(dom.paginations).forEach(type => {
         const pagination = dom.paginations[type];
         pagination.prev.addEventListener('click', () => { if (state.currentPage[type] > 1) { state.currentPage[type]--; renderPage(type); } });
@@ -918,7 +883,7 @@
           if (state.currentPage[type] < totalPages) { state.currentPage[type]++; renderPage(type); }
         });
       });
-      
+
       dom.modalOverlay.addEventListener("click", (e) => { if (e.target === dom.modalOverlay) { dom.modalOverlay.classList.add("hidden"); } });
       dom.hideBadBtn.addEventListener("click", () => {
         state.hideBadlyRated = !state.hideBadlyRated;
@@ -940,7 +905,6 @@
         renderPage('new');
         renderPage('ranking');
       });
-
       dom.contactBtn.addEventListener('click', openContactModal);
     }
 

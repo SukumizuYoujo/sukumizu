@@ -2,64 +2,65 @@
 <html lang="ja">
 <head>
   <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>DLsiteおすすめ共有</title>
   <style>
     /* ===================================
-      基本スタイル & 全体レイアウト
+       基本スタイル & 全体レイアウト (PC向け)
     ====================================== */
-    * { 
+    * {
       box-sizing: border-box;
       margin: 0;
-      padding: 0; 
+      padding: 0;
     }
-    body { 
-      font-family: sans-serif; 
-      background: #f5f5f5; 
-      color: #333; 
+    body {
+      font-family: sans-serif;
+      background: #f5f5f5;
+      color: #333;
     }
-    .container { 
-      max-width: 960px; 
-      margin: 2rem auto; 
-      padding: 0 1rem; 
+    .container {
+      max-width: 960px;
+      margin: 2rem auto;
+      padding: 0 1rem;
     }
-    h2 { 
-      margin-top: 2.5rem; 
-      border-bottom: 2px solid #ccc; 
-      padding-bottom: 0.5rem; 
+    h2 {
+      margin-top: 2.5rem;
+      border-bottom: 2px solid #ccc;
+      padding-bottom: 0.5rem;
     }
-    hr { 
-      border: none; 
-      border-top: 1px solid #eee; 
-      margin: 2rem 0; 
+    hr {
+      border: none;
+      border-top: 1px solid #eee;
+      margin: 2rem 0;
     }
-    .hidden { 
-      display: none !important; 
+    .hidden {
+      display: none !important;
     }
 
     /* ===================================
-      操作コントロール (ボタン、入力欄)
+       操作コントロール (ボタン、入力欄)
     ====================================== */
-    .controls { 
-      display: flex; 
-      flex-wrap: wrap; 
-      gap: .5rem; 
-      margin-bottom: 1rem; 
-      align-items: center; 
+    .controls {
+      display: flex;
+      flex-wrap: wrap;
+      gap: .5rem;
+      margin-bottom: 1rem;
+      align-items: center;
     }
-    .controls input { 
-      flex: 1; 
-      min-width: 200px; 
-      padding: .5rem; 
-      border: 1px solid #ccc; 
-      border-radius: 4px; 
+    .controls input {
+      flex: 1;
+      min-width: 200px;
+      padding: .5rem;
+      border: 1px solid #ccc;
+      border-radius: 4px;
     }
-    .controls button { 
-      padding: .5rem 1rem; 
-      border: none; 
-      color: #fff; 
-      border-radius: 4px; 
-      cursor: pointer; 
-      transition: background-color 0.2s; 
+    .controls button {
+      padding: .5rem 1rem;
+      border: none;
+      color: #fff;
+      border-radius: 4px;
+      cursor: pointer;
+      transition: background-color 0.2s;
     }
 
     /* 各ボタンの個別スタイル */
@@ -68,132 +69,138 @@
     #hideBadBtn { background: #6c757d; }
     #hideBadBtn.active { background: #f44336; font-weight: bold; }
     #mosaicToggleBtn { background: #8e44ad; }
-    #filterByTagsBtn, #resetFilterBtn { background: #4CAF50; } 
-    #filterByTagsBtn.active { background: #2E7D32; font-weight: bold;} 
+    #filterByTagsBtn, #resetFilterBtn { background: #4CAF50; }
+    #filterByTagsBtn.active { background: #2E7D32; font-weight: bold;}
     #contactBtn { background-color: #007bff; color: white; }
 
     /* 追加ボタンのローディングアニメーション */
     .loading { position: relative; }
-    .loading::after { 
-      content: ''; 
-      position: absolute; 
-      top: 50%; 
-      right: 10px; 
-      width: 16px; 
-      height: 16px; 
-      margin-top: -8px; 
-      border: 2px solid #fff; 
-      border-top-color: transparent; 
-      border-radius: 50%; 
-      animation: spin .6s linear infinite; 
+    .loading::after {
+      content: '';
+      position: absolute;
+      top: 50%;
+      right: 10px;
+      width: 16px;
+      height: 16px;
+      margin-top: -8px;
+      border: 2px solid #fff;
+      border-top-color: transparent;
+      border-radius: 50%;
+      animation: spin .6s linear infinite;
     }
     @keyframes spin { to { transform: rotate(360deg); } }
 
     /* ===================================
-      タブ & コンテンツエリア
+       タブ & コンテンツエリア
     ====================================== */
     .tabs input[type="radio"] { display: none; }
-    .tabs label { 
-      display: inline-block; 
-      padding: .5rem 1.5rem; 
-      cursor: pointer; 
-      background: #eee; 
-      margin-right: .5rem; 
-      border-radius: 4px 4px 0 0; 
-      font-weight: bold; 
+    .tabs label {
+      display: inline-block;
+      padding: .5rem 1.5rem;
+      cursor: pointer;
+      background: #eee;
+      margin-right: .5rem;
+      border-radius: 4px 4px 0 0;
+      font-weight: bold;
     }
-    .tabs input:checked + label { background: #fff; }
-    .tab-content { 
-      display: none; 
-      padding: 1rem; 
-      background: #fff; 
-      border: 1px solid #ddd; 
-      border-top: none; 
-      border-radius: 0 4px 4px 4px; 
+    #tab-admin_manga:checked ~ .tabs-container label[for="tab-admin_manga"],
+    #tab-admin_game:checked ~ .tabs-container label[for="tab-admin_game"],
+    #tab-new:checked ~ .tabs-container label[for="tab-new"],
+    #tab-ranking:checked ~ .tabs-container label[for="tab-ranking"] {
+        background: #fff;
+    }
+
+    .tab-content {
+      display: none;
+      padding: 1rem;
+      background: #fff;
+      border: 1px solid #ddd;
+      border-top: none;
+      border-radius: 0 4px 4px 4px;
     }
     #tab-admin_manga:checked ~ #admin_manga, #tab-admin_game:checked ~ #admin_game,
     #tab-new:checked ~ #new, #tab-ranking:checked ~ #ranking { display: block; }
-    
+     
     /* ===================================
-      グリッド & カード表示
+       グリッド & カード表示
     ====================================== */
-    .grid { 
-      display: grid; 
-      grid-template-columns: repeat(auto-fill, minmax(140px,1fr)); 
-      gap: 1rem; 
+    .grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(140px,1fr));
+      gap: 1rem;
     }
-    .item { 
-      position: relative; 
-      background: #fafafa; 
-      border: 1px solid #ddd; 
-      border-radius: 6px; 
-      display: flex; 
-      flex-direction: column; 
-      overflow: hidden; 
-      cursor: pointer; 
-      height: 320px; 
+    .item {
+      position: relative;
+      background: #fafafa;
+      border: 1px solid #ddd;
+      border-radius: 6px;
+      display: flex;
+      flex-direction: column;
+      overflow: hidden;
+      cursor: pointer;
+      height: 320px;
     }
     .item:hover { box-shadow: 0 2px 8px rgba(0,0,0,0.1); }
-    .item img { 
-      width: 100%; 
-      height: 180px; 
-      object-fit: cover; 
-      flex-shrink: 0; 
+    .item img {
+      width: 100%;
+      height: 180px;
+      object-fit: cover;
+      flex-shrink: 0;
     }
-    .item-body { 
-      flex: 1; 
-      overflow-y: auto; 
-      padding: 0 .5rem; 
+    .item-body {
+      flex: 1;
+      overflow-y: auto;
+      padding: 0 .5rem;
     }
-    .title { 
-      font-size: .9rem; 
-      margin: .5rem 0; 
-      max-height: 2.4em; 
+    .title {
+      font-size: .9rem;
+      margin: .5rem 0;
+      max-height: 2.4em;
     }
-    .tags { 
-      display: flex; 
-      flex-wrap: wrap; 
-      gap: 4px; 
+    .tags {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 4px;
     }
-    .tag { 
-      background: #ddd; 
-      border-radius: 4px; 
-      padding: 2px 6px; 
-      font-size: .75rem; 
+    .tag {
+      background: #ddd;
+      border-radius: 4px;
+      padding: 2px 6px;
+      font-size: .75rem;
     }
 
     /* カードフッター (評価ボタンなど) */
-    .item-footer { 
-      margin-top: auto; 
-      display: flex; 
-      justify-content: space-between; 
-      align-items: center; 
-      padding: .5rem; 
-      background: #fff; 
-      gap: 0.5rem; 
-      flex-shrink: 0; 
+    .item-footer {
+      margin-top: auto;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: .5rem;
+      background: #fff;
+      gap: 0.5rem;
+      flex-shrink: 0;
     }
-    .rating-buttons { 
-      display: flex; 
-      align-items: center; 
-      gap: 4px; 
+    .rating-buttons {
+      display: flex;
+      align-items: center;
+      gap: 4px;
     }
-    .rating-btn { 
-      padding: 2px 6px; 
-      font-size: .8rem; 
-      border: none; 
-      border-radius: 4px; 
-      background: #eee; 
-      cursor: pointer; 
+    .rating-btn {
+      padding: 2px 6px;
+      font-size: .8rem;
+      border: none;
+      border-radius: 4px;
+      background: #eee;
+      cursor: pointer;
     }
     .rating-btn.good.active { background: #4caf50; color: #fff; }
     .rating-btn.bad.active { background: #f44336; color: #fff; }
-    .score-display { 
-      visibility: hidden; 
-      font-size: 0.9rem; 
-      font-weight: bold; 
-      color: #333; 
-      margin-left: 0.5rem; 
+    .score-display {
+      visibility: hidden;
+      font-size: 0.9rem;
+      font-weight: bold;
+      color: #333;
+      margin-left: 0.5rem;
     }
     #rankingGrid .score-display { visibility: visible; }
     #adminMangaGrid .rating-buttons, #adminGameGrid .rating-buttons { display: none; }
@@ -202,64 +209,64 @@
         min-height: calc(320px * 2 + 1rem);
         align-content: start;
     }
-    
+     
     /* ===================================
-      ページネーション
+       ページネーション
     ====================================== */
-    .pagination { 
-      display: flex; 
-      align-items: center; 
-      justify-content: center; 
-      gap: .5rem; 
-      margin-top: 1rem; 
+    .pagination {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: .5rem;
+      margin-top: 1rem;
     }
-    .pagination button { 
-      padding: .3rem .6rem; 
-      font-size: .9rem; 
-      border: 1px solid #ccc; 
-      background: #fff; 
-      cursor: pointer; 
+    .pagination button {
+      padding: .3rem .6rem;
+      font-size: .9rem;
+      border: 1px solid #ccc;
+      background: #fff;
+      cursor: pointer;
     }
     .pagination button:disabled { opacity: .5; cursor: default; }
 
     /* ===================================
-      モーダル & オーバーレイ
+       モーダル & オーバーレイ
     ====================================== */
-    .overlay { 
-      position: fixed; 
-      top: 0; 
-      left: 0; 
-      width: 100%; 
-      height: 100%; 
-      background: rgba(0,0,0,0.6); 
-      z-index: 1999; 
-      display: flex; 
-      align-items: center; 
-      justify-content: center; 
+    .overlay {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background: rgba(0,0,0,0.6);
+      z-index: 1999;
+      display: flex;
+      align-items: center;
+      justify-content: center;
     }
     .overlay.hidden { display: none; }
 
-    .modal { 
-      width: 90%; 
-      max-width: 600px; 
-      background: #fff; 
-      border-radius: 8px; 
-      box-shadow: 0 4px 12px rgba(0,0,0,0.2); 
-      display: flex; 
-      flex-direction: column; 
-      max-height: 80vh; 
+    .modal {
+      width: 90%;
+      max-width: 600px;
+      background: #fff;
+      border-radius: 8px;
+      box-shadow: 0 4px 12px rgba(0,0,0,0.2);
+      display: flex;
+      flex-direction: column;
+      max-height: 80vh;
     }
-    .modal-header { 
-      font-weight: bold; 
-      padding: 1rem; 
-      border-bottom: 1px solid #ddd; 
+    .modal-header {
+      font-weight: bold;
+      padding: 1rem;
+      border-bottom: 1px solid #ddd;
     }
-    .modal-body { 
-      flex: 1; 
-      overflow-y: auto; 
-      padding: 1rem; 
+    .modal-body {
+      flex: 1;
+      overflow-y: auto;
+      padding: 1rem;
     }
-    
+     
     /* タグ選択パネル個別スタイル */
     .tag-panel .modal-body { padding: 0; }
     .tag-panel .tag-search-input { width: 100%; padding: .75rem; font-size: 1rem; border: none; border-bottom: 1px solid #ddd; }
@@ -308,22 +315,22 @@
     }
 
     /* ===================================
-      その他 (トースト、モザイク)
+       その他 (トースト、モザイク)
     ====================================== */
-    .toast { 
-      position: fixed; 
-      bottom: 1rem; 
-      right: 1rem; 
-      background: rgba(0,0,0,.8); 
-      color: #fff; 
-      padding: .5rem 1rem; 
-      border-radius: 4px; 
-      opacity: 0; 
-      transition: opacity .3s; 
-      z-index: 3000; 
+    .toast {
+      position: fixed;
+      bottom: 1rem;
+      right: 1rem;
+      background: rgba(0,0,0,.8);
+      color: #fff;
+      padding: .5rem 1rem;
+      border-radius: 4px;
+      opacity: 0;
+      transition: opacity .3s;
+      z-index: 3000;
     }
     .toast.show { opacity: 1; }
-    
+     
     body.mosaic-on .item img {
         filter: blur(8px);
         transition: filter 0.2s ease-in-out;
@@ -333,13 +340,186 @@
     }
 
     /* ======================================
-      お問い合わせフォーム
+       お問い合わせフォーム
     ====================================== */
     .contact-form .form-group { margin-bottom: 1rem; }
     .contact-form .form-group label { display: block; margin-bottom: 0.25rem; font-weight: bold; font-size: 0.9rem; }
     .contact-form .form-group input,
     .contact-form .form-group textarea { width: 100%; padding: 0.6rem; border: 1px solid #ccc; border-radius: 4px; font-size: 1rem; }
     .contact-form .form-group textarea { min-height: 120px; resize: vertical; }
+
+
+    /* ======================================
+       レスポンシブ (スマホ向けスタイル)
+    ====================================== */
+    @media screen and (max-width: 768px) {
+        /* 全体レイアウト */
+        body {
+            font-size: 14px;
+           -webkit-text-size-adjust: 100%;
+        }
+        .container {
+            margin: 1rem auto;
+            padding: 0 0.75rem;
+        }
+        header h1 {
+            font-size: 1.8rem;
+        }
+        h2 {
+            font-size: 1.2rem;
+            margin-top: 2rem;
+        }
+        hr {
+            margin: 1.5rem 0;
+        }
+
+        /* 操作コントロール */
+        .controls {
+            flex-direction: column;
+            gap: 0.75rem;
+            align-items: stretch;
+        }
+        .controls input {
+            min-width: 0;
+            width: 100%;
+            padding: .75rem;
+            font-size: 1rem;
+        }
+        .controls button {
+            width: 100%;
+            padding: .75rem 1rem;
+        }
+        .controls:has(#dlsiteUrl) {
+            flex-direction: row;
+            flex-wrap: nowrap;
+        }
+        .controls:has(#dlsiteUrl) #dlsiteUrl {
+             flex: 1;
+        }
+         .controls:has(#dlsiteUrl) #addBtn {
+             flex-shrink: 0;
+             width: auto;
+             padding: .75rem;
+        }
+
+        /* タブ */
+        .tabs {
+            position: relative;
+        }
+        .tab-content {
+            padding: 0.75rem;
+        }
+        .tabs-container {
+            overflow-x: auto;
+            white-space: nowrap;
+            -webkit-overflow-scrolling: touch;
+            padding-bottom: 8px;
+            border-bottom: 1px solid #ddd;
+        }
+        .tabs label {
+            padding: .6rem 1.1rem;
+            font-size: .9rem;
+            margin-right: 4px;
+        }
+        
+        /* ▼▼▼【修正箇所】▼▼▼ */
+        /* スマホで選択中のタブスタイル。背景色指定を追加しました。 */
+        #tab-admin_manga:checked ~ .tabs-container label[for="tab-admin_manga"],
+        #tab-admin_game:checked ~ .tabs-container label[for="tab-admin_game"],
+        #tab-new:checked ~ .tabs-container label[for="tab-new"],
+        #tab-ranking:checked ~ .tabs-container label[for="tab-ranking"] {
+            background: #fff; /* ★この行を追加しました */
+            border: 1px solid #ddd;
+            border-bottom: 1px solid #fff;
+            position: relative;
+            top: 1px;
+        }
+
+        /* グリッド & カード */
+        .grid {
+            grid-template-columns: repeat(2, 1fr);
+            gap: 0.75rem;
+        }
+        .item {
+            height: auto;
+        }
+        .item img {
+            height: 160px;
+        }
+        .title {
+            font-size: .8rem;
+            margin: .4rem 0;
+            max-height: 3.2em;
+        }
+        .tag {
+            font-size: .7rem;
+            padding: 2px 5px;
+        }
+        .item-footer {
+            padding: .4rem;
+        }
+        .rating-btn {
+            padding: 3px 7px;
+        }
+        #adminMangaGrid, #adminGameGrid {
+             min-height: auto;
+        }
+
+        /* ページネーション */
+        .pagination {
+            gap: .25rem;
+        }
+        .pagination button, .pagination span {
+            font-size: 0.85rem;
+        }
+        .pagination button {
+            padding: .4rem .6rem;
+        }
+
+        /* モーダル */
+        .modal {
+            width: 95vw;
+            max-height: 85vh;
+        }
+        .modal-body {
+            padding: 0.75rem;
+        }
+        .tag-panel .tag-list {
+            grid-template-columns: repeat(auto-fill, minmax(120px, 1fr));
+            height: 40vh;
+            gap: .75rem;
+        }
+        .tag-panel .category-tabs {
+            padding: 0.5rem;
+            gap: 0.25rem;
+        }
+         .tag-panel .category-tabs button {
+            font-size: 0.75rem;
+         }
+
+        /* モーダルフッター */
+        .modal-footer {
+            flex-direction: column;
+            gap: 0.5rem;
+        }
+        #filter-mode-select-buttons {
+            order: -1;
+            width: 100%;
+            justify-content: center;
+            margin-right: 0;
+        }
+        .modal-footer button {
+            width: 100%;
+        }
+
+        /* トーストの位置調整 */
+        .toast {
+            left: 1rem;
+            right: 1rem;
+            width: auto;
+            text-align: center;
+        }
+    }
   </style>
 </head>
 <body>
@@ -353,8 +533,8 @@
 
     <div class="controls">
       <button id="contactBtn">お問い合わせ</button>
-      <button id="filterByTagsBtn">タグで絞り込み</button> 
-      <button id="resetFilterBtn" class="hidden">絞り込み解除</button> 
+      <button id="filterByTagsBtn">タグで絞り込み</button>
+      <button id="resetFilterBtn" class="hidden">絞り込み解除</button>
       <button id="hideBadBtn">Bad評価を非表示</button>
       <button id="mosaicToggleBtn">モザイク ON</button>
     </div>
@@ -363,9 +543,12 @@
     <h2>管理者のおすすめ</h2>
     <div class="tabs">
         <input type="radio" id="tab-admin_manga" name="admin_tab" checked>
-        <label for="tab-admin_manga">漫画</label>
         <input type="radio" id="tab-admin_game" name="admin_tab">
-        <label for="tab-admin_game">ゲーム</label>
+        
+        <div class="tabs-container">
+            <label for="tab-admin_manga">漫画</label>
+            <label for="tab-admin_game">ゲーム</label>
+        </div>
 
         <section id="admin_manga" class="tab-content">
             <div class="grid" id="adminMangaGrid"></div>
@@ -392,28 +575,31 @@
       <button id="addBtn">追加</button>
     </div>
     <div class="tabs">
-      <input type="radio" id="tab-new" name="tab" checked>
-      <label for="tab-new">新着</label>
-      <input type="radio" id="tab-ranking" name="tab">
-      <label for="tab-ranking">ランキング</label>
-
-      <section id="new" class="tab-content">
-        <div class="grid" id="newGrid"></div>
-        <div class="pagination">
-          <button id="newPrev" disabled>前へ</button>
-          <span id="newCurrent">1</span>/<span id="newTotal">1</span>
-          <button id="newNext" disabled>次へ</button>
+        <input type="radio" id="tab-new" name="tab" checked>
+        <input type="radio" id="tab-ranking" name="tab">
+        
+        <div class="tabs-container">
+          <label for="tab-new">新着</label>
+          <label for="tab-ranking">ランキング</label>
         </div>
-      </section>
 
-      <section id="ranking" class="tab-content">
-        <div class="grid" id="rankingGrid"></div>
-        <div class="pagination">
-          <button id="rankPrev" disabled>前へ</button>
-          <span id="rankCurrent">1</span>/<span id="rankTotal">1</span>
-          <button id="rankNext" disabled>次へ</button>
-        </div>
-      </section>
+        <section id="new" class="tab-content">
+            <div class="grid" id="newGrid"></div>
+            <div class="pagination">
+            <button id="newPrev" disabled>前へ</button>
+            <span id="newCurrent">1</span>/<span id="newTotal">1</span>
+            <button id="newNext" disabled>次へ</button>
+            </div>
+        </section>
+
+        <section id="ranking" class="tab-content">
+            <div class="grid" id="rankingGrid"></div>
+            <div class="pagination">
+            <button id="rankPrev" disabled>前へ</button>
+            <span id="rankCurrent">1</span>/<span id="rankTotal">1</span>
+            <button id="rankNext" disabled>次へ</button>
+            </div>
+        </section>
     </div>
   </div>
   
@@ -421,510 +607,510 @@
   <div id="toast" class="toast"></div>
 
   <script type="module">
-    // --- モジュールのインポート ---
-    import { initializeApp } from "https://www.gstatic.com/firebasejs/11.10.0/firebase-app.js";
-    import { getDatabase, ref, query, onChildAdded, onChildChanged, onChildRemoved, onValue, push, set, remove, serverTimestamp, get, update } from "https://www.gstatic.com/firebasejs/11.10.0/firebase-database.js";
-    
-    // --- 定数定義 (アプリケーション全体の設定) ---
-    const CONSTANTS = {
-      PAGE_SIZES: { user: 40, admin: 10 },
-      DL_AFFILIATE_ID: "sukumizuyoujo", // あなたのアフィリエイトID
-      FIREBASE_CONFIG: {
-        apiKey: "AIzaSyByYU-ZNJEDO0Z4LdXyI3Pn_vHhmOqa3Go",
-        authDomain: "dlsite-share.firebaseapp.com",
-        databaseURL: "https://dlsite-share-default-rtdb.firebaseio.com",
-        projectId: "dlsite-share",
-        storageBucket: "dlsite-share-default-rtdb.appspot.com",
-        messagingSenderId: "764936540510",
-        appId: "1:764936540510:web:846938ef579ea0b0cf3fcf",
-        measurementId: "G-LXNH02PV7J"
-      },
-      DB_PATHS: { WORKS: "works", ADMIN_PICKS: "adminPicks", TAGS: "tags", CATEGORIES: "categories", CONTACTS: "contacts" },
-    };
+    // --- モジュールのインポート --- 
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/11.10.0/firebase-app.js"; 
+    import { getDatabase, ref, query, onChildAdded, onChildChanged, onChildRemoved, onValue, push, set, remove, serverTimestamp, get, update } from "https://www.gstatic.com/firebasejs/11.10.0/firebase-database.js"; 
+     
+    // --- 定数定義 (アプリケーション全体の設定) --- 
+    const CONSTANTS = { 
+      PAGE_SIZES: { user: 40, admin: 10 }, 
+      DL_AFFILIATE_ID: "sukumizuyoujo", // あなたのアフィリエイトID 
+      FIREBASE_CONFIG: { 
+        apiKey: "AIzaSyByYU-ZNJEDO0Z4LdXyI3Pn_vHhmOqa3Go", 
+        authDomain: "dlsite-share.firebaseapp.com", 
+        databaseURL: "https://dlsite-share-default-rtdb.firebaseio.com", 
+        projectId: "dlsite-share", 
+        storageBucket: "dlsite-share-default-rtdb.appspot.com", 
+        messagingSenderId: "764936540510", 
+        appId: "1:764936540510:web:846938ef579ea0b0cf3fcf", 
+        measurementId: "G-LXNH02PV7J" 
+      }, 
+      DB_PATHS: { WORKS: "works", ADMIN_PICKS: "adminPicks", TAGS: "tags", CATEGORIES: "categories", CONTACTS: "contacts" }, 
+    }; 
 
-    // --- 状態管理 (アプリケーションの状態を保持する変数) ---
-    const state = {
-      works: {}, adminPicks: {}, tags: {}, tagNameToDataMap: new Map(), categories: {},
-      sortedWorkIds: { new: [], ranking: [] },
-      sortedAdminIds: { manga: [], game: [] },
-      currentPage: { new: 1, ranking: 1, admin_manga: 1, admin_game: 1 },
-      clientId: null,
-      hideBadlyRated: false,
-      mosaicActive: false,
-      highlightTagIds: new Set(),
-      hideTagIds: new Set(),
-      currentTagEditMode: 'highlight',
-    };
+    // --- 状態管理 (アプリケーションの状態を保持する変数) --- 
+    const state = { 
+      works: {}, adminPicks: {}, tags: {}, tagNameToDataMap: new Map(), categories: {}, 
+      sortedWorkIds: { new: [], ranking: [] }, 
+      sortedAdminIds: { manga: [], game: [] }, 
+      currentPage: { new: 1, ranking: 1, admin_manga: 1, admin_game: 1 }, 
+      clientId: null, 
+      hideBadlyRated: false, 
+      mosaicActive: false, 
+      highlightTagIds: new Set(), 
+      hideTagIds: new Set(), 
+      currentTagEditMode: 'highlight', 
+    }; 
 
-    // --- DOM要素のキャッシュ ---
-    const dom = {
-      urlInput: document.getElementById("dlsiteUrl"), 
-      addBtn: document.getElementById("addBtn"),
-      grids: { 
-          new: document.getElementById("newGrid"), 
-          ranking: document.getElementById("rankingGrid"), 
-          admin_manga: document.getElementById("adminMangaGrid"), 
-          admin_game: document.getElementById("adminGameGrid") 
-      },
-      paginations: {
-        new: { prev: document.getElementById("newPrev"), next: document.getElementById("newNext"), current: document.getElementById("newCurrent"), total: document.getElementById("newTotal") },
-        ranking: { prev: document.getElementById("rankPrev"), next: document.getElementById("rankNext"), current: document.getElementById("rankCurrent"), total: document.getElementById("rankTotal") },
-        admin_manga: { prev: document.getElementById("adminMangaPrev"), next: document.getElementById("adminMangaNext"), current: document.getElementById("adminMangaCurrent"), total: document.getElementById("adminMangaTotal") },
-        admin_game: { prev: document.getElementById("adminGamePrev"), next: document.getElementById("adminGameNext"), current: document.getElementById("adminGameCurrent"), total: document.getElementById("adminGameTotal") },
-      },
-      toast: document.getElementById("toast"),
-      modalOverlay: document.getElementById("modalOverlay"), 
-      modalContent: document.getElementById("modalContent"),
-      contactBtn: document.getElementById("contactBtn"),
-      hideBadBtn: document.getElementById("hideBadBtn"),
-      mosaicToggleBtn: document.getElementById("mosaicToggleBtn"),
-      filterByTagsBtn: document.getElementById("filterByTagsBtn"), 
-      resetFilterBtn: document.getElementById("resetFilterBtn"), 
-    };
+    // --- DOM要素のキャッシュ --- 
+    const dom = { 
+      urlInput: document.getElementById("dlsiteUrl"),  
+      addBtn: document.getElementById("addBtn"), 
+      grids: {  
+        new: document.getElementById("newGrid"),  
+        ranking: document.getElementById("rankingGrid"),  
+        admin_manga: document.getElementById("adminMangaGrid"),  
+        admin_game: document.getElementById("adminGameGrid")  
+      }, 
+      paginations: { 
+        new: { prev: document.getElementById("newPrev"), next: document.getElementById("newNext"), current: document.getElementById("newCurrent"), total: document.getElementById("newTotal") }, 
+        ranking: { prev: document.getElementById("rankPrev"), next: document.getElementById("rankNext"), current: document.getElementById("rankCurrent"), total: document.getElementById("rankTotal") }, 
+        admin_manga: { prev: document.getElementById("adminMangaPrev"), next: document.getElementById("adminMangaNext"), current: document.getElementById("adminMangaCurrent"), total: document.getElementById("adminMangaTotal") }, 
+        admin_game: { prev: document.getElementById("adminGamePrev"), next: document.getElementById("adminGameNext"), current: document.getElementById("adminGameCurrent"), total: document.getElementById("adminGameTotal") }, 
+      }, 
+      toast: document.getElementById("toast"), 
+      modalOverlay: document.getElementById("modalOverlay"),  
+      modalContent: document.getElementById("modalContent"), 
+      contactBtn: document.getElementById("contactBtn"), 
+      hideBadBtn: document.getElementById("hideBadBtn"), 
+      mosaicToggleBtn: document.getElementById("mosaicToggleBtn"), 
+      filterByTagsBtn: document.getElementById("filterByTagsBtn"),  
+      resetFilterBtn: document.getElementById("resetFilterBtn"),  
+    }; 
 
-    // --- ユーティリティ & 分類ロジック ---
-    const util = {
-      showToast: (msg, duration = 3000) => { dom.toast.textContent = msg; dom.toast.classList.add("show"); setTimeout(() => dom.toast.classList.remove("show"), duration); },
-      getClientId: () => { let id = localStorage.getItem("clientId"); if (!id) { id = crypto.randomUUID(); localStorage.setItem("clientId", id); } return id; },
-      calculateTotalPages: (totalItems, pageSize) => Math.max(1, Math.ceil(totalItems / pageSize)),
-      classifyWork: (work) => {
-          if (!work) return 'unknown';
-          if (work.manualGenre) return work.manualGenre;
-          if (work.workType) {
-              const type = work.workType;
-              if (type === 'Book' || type === 'Comic') return 'manga';
-              if (type === 'VideoGame') return 'game';
-          }
-          const url = work.pageUrl || '';
-          if (url.includes('/comic/') || url.includes('/books/')) return 'manga';
-          if (url.includes('/soft/') || url.includes('/pro/')) return 'game';
-          return 'unknown';
-      },
-      hasAnyOfTags: (work, tagIdsSet) => {
-        if (!work || !work.tags || tagIdsSet.size === 0) return false;
-        for (const tagId of tagIdsSet) {
-          if (work.tags[tagId]) return true;
-        }
-        return false;
-      }
-    };
+    // --- ユーティリティ & 分類ロジック --- 
+    const util = { 
+      showToast: (msg, duration = 3000) => { dom.toast.textContent = msg; dom.toast.classList.add("show"); setTimeout(() => dom.toast.classList.remove("show"), duration); }, 
+      getClientId: () => { let id = localStorage.getItem("clientId"); if (!id) { id = crypto.randomUUID(); localStorage.setItem("clientId", id); } return id; }, 
+      calculateTotalPages: (totalItems, pageSize) => Math.max(1, Math.ceil(totalItems / pageSize)), 
+      classifyWork: (work) => { 
+          if (!work) return 'unknown'; 
+          if (work.manualGenre) return work.manualGenre; 
+          if (work.workType) { 
+              const type = work.workType; 
+              if (type === 'Book' || type === 'Comic') return 'manga'; 
+              if (type === 'VideoGame') return 'game'; 
+          } 
+          const url = work.pageUrl || ''; 
+          if (url.includes('/comic/') || url.includes('/books/')) return 'manga'; 
+          if (url.includes('/soft/') || url.includes('/pro/')) return 'game'; 
+          return 'unknown'; 
+      }, 
+      hasAnyOfTags: (work, tagIdsSet) => { 
+        if (!work || !work.tags || tagIdsSet.size === 0) return false; 
+        for (const tagId of tagIdsSet) { 
+          if (work.tags[tagId]) return true; 
+        } 
+        return false; 
+      } 
+    }; 
 
-    // --- UI描画関連の関数 ---
-    /** 作品カードのHTML要素を生成する */
-    function makeCard(workId, source) {
-      const data = source[workId];
-      if (!data) return document.createElement('div');
-      const { title, coverUrl, pageUrl, tags = {}, votes = {}, score = 0 } = data;
-      const userVote = source === state.works ? (votes[state.clientId] || 0) : 0;
-      const card = document.createElement("article");
-      card.className = `item`;
-      card.dataset.id = workId;
-      card.innerHTML = `
-        <img src="${coverUrl}" alt="${title}" loading="lazy">
-        <div class="item-body">
-          <h3 class="title">${title}</h3>
-          <div class="tags">${Object.values(tags).map(n => `<span class="tag">${n}</span>`).join("")}</div>
-        </div>
-        <div class="item-footer">
-          <div class="rating-buttons">
-            <button class="rating-btn good${userVote === 1 ? ' active' : ''}" data-score="1">Good</button>
-            <button class="rating-btn bad${userVote === -1 ? ' active' : ''}" data-score="-1">Bad</button>
-            <span class="score-display">${score}</span>
-          </div>
-        </div>
-      `;
-      card.addEventListener("click", (e) => { if(e.target.closest('button')) return; window.open(pageUrl, "_blank"); });
-      
-      if (source === state.works) {
-        card.querySelectorAll(".rating-btn").forEach(btn => { btn.addEventListener("click", (e) => { e.stopPropagation(); handleVote(workId, btn); }); });
-      }
-      return card;
-    }
+    // --- UI描画関連の関数 --- 
+    /** 作品カードのHTML要素を生成する */ 
+    function makeCard(workId, source) { 
+      const data = source[workId]; 
+      if (!data) return document.createElement('div'); 
+      const { title, coverUrl, pageUrl, tags = {}, votes = {}, score = 0 } = data; 
+      const userVote = source === state.works ? (votes[state.clientId] || 0) : 0; 
+      const card = document.createElement("article"); 
+      card.className = `item`; 
+      card.dataset.id = workId; 
+      card.innerHTML = ` 
+        <img src="${coverUrl}" alt="${title}" loading="lazy"> 
+        <div class="item-body"> 
+          <h3 class="title">${title}</h3> 
+          <div class="tags">${Object.values(tags).map(n => `<span class="tag">${n}</span>`).join("")}</div> 
+        </div> 
+        <div class="item-footer"> 
+          <div class="rating-buttons"> 
+            <button class="rating-btn good${userVote === 1 ? ' active' : ''}" data-score="1">Good</button> 
+            <button class="rating-btn bad${userVote === -1 ? ' active' : ''}" data-score="-1">Bad</button> 
+            <span class="score-display">${score}</span> 
+          </div> 
+        </div> 
+      `; 
+      card.addEventListener("click", (e) => { if(e.target.closest('button')) return; window.open(pageUrl, "_blank"); }); 
+       
+      if (source === state.works) { 
+        card.querySelectorAll(".rating-btn").forEach(btn => { btn.addEventListener("click", (e) => { e.stopPropagation(); handleVote(workId, btn); }); }); 
+      } 
+      return card; 
+    } 
 
-    /** 指定されたタブのページを描画する */
-    function renderPage(type) {
-      const isAdminSection = type.startsWith('admin_');
-      const source = isAdminSection ? state.adminPicks : state.works;
-      const pageSize = isAdminSection ? CONSTANTS.PAGE_SIZES.admin : CONSTANTS.PAGE_SIZES.user;
-      let sortedIds = [];
-      if (isAdminSection) {
-          const genre = type.split('_')[1];
-          sortedIds = state.sortedAdminIds[genre] || [];
-      } else {
-          sortedIds = state.sortedWorkIds[type] || [];
-      }
-      
-      let filteredIds = [...sortedIds]; 
-      
-      if (state.hideBadlyRated && !isAdminSection) { 
-        filteredIds = filteredIds.filter(id => (state.works[id]?.votes?.[state.clientId] || 0) !== -1); 
-      }
+    /** 指定されたタブのページを描画する */ 
+    function renderPage(type) { 
+      const isAdminSection = type.startsWith('admin_'); 
+      const source = isAdminSection ? state.adminPicks : state.works; 
+      const pageSize = isAdminSection ? CONSTANTS.PAGE_SIZES.admin : CONSTANTS.PAGE_SIZES.user; 
+      let sortedIds = []; 
+      if (isAdminSection) { 
+          const genre = type.split('_')[1]; 
+          sortedIds = state.sortedAdminIds[genre] || []; 
+      } else { 
+          sortedIds = state.sortedWorkIds[type] || []; 
+      } 
+       
+      let filteredIds = [...sortedIds];  
+       
+      if (state.hideBadlyRated && !isAdminSection) {  
+        filteredIds = filteredIds.filter(id => (state.works[id]?.votes?.[state.clientId] || 0) !== -1);  
+      } 
 
-      if (!isAdminSection && (state.highlightTagIds.size > 0 || state.hideTagIds.size > 0)) {
-        const worksMap = {};
-        for (const id of filteredIds) { worksMap[id] = state.works[id]; }
+      if (!isAdminSection && (state.highlightTagIds.size > 0 || state.hideTagIds.size > 0)) { 
+        const worksMap = {}; 
+        for (const id of filteredIds) { worksMap[id] = state.works[id]; } 
 
-        const hiddenByTags = new Set();
-        const highlightedByTags = new Set();
-        const others = new Set();
+        const hiddenByTags = new Set(); 
+        const highlightedByTags = new Set(); 
+        const others = new Set(); 
 
-        for (const workId of filteredIds) {
-            const work = worksMap[workId];
-            const hasHideTag = util.hasAnyOfTags(work, state.hideTagIds);
-            const hasHighlightTag = util.hasAnyOfTags(work, state.highlightTagIds);
+        for (const workId of filteredIds) { 
+            const work = worksMap[workId]; 
+            const hasHideTag = util.hasAnyOfTags(work, state.hideTagIds); 
+            const hasHighlightTag = util.hasAnyOfTags(work, state.highlightTagIds); 
 
-            if (hasHideTag) { hiddenByTags.add(workId);
-            } else if (hasHighlightTag) { highlightedByTags.add(workId);
-            } else { others.add(workId); }
-        }
-        
-        const finalDisplayedIds = [];
-        for (const id of sortedIds) { if (highlightedByTags.has(id)) { finalDisplayedIds.push(id); } }
-        for (const id of sortedIds) { if (others.has(id)) { finalDisplayedIds.push(id); } }
-        filteredIds = finalDisplayedIds;
-      }
-      
-      const grid = dom.grids[type];
-      const pagination = dom.paginations[type];
-      let currentPage = state.currentPage[type];
-      
-      const totalPages = util.calculateTotalPages(filteredIds.length, pageSize);
-      if (currentPage > totalPages) currentPage = state.currentPage[type] = totalPages;
-      pagination.current.textContent = currentPage; pagination.total.textContent = totalPages;
-      pagination.prev.disabled = currentPage <= 1; pagination.next.disabled = currentPage >= totalPages;
-      
-      const startIndex = (currentPage - 1) * pageSize;
-      const endIndex = startIndex + pageSize;
-      const pageIds = filteredIds.slice(startIndex, endIndex);
-      
-      grid.innerHTML = "";
-      pageIds.forEach(id => { if (source[id]) { grid.appendChild(makeCard(id, source)); } });
+            if (hasHideTag) { hiddenByTags.add(workId); 
+            } else if (hasHighlightTag) { highlightedByTags.add(workId); 
+            } else { others.add(workId); } 
+        } 
+         
+        const finalDisplayedIds = []; 
+        for (const id of sortedIds) { if (highlightedByTags.has(id)) { finalDisplayedIds.push(id); } } 
+        for (const id of sortedIds) { if (others.has(id)) { finalDisplayedIds.push(id); } } 
+        filteredIds = finalDisplayedIds; 
+      } 
+       
+      const grid = dom.grids[type]; 
+      const pagination = dom.paginations[type]; 
+      let currentPage = state.currentPage[type]; 
+       
+      const totalPages = util.calculateTotalPages(filteredIds.length, pageSize); 
+      if (currentPage > totalPages) currentPage = state.currentPage[type] = totalPages; 
+      pagination.current.textContent = currentPage; pagination.total.textContent = totalPages; 
+      pagination.prev.disabled = currentPage <= 1; pagination.next.disabled = currentPage >= totalPages; 
+       
+      const startIndex = (currentPage - 1) * pageSize; 
+      const endIndex = startIndex + pageSize; 
+      const pageIds = filteredIds.slice(startIndex, endIndex); 
+       
+      grid.innerHTML = ""; 
+      pageIds.forEach(id => { if (source[id]) { grid.appendChild(makeCard(id, source)); } }); 
 
-      const activeFiltersCount = state.highlightTagIds.size + state.hideTagIds.size;
-      if (activeFiltersCount > 0) {
-        dom.filterByTagsBtn.classList.add('active');
-        dom.filterByTagsBtn.textContent = `タグで絞り込み (${state.highlightTagIds.size}優先 / ${state.hideTagIds.size}非表示)`;
-        dom.resetFilterBtn.classList.remove('hidden');
-      } else {
-        dom.filterByTagsBtn.classList.remove('active');
-        dom.filterByTagsBtn.textContent = 'タグで絞り込み';
-        dom.resetFilterBtn.classList.add('hidden');
-      }
-    }
+      const activeFiltersCount = state.highlightTagIds.size + state.hideTagIds.size; 
+      if (activeFiltersCount > 0) { 
+        dom.filterByTagsBtn.classList.add('active'); 
+        dom.filterByTagsBtn.textContent = `タグで絞り込み (${state.highlightTagIds.size}優先 / ${state.hideTagIds.size}非表示)`; 
+        dom.resetFilterBtn.classList.remove('hidden'); 
+      } else { 
+        dom.filterByTagsBtn.classList.remove('active'); 
+        dom.filterByTagsBtn.textContent = 'タグで絞り込み'; 
+        dom.resetFilterBtn.classList.add('hidden'); 
+      } 
+    } 
 
-    /** タグで絞り込むモーダルを表示する */
-    function openTagFilterModal() {
-      dom.modalOverlay.classList.remove("hidden");
-      const modal = dom.modalContent;
-      modal.className = 'modal tag-panel'; 
-      
-      let currentHighlightTagIds = new Set(state.highlightTagIds);
-      let currentHideTagIds = new Set(state.hideTagIds);
-      
-      modal.innerHTML = `
-        <div class="modal-header">タグで絞り込み</div>
-        <div class="modal-body">
-          <input type="search" class="tag-search-input" placeholder="お探しのジャンルはなんですか？">
-          <div class="category-tabs"></div>
-          <div class="tag-list"></div>
-        </div>
-        <div class="modal-footer">
-          <div id="filter-mode-select-buttons">
-            <button data-mode="highlight">優先表示タグを選択</button>
-            <button data-mode="hide">非表示タグを選択</button>
-          </div>
-          <button id="tag-panel-reset">現在のリストをリセット</button>
-          <button id="tag-panel-confirm">適用</button>
-        </div>
-      `;
-      const searchInput = modal.querySelector('.tag-search-input');
-      const categoryTabsContainer = modal.querySelector('.category-tabs');
-      const tagListContainer = modal.querySelector('.tag-list');
-      const modeSelectButtons = modal.querySelector('#filter-mode-select-buttons');
+    /** タグで絞り込むモーダルを表示する */ 
+    function openTagFilterModal() { 
+      dom.modalOverlay.classList.remove("hidden"); 
+      const modal = dom.modalContent; 
+      modal.className = 'modal tag-panel';  
+       
+      let currentHighlightTagIds = new Set(state.highlightTagIds); 
+      let currentHideTagIds = new Set(state.hideTagIds); 
+       
+      modal.innerHTML = ` 
+        <div class="modal-header">タグで絞り込み</div> 
+        <div class="modal-body"> 
+          <input type="search" class="tag-search-input" placeholder="お探しのジャンルはなんですか？"> 
+          <div class="category-tabs"></div> 
+          <div class="tag-list"></div> 
+        </div> 
+        <div class="modal-footer"> 
+          <div id="filter-mode-select-buttons"> 
+            <button data-mode="highlight">優先表示タグを選択</button> 
+            <button data-mode="hide">非表示タグを選択</button> 
+          </div> 
+          <button id="tag-panel-reset">現在のリストをリセット</button> 
+          <button id="tag-panel-confirm">適用</button> 
+        </div> 
+      `; 
+      const searchInput = modal.querySelector('.tag-search-input'); 
+      const categoryTabsContainer = modal.querySelector('.category-tabs'); 
+      const tagListContainer = modal.querySelector('.tag-list'); 
+      const modeSelectButtons = modal.querySelector('#filter-mode-select-buttons'); 
 
-      let activeCategoryId = Object.keys(state.categories)[0] || '';
-      let currentEditingTagSet = state.currentTagEditMode === 'highlight' ? currentHighlightTagIds : currentHideTagIds;
+      let activeCategoryId = Object.keys(state.categories)[0] || ''; 
+      let currentEditingTagSet = state.currentTagEditMode === 'highlight' ? currentHighlightTagIds : currentHideTagIds; 
 
-      const updateModeButtons = () => {
-        modeSelectButtons.querySelectorAll('button').forEach(btn => {
-          btn.classList.remove('active');
-          if (btn.dataset.mode === state.currentTagEditMode) {
-            btn.classList.add('active');
-          }
-        });
-      };
+      const updateModeButtons = () => { 
+        modeSelectButtons.querySelectorAll('button').forEach(btn => { 
+          btn.classList.remove('active'); 
+          if (btn.dataset.mode === state.currentTagEditMode) { 
+            btn.classList.add('active'); 
+          } 
+        }); 
+      }; 
 
-      const renderTagList = () => {
-        tagListContainer.innerHTML = '';
-        const categoryTags = Object.entries(state.tags).filter(([, tag]) => tag.category === activeCategoryId);
-        categoryTags.filter(([, tag]) => tag.name.toLowerCase().includes(searchInput.value.toLowerCase())).forEach(([tagId, tag]) => {
-            const label = document.createElement('label'); const checkbox = document.createElement('input');
-            checkbox.type = 'checkbox'; checkbox.value = tagId; 
-            checkbox.checked = currentEditingTagSet.has(tagId);
-            checkbox.onchange = () => { checkbox.checked ? currentEditingTagSet.add(tagId) : currentEditingTagSet.delete(tagId); };
-            label.appendChild(checkbox); label.append(` ${tag.name}`);
-            tagListContainer.appendChild(label);
-        });
-      };
+      const renderTagList = () => { 
+        tagListContainer.innerHTML = ''; 
+        const categoryTags = Object.entries(state.tags).filter(([, tag]) => tag.category === activeCategoryId); 
+        categoryTags.filter(([, tag]) => tag.name.toLowerCase().includes(searchInput.value.toLowerCase())).forEach(([tagId, tag]) => { 
+            const label = document.createElement('label'); const checkbox = document.createElement('input'); 
+            checkbox.type = 'checkbox'; checkbox.value = tagId;  
+            checkbox.checked = currentEditingTagSet.has(tagId); 
+            checkbox.onchange = () => { checkbox.checked ? currentEditingTagSet.add(tagId) : currentEditingTagSet.delete(tagId); }; 
+            label.appendChild(checkbox); label.append(` ${tag.name}`); 
+            tagListContainer.appendChild(label); 
+        }); 
+      }; 
 
-      const renderCategoryTabs = () => {
-          categoryTabsContainer.innerHTML = '';
-          Object.entries(state.categories).forEach(([catId, category]) => {
-              const btn = document.createElement('button'); btn.textContent = category.name; btn.className = catId === activeCategoryId ? 'active' : '';
-              btn.onclick = () => { activeCategoryId = catId; renderCategoryTabs(); renderTagList(); };
-              categoryTabsContainer.appendChild(btn);
-          });
-      };
+      const renderCategoryTabs = () => { 
+          categoryTabsContainer.innerHTML = ''; 
+          Object.entries(state.categories).forEach(([catId, category]) => { 
+              const btn = document.createElement('button'); btn.textContent = category.name; btn.className = catId === activeCategoryId ? 'active' : ''; 
+              btn.onclick = () => { activeCategoryId = catId; renderCategoryTabs(); renderTagList(); }; 
+              categoryTabsContainer.appendChild(btn); 
+          }); 
+      }; 
 
-      modeSelectButtons.querySelectorAll('button').forEach(btn => {
-        btn.addEventListener('click', () => {
-          state.currentTagEditMode = btn.dataset.mode;
-          currentEditingTagSet = state.currentTagEditMode === 'highlight' ? currentHighlightTagIds : currentHideTagIds;
-          updateModeButtons();
-          renderTagList();
-        });
-      });
+      modeSelectButtons.querySelectorAll('button').forEach(btn => { 
+        btn.addEventListener('click', () => { 
+          state.currentTagEditMode = btn.dataset.mode; 
+          currentEditingTagSet = state.currentTagEditMode === 'highlight' ? currentHighlightTagIds : currentHideTagIds; 
+          updateModeButtons(); 
+          renderTagList(); 
+        }); 
+      }); 
 
-      searchInput.oninput = () => { renderTagList(); };
-      modal.querySelector('#tag-panel-reset').onclick = () => { currentEditingTagSet.clear(); renderTagList(); };
-      modal.querySelector('#tag-panel-confirm').onclick = () => {
-        state.highlightTagIds = new Set(currentHighlightTagIds);
-        state.hideTagIds = new Set(currentHideTagIds);
-        renderPage('new');
-        renderPage('ranking');
-        dom.modalOverlay.classList.add("hidden");
-      };
-      
-      updateModeButtons();
-      renderCategoryTabs(); 
-      renderTagList();
-    }
+      searchInput.oninput = () => { renderTagList(); }; 
+      modal.querySelector('#tag-panel-reset').onclick = () => { currentEditingTagSet.clear(); renderTagList(); }; 
+      modal.querySelector('#tag-panel-confirm').onclick = () => { 
+        state.highlightTagIds = new Set(currentHighlightTagIds); 
+        state.hideTagIds = new Set(currentHideTagIds); 
+        renderPage('new'); 
+        renderPage('ranking'); 
+        dom.modalOverlay.classList.add("hidden"); 
+      }; 
+       
+      updateModeButtons(); 
+      renderCategoryTabs();  
+      renderTagList(); 
+    } 
 
-    /** お問い合わせフォームのモーダルを表示する */
-    function openContactModal() {
-      dom.modalOverlay.classList.remove("hidden");
-      const modal = dom.modalContent;
-      modal.className = 'modal contact-form';
-      modal.innerHTML = `
-          <div class="modal-header">お問い合わせ</div>
-          <form id="contactForm" class="modal-body">
-              <div class="form-group">
-                  <label for="contactName">お名前<span style="color:red">*</span></label>
-                  <input type="text" id="contactName" placeholder="名前またはニックネーム" required>
-              </div>
-              <div class="form-group">
-                  <label for="contactEmail">メール<span style="color:red">*</span></label>
-                  <input type="email" id="contactEmail" placeholder="例: info@example.com" required>
-              </div>
-              <div class="form-group">
-                  <label for="contactTitle">タイトル</label>
-                  <input type="text" id="contactTitle">
-              </div>
-              <div class="form-group">
-                  <label for="contactContent">お問い合わせ内容<span style="color:red">*</span></label>
-                  <textarea id="contactContent" placeholder="コメントまたはメッセージ" required></textarea>
-              </div>
-          </form>
-          <div class="modal-footer">
-              <button id="modal-close-btn">閉じる</button>
-              <button id="contact-submit-btn" type="submit" form="contactForm" style="background-color: #28a745; color: white;">送信</button>
-          </div>
-      `;
-      modal.querySelector('#modal-close-btn').onclick = () => dom.modalOverlay.classList.add("hidden");
-      modal.querySelector('#contactForm').onsubmit = handleContactSubmit;
-    }
+    /** お問い合わせフォームのモーダルを表示する */ 
+    function openContactModal() { 
+      dom.modalOverlay.classList.remove("hidden"); 
+      const modal = dom.modalContent; 
+      modal.className = 'modal contact-form'; 
+      modal.innerHTML = ` 
+          <div class="modal-header">お問い合わせ</div> 
+          <form id="contactForm" class="modal-body"> 
+              <div class="form-group"> 
+                  <label for="contactName">お名前<span style="color:red">*</span></label> 
+                  <input type="text" id="contactName" placeholder="名前またはニックネーム" required> 
+              </div> 
+              <div class="form-group"> 
+                  <label for="contactEmail">メール<span style="color:red">*</span></label> 
+                  <input type="email" id="contactEmail" placeholder="例: info@example.com" required> 
+              </div> 
+              <div class="form-group"> 
+                  <label for="contactTitle">タイトル</label> 
+                  <input type="text" id="contactTitle"> 
+              </div> 
+              <div class="form-group"> 
+                  <label for="contactContent">お問い合わせ内容<span style="color:red">*</span></label> 
+                  <textarea id="contactContent" placeholder="コメントまたはメッセージ" required></textarea> 
+              </div> 
+          </form> 
+          <div class="modal-footer"> 
+              <button id="modal-close-btn">閉じる</button> 
+              <button id="contact-submit-btn" type="submit" form="contactForm" style="background-color: #28a745; color: white;">送信</button> 
+          </div> 
+      `; 
+      modal.querySelector('#modal-close-btn').onclick = () => dom.modalOverlay.classList.add("hidden"); 
+      modal.querySelector('#contactForm').onsubmit = handleContactSubmit; 
+    } 
 
-    // --- データベース操作 & ロジック ---
-    /** お問い合わせを送信する */
-    async function handleContactSubmit(event) {
-        event.preventDefault();
-        const btn = document.getElementById('contact-submit-btn');
-        const name = document.getElementById('contactName').value.trim();
-        const email = document.getElementById('contactEmail').value.trim();
-        const title = document.getElementById('contactTitle').value.trim();
-        const content = document.getElementById('contactContent').value.trim();
+    // --- データベース操作 & ロジック --- 
+    /** お問い合わせを送信する */ 
+    async function handleContactSubmit(event) { 
+        event.preventDefault(); 
+        const btn = document.getElementById('contact-submit-btn'); 
+        const name = document.getElementById('contactName').value.trim(); 
+        const email = document.getElementById('contactEmail').value.trim(); 
+        const title = document.getElementById('contactTitle').value.trim(); 
+        const content = document.getElementById('contactContent').value.trim(); 
 
-        if (!name || !email || !content) {
-            return util.showToast("必須項目をすべて入力してください");
-        }
-        btn.disabled = true;
-        btn.textContent = '送信中...';
+        if (!name || !email || !content) { 
+            return util.showToast("必須項目をすべて入力してください"); 
+        } 
+        btn.disabled = true; 
+        btn.textContent = '送信中...'; 
 
-        const contactData = { name, email, title, content, timestamp: serverTimestamp(), isRead: false };
+        const contactData = { name, email, title, content, timestamp: serverTimestamp(), isRead: false }; 
 
-        try {
-            await push(ref(getDatabase(), CONSTANTS.DB_PATHS.CONTACTS), contactData);
-            util.showToast("お問い合わせを送信しました。ありがとうございます。");
-            dom.modalOverlay.classList.add("hidden");
-        } catch (error) {
-            util.showToast(`送信に失敗しました: ${error.message}`);
-            btn.disabled = false;
-            btn.textContent = '送信';
-        }
-    }
+        try { 
+            await push(ref(getDatabase(), CONSTANTS.DB_PATHS.CONTACTS), contactData); 
+            util.showToast("お問い合わせを送信しました。ありがとうございます。"); 
+            dom.modalOverlay.classList.add("hidden"); 
+        } catch (error) { 
+            util.showToast(`送信に失敗しました: ${error.message}`); 
+            btn.disabled = false; 
+            btn.textContent = '送信'; 
+        } 
+    } 
 
-    /** 作品を「みんなの投稿」に追加する */
-    async function addWork(url) {
-        const originalUrl = url.trim();
-        if (!originalUrl.includes("dlsite.com")) return util.showToast("有効なDLsiteのURLを入力してください");
+    /** 作品を「みんなの投稿」に追加する */ 
+    async function addWork(url) { 
+        const originalUrl = url.trim(); 
+        if (!originalUrl.includes("dlsite.com")) return util.showToast("有効なDLsiteのURLを入力してください"); 
 
-        const workIdMatch = originalUrl.match(/(RJ|VJ|BJ)\d{6,}/i);
-        if (!workIdMatch) {
-            return util.showToast("URLから有効な作品IDが見つかりませんでした。");
-        }
-        const workId = workIdMatch[0].toUpperCase();
-        const affiliateUrl = `https://dlaf.jp/maniax/dlaf/=/t/n/link/work/aid/${CONSTANTS.DL_AFFILIATE_ID}/id/${workId}.html`;
+        const workIdMatch = originalUrl.match(/(RJ|VJ|BJ)\d{6,}/i); 
+        if (!workIdMatch) { 
+            return util.showToast("URLから有効な作品IDが見つかりませんでした。"); 
+        } 
+        const workId = workIdMatch[0].toUpperCase(); 
+        const affiliateUrl = `https://dlaf.jp/maniax/dlaf/=/t/n/link/work/aid/${CONSTANTS.DL_AFFILIATE_ID}/id/${workId}.html`; 
 
-        if (Object.values(state.works).some(w => w.pageUrl === affiliateUrl)) {
-            return util.showToast("この作品は既に追加されています");
-        }
-        
-        const btn = dom.addBtn;
-        const input = dom.urlInput;
-        btn.disabled = true; btn.classList.add('loading');
-        try {
-            const proxyUrl = `https://api.allorigins.win/raw?url=${encodeURIComponent(originalUrl)}`;
-            const response = await fetch(proxyUrl, { signal: AbortSignal.timeout(8000) });
-            if (!response.ok) throw new Error('作品情報の取得に失敗');
-            const html = await response.text();
-            const doc = new DOMParser().parseFromString(html, "text/html");
-            const title = doc.querySelector('meta[property="og:title"]')?.content || "";
-            const coverUrl = doc.querySelector('meta[property="og:image"]')?.content || "";
-            if (!title || !coverUrl) throw new Error("タイトル・画像の取得に失敗");
-            
-            let workType = 'unknown'; let extractedTagNames = [];
-            const jsonLdElement = doc.querySelector('script[type="application/ld+json"]');
-            if (jsonLdElement) { try { const data = JSON.parse(jsonLdElement.textContent); workType = data["@type"] || 'unknown'; if (data.keywords) { extractedTagNames = data.keywords.split(',').map(k => k.trim()); } } catch(e){} }
-            const matchedTags = {};
-            [...new Set(extractedTagNames)].filter(Boolean).forEach(tagName => { if (state.tagNameToDataMap.has(tagName)) { const foundTag = state.tagNameToDataMap.get(tagName); matchedTags[foundTag.id] = foundTag.name; } });
-            
-            const newWorkData = { 
-                title: title.replace(/\[DLsite.*\]/, '').trim(), 
-                coverUrl, 
-                pageUrl: affiliateUrl, 
-                workType, 
-                timestamp: serverTimestamp(), 
-                tags: matchedTags, 
-                votes: {} 
-            };
+        if (Object.values(state.works).some(w => w.pageUrl === affiliateUrl)) { 
+            return util.showToast("この作品は既に追加されています"); 
+        } 
+         
+        const btn = dom.addBtn; 
+        const input = dom.urlInput; 
+        btn.disabled = true; btn.classList.add('loading'); 
+        try { 
+            const proxyUrl = `https://api.allorigins.win/raw?url=${encodeURIComponent(originalUrl)}`; 
+            const response = await fetch(proxyUrl, { signal: AbortSignal.timeout(8000) }); 
+            if (!response.ok) throw new Error('作品情報の取得に失敗'); 
+            const html = await response.text(); 
+            const doc = new DOMParser().parseFromString(html, "text/html"); 
+            const title = doc.querySelector('meta[property="og:title"]')?.content || ""; 
+            const coverUrl = doc.querySelector('meta[property="og:image"]')?.content || ""; 
+            if (!title || !coverUrl) throw new Error("タイトル・画像の取得に失敗"); 
+             
+            let workType = 'unknown'; let extractedTagNames = []; 
+            const jsonLdElement = doc.querySelector('script[type="application/ld+json"]'); 
+            if (jsonLdElement) { try { const data = JSON.parse(jsonLdElement.textContent); workType = data["@type"] || 'unknown'; if (data.keywords) { extractedTagNames = data.keywords.split(',').map(k => k.trim()); } } catch(e){} } 
+            const matchedTags = {}; 
+            [...new Set(extractedTagNames)].filter(Boolean).forEach(tagName => { if (state.tagNameToDataMap.has(tagName)) { const foundTag = state.tagNameToDataMap.get(tagName); matchedTags[foundTag.id] = foundTag.name; } }); 
+             
+            const newWorkData = {  
+                title: title.replace(/\[DLsite.*\]/, '').trim(),  
+                coverUrl,  
+                pageUrl: affiliateUrl,  
+                workType,  
+                timestamp: serverTimestamp(),  
+                tags: matchedTags,  
+                votes: {}  
+            }; 
 
-            await push(ref(getDatabase(), CONSTANTS.DB_PATHS.WORKS), newWorkData);
-            util.showToast(`作品を追加しました`);
-            input.value = "";
-        } catch (err) { util.showToast(`エラー: ${err.message}`);
-        } finally { btn.disabled = false; btn.classList.remove('loading'); }
-    }
-    
-    /** 投票を処理する */
-    async function handleVote(workId, btn) {
-        const score = Number(btn.dataset.score);
-        const currentVote = state.works[workId]?.votes?.[state.clientId] || 0;
-        const newVote = currentVote === score ? 0 : score;
-        const ratingButtons = btn.closest('.rating-buttons');
-        ratingButtons.querySelector('.active')?.classList.remove('active');
-        if (newVote !== 0) { ratingButtons.querySelector(`[data-score="${newVote}"]`).classList.add('active'); }
-        try {
-            const voteRef = ref(getDatabase(), `${CONSTANTS.DB_PATHS.WORKS}/${workId}/votes/${state.clientId}`);
-            await (newVote === 0 ? remove(voteRef) : set(voteRef, newVote));
-        } catch (error) { util.showToast(`投票エラー: ${error.message}`); ratingButtons.querySelector('.active')?.classList.remove('active'); if (currentVote !== 0) { ratingButtons.querySelector(`[data-score="${currentVote}"]`).classList.add('active'); } }
-    }
-    
-    /** 作品リストをソートする */
-    function updateSortedArrays() {
-      const workValues = Object.values(state.works);
-      state.sortedWorkIds.ranking = workValues.sort((a, b) => (b.score || 0) - (a.score || 0)).map(w => w.id);
-      state.sortedWorkIds.new = workValues.sort((a, b) => b.timestamp - a.timestamp).map(w => w.id);
-      
-      const adminPickValues = Object.values(state.adminPicks).sort((a, b) => {
-          const orderA = a.order ?? a.timestamp;
-          const orderB = b.order ?? b.timestamp;
-          if (orderA !== undefined && orderB !== undefined) { return orderA - orderB; }
-          return 0; 
-      });
-      state.sortedAdminIds.manga = adminPickValues.filter(w => util.classifyWork(w) === 'manga').map(w => w.id);
-      state.sortedAdminIds.game = adminPickValues.filter(w => util.classifyWork(w) === 'game').map(w => w.id);
-    }
-    
-    // --- リアルタイムリスナー ---
-    function initializeListeners() {
-        const db = getDatabase();
-        onValue(ref(db, CONSTANTS.DB_PATHS.CATEGORIES), (snap) => { state.categories = snap.val() || {}; });
-        onValue(ref(db, CONSTANTS.DB_PATHS.TAGS), (snap) => { state.tags = snap.val() || {}; state.tagNameToDataMap.clear(); Object.entries(state.tags).forEach(([id, data]) => { state.tagNameToDataMap.set(data.name, { id, ...data }); }); });
-        
-        const worksQuery = query(ref(db, CONSTANTS.DB_PATHS.WORKS));
-        const refreshUserSection = () => { updateSortedArrays(); renderPage('new'); renderPage('ranking'); };
-        const userWorkChange = (snap) => { state.works[snap.key] = { id: snap.key, ...snap.val(), score: Object.values(snap.val()?.votes || {}).reduce((s,v)=>s+v,0) }; refreshUserSection(); };
-        onChildAdded(worksQuery, userWorkChange);
-        onChildChanged(worksQuery, userWorkChange);
-        onChildRemoved(worksQuery, (snap) => { delete state.works[snap.key]; refreshUserSection(); });
+            await push(ref(getDatabase(), CONSTANTS.DB_PATHS.WORKS), newWorkData); 
+            util.showToast(`作品を追加しました`); 
+            input.value = ""; 
+        } catch (err) { util.showToast(`エラー: ${err.message}`); 
+        } finally { btn.disabled = false; btn.classList.remove('loading'); } 
+    } 
+     
+    /** 投票を処理する */ 
+    async function handleVote(workId, btn) { 
+        const score = Number(btn.dataset.score); 
+        const currentVote = state.works[workId]?.votes?.[state.clientId] || 0; 
+        const newVote = currentVote === score ? 0 : score; 
+        const ratingButtons = btn.closest('.rating-buttons'); 
+        ratingButtons.querySelector('.active')?.classList.remove('active'); 
+        if (newVote !== 0) { ratingButtons.querySelector(`[data-score="${newVote}"]`).classList.add('active'); } 
+        try { 
+            const voteRef = ref(getDatabase(), `${CONSTANTS.DB_PATHS.WORKS}/${workId}/votes/${state.clientId}`); 
+            await (newVote === 0 ? remove(voteRef) : set(voteRef, newVote)); 
+        } catch (error) { util.showToast(`投票エラー: ${error.message}`); ratingButtons.querySelector('.active')?.classList.remove('active'); if (currentVote !== 0) { ratingButtons.querySelector(`[data-score="${currentVote}"]`).classList.add('active'); } } 
+    } 
+     
+    /** 作品リストをソートする */ 
+    function updateSortedArrays() { 
+      const workValues = Object.values(state.works); 
+      state.sortedWorkIds.ranking = workValues.sort((a, b) => (b.score || 0) - (a.score || 0)).map(w => w.id); 
+      state.sortedWorkIds.new = workValues.sort((a, b) => b.timestamp - a.timestamp).map(w => w.id); 
+       
+      const adminPickValues = Object.values(state.adminPicks).sort((a, b) => { 
+          const orderA = a.order ?? a.timestamp; 
+          const orderB = b.order ?? b.timestamp; 
+          if (orderA !== undefined && orderB !== undefined) { return orderA - orderB; } 
+          return 0;  
+      }); 
+      state.sortedAdminIds.manga = adminPickValues.filter(w => util.classifyWork(w) === 'manga').map(w => w.id); 
+      state.sortedAdminIds.game = adminPickValues.filter(w => util.classifyWork(w) === 'game').map(w => w.id); 
+    } 
+     
+    // --- リアルタイムリスナー --- 
+    function initializeListeners() { 
+        const db = getDatabase(); 
+        onValue(ref(db, CONSTANTS.DB_PATHS.CATEGORIES), (snap) => { state.categories = snap.val() || {}; }); 
+        onValue(ref(db, CONSTANTS.DB_PATHS.TAGS), (snap) => { state.tags = snap.val() || {}; state.tagNameToDataMap.clear(); Object.entries(state.tags).forEach(([id, data]) => { state.tagNameToDataMap.set(data.name, { id, ...data }); }); }); 
+         
+        const worksQuery = query(ref(db, CONSTANTS.DB_PATHS.WORKS)); 
+        const refreshUserSection = () => { updateSortedArrays(); renderPage('new'); renderPage('ranking'); }; 
+        const userWorkChange = (snap) => { state.works[snap.key] = { id: snap.key, ...snap.val(), score: Object.values(snap.val()?.votes || {}).reduce((s,v)=>s+v,0) }; refreshUserSection(); }; 
+        onChildAdded(worksQuery, userWorkChange); 
+        onChildChanged(worksQuery, userWorkChange); 
+        onChildRemoved(worksQuery, (snap) => { delete state.works[snap.key]; refreshUserSection(); }); 
 
-        const adminPicksQuery = query(ref(db, CONSTANTS.DB_PATHS.ADMIN_PICKS));
-        const refreshAdminSection = () => { updateSortedArrays(); renderPage('admin_manga'); renderPage('admin_game'); };
-        const adminWorkChange = (snap) => { state.adminPicks[snap.key] = { id: snap.key, ...snap.val() }; refreshAdminSection(); };
-        onChildAdded(adminPicksQuery, adminWorkChange);
-        onChildChanged(adminPicksQuery, adminWorkChange);
-        onChildRemoved(adminPicksQuery, (snap) => { delete state.adminPicks[snap.key]; refreshAdminSection(); });
-    }
+        const adminPicksQuery = query(ref(db, CONSTANTS.DB_PATHS.ADMIN_PICKS)); 
+        const refreshAdminSection = () => { updateSortedArrays(); renderPage('admin_manga'); renderPage('admin_game'); }; 
+        const adminWorkChange = (snap) => { state.adminPicks[snap.key] = { id: snap.key, ...snap.val() }; refreshAdminSection(); }; 
+        onChildAdded(adminPicksQuery, adminWorkChange); 
+        onChildChanged(adminPicksQuery, adminWorkChange); 
+        onChildRemoved(adminPicksQuery, (snap) => { delete state.adminPicks[snap.key]; refreshAdminSection(); }); 
+    } 
 
-    // --- イベントリスナー設定 ---
-    function setupEventListeners() {
-      dom.addBtn.addEventListener("click", () => addWork(dom.urlInput.value.trim()));
-      
-      Object.keys(dom.paginations).forEach(type => {
-        const pagination = dom.paginations[type];
-        pagination.prev.addEventListener('click', () => { if (state.currentPage[type] > 1) { state.currentPage[type]--; renderPage(type); } });
-        pagination.next.addEventListener('click', () => {
-          const isAdmin = type.startsWith('admin_'); let ids;
-          if(isAdmin) { ids = state.sortedAdminIds[type.split('_')[1]]; }
-          else { ids = state.sortedWorkIds[type]; }
-          if (state.hideBadlyRated && !isAdmin) { ids = ids.filter(id => (state.works[id]?.votes?.[state.clientId] || 0) !== -1); }
-          const pageSize = isAdmin ? CONSTANTS.PAGE_SIZES.admin : CONSTANTS.PAGE_SIZES.user;
-          const totalPages = util.calculateTotalPages(ids.length, pageSize);
-          if (state.currentPage[type] < totalPages) { state.currentPage[type]++; renderPage(type); }
-        });
-      });
+    // --- イベントリスナー設定 --- 
+    function setupEventListeners() { 
+      dom.addBtn.addEventListener("click", () => addWork(dom.urlInput.value.trim())); 
+       
+      Object.keys(dom.paginations).forEach(type => { 
+        const pagination = dom.paginations[type]; 
+        pagination.prev.addEventListener('click', () => { if (state.currentPage[type] > 1) { state.currentPage[type]--; renderPage(type); } }); 
+        pagination.next.addEventListener('click', () => { 
+          const isAdmin = type.startsWith('admin_'); let ids; 
+          if(isAdmin) { ids = state.sortedAdminIds[type.split('_')[1]]; } 
+          else { ids = state.sortedWorkIds[type]; } 
+          if (state.hideBadlyRated && !isAdmin) { ids = ids.filter(id => (state.works[id]?.votes?.[state.clientId] || 0) !== -1); } 
+          const pageSize = isAdmin ? CONSTANTS.PAGE_SIZES.admin : CONSTANTS.PAGE_SIZES.user; 
+          const totalPages = util.calculateTotalPages(ids.length, pageSize); 
+          if (state.currentPage[type] < totalPages) { state.currentPage[type]++; renderPage(type); } 
+        }); 
+      }); 
 
-      dom.modalOverlay.addEventListener("click", (e) => { if (e.target === dom.modalOverlay) { dom.modalOverlay.classList.add("hidden"); } });
-      dom.hideBadBtn.addEventListener("click", () => {
-        state.hideBadlyRated = !state.hideBadlyRated;
-        dom.hideBadBtn.classList.toggle('active', state.hideBadlyRated);
-        dom.hideBadBtn.textContent = state.hideBadlyRated ? 'Bad評価を再表示' : 'Bad評価を非表示';
-        renderPage('new'); renderPage('ranking');
-      });
-      dom.mosaicToggleBtn.addEventListener("click", () => {
-        state.mosaicActive = !state.mosaicActive;
-        localStorage.setItem('mosaicActive', state.mosaicActive);
-        document.body.classList.toggle('mosaic-on', state.mosaicActive);
-        dom.mosaicToggleBtn.textContent = state.mosaicActive ? 'モザイク OFF' : 'モザイク ON';
-      });
+      dom.modalOverlay.addEventListener("click", (e) => { if (e.target === dom.modalOverlay) { dom.modalOverlay.classList.add("hidden"); } }); 
+      dom.hideBadBtn.addEventListener("click", () => { 
+        state.hideBadlyRated = !state.hideBadlyRated; 
+        dom.hideBadBtn.classList.toggle('active', state.hideBadlyRated); 
+        dom.hideBadBtn.textContent = state.hideBadlyRated ? 'Bad評価を再表示' : 'Bad評価を非表示'; 
+        renderPage('new'); renderPage('ranking'); 
+      }); 
+      dom.mosaicToggleBtn.addEventListener("click", () => { 
+        state.mosaicActive = !state.mosaicActive; 
+        localStorage.setItem('mosaicActive', state.mosaicActive); 
+        document.body.classList.toggle('mosaic-on', state.mosaicActive); 
+        dom.mosaicToggleBtn.textContent = state.mosaicActive ? 'モザイク OFF' : 'モザイク ON'; 
+      }); 
 
-      dom.filterByTagsBtn.addEventListener('click', openTagFilterModal);
-      dom.resetFilterBtn.addEventListener('click', () => {
-        state.highlightTagIds.clear();
-        state.hideTagIds.clear();
-        renderPage('new');
-        renderPage('ranking');
-      });
-      dom.contactBtn.addEventListener('click', openContactModal);
-    }
+      dom.filterByTagsBtn.addEventListener('click', openTagFilterModal); 
+      dom.resetFilterBtn.addEventListener('click', () => { 
+        state.highlightTagIds.clear(); 
+        state.hideTagIds.clear(); 
+        renderPage('new'); 
+        renderPage('ranking'); 
+      }); 
+      dom.contactBtn.addEventListener('click', openContactModal); 
+    } 
 
-    // --- アプリケーション初期化 ---
-    function main() {
-      initializeApp(CONSTANTS.FIREBASE_CONFIG);
-      
-      const savedMosaic = localStorage.getItem('mosaicActive');
-      if (savedMosaic === 'true') {
-        state.mosaicActive = true;
-        document.body.classList.add('mosaic-on');
-        dom.mosaicToggleBtn.textContent = 'モザイク OFF';
-      }
+    // --- アプリケーション初期化 --- 
+    function main() { 
+      initializeApp(CONSTANTS.FIREBASE_CONFIG); 
+       
+      const savedMosaic = localStorage.getItem('mosaicActive'); 
+      if (savedMosaic === 'true') { 
+        state.mosaicActive = true; 
+        document.body.classList.add('mosaic-on'); 
+        dom.mosaicToggleBtn.textContent = 'モザイク OFF'; 
+      } 
 
-      state.clientId = util.getClientId();
-      initializeListeners();
-      setupEventListeners();
-    }
-    
-    main();
+      state.clientId = util.getClientId(); 
+      initializeListeners(); 
+      setupEventListeners(); 
+    } 
+     
+    main(); 
   </script>
 </body>
 </html>

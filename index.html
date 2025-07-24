@@ -1,1052 +1,1263 @@
 <!DOCTYPE html>
 <html lang="ja">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>DLsiteおすすめ共有</title>
-  <style>
-    /* ===================================
-       基本スタイル & 全体レイアウト
-    ====================================== */
-    * {
-      box-sizing: border-box;
-      margin: 0;
-      padding: 0;
-    }
-    body {
-      font-family: sans-serif;
-      background: #f5f5f5;
-      color: #333;
-    }
-    .container {
-      max-width: 960px;
-      margin: 2rem auto;
-      padding: 0 1rem;
-    }
-    .section-header {
-        display: flex;
-        justify-content: space-between;
-        align-items: center;
-        border-bottom: 2px solid #ccc;
-        padding-bottom: 0.5rem;
-        margin-top: 2.5rem;
-    }
-    h2 {
-      margin: 0;
-      padding: 0;
-      border: none;
-    }
-    hr {
-      border: none;
-      border-top: 1px solid #eee;
-      margin: 2rem 0;
-    }
-    .hidden {
-      display: none !important;
-    }
-    .view-options {
-        display: flex;
-        align-items: center;
-        gap: 0.5rem;
-    }
-    .view-options label {
-        font-size: 0.85rem;
-        color: #555;
-    }
-    .view-options select {
-        padding: 0.2rem 0.4rem;
-        border: 1px solid #ccc;
-        border-radius: 4px;
-        background-color: #fff;
-    }
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>DLsiteおすすめ共有</title>
+    <style>
+        /* ===================================
+            基本スタイル & 全体レイアウト
+        ====================================== */
+        * { box-sizing: border-box; margin: 0; padding: 0; }
+        body { font-family: sans-serif; background: #f5f5f5; color: #333; }
+        .container { max-width: 960px; margin: 2rem auto; padding: 0 1rem; }
+        .site-header { text-align: center; margin-bottom: 2rem; }
+        .site-header h1 { font-size: 2.5rem; margin-bottom: 0.5rem; }
+        .site-header p { font-size: 0.8rem; color: #888; }
+        .section-header { display: flex; justify-content: space-between; align-items: center; border-bottom: 2px solid #ccc; padding-bottom: 0.5rem; margin-top: 2.5rem; }
+        h2 { margin: 0; padding: 0; border: none; display: flex; align-items: center; gap: 0.5rem;}
+        hr { border: none; border-top: 1px solid #eee; margin: 2rem 0; }
+        .hidden { display: none !important; }
+        .view-options { display: flex; align-items: center; gap: 0.5rem; }
+        .view-options label { font-size: 0.85rem; color: #555; }
+        .view-options select { padding: 0.2rem 0.4rem; border: 1px solid #ccc; border-radius: 4px; background-color: #fff; }
+        .collapser-header { cursor: pointer; user-select: none; }
+        .collapser-header h2::after { content: '▲'; font-size: 0.8em; margin-left: 0.5em; display: inline-block; transition: transform 0.3s; }
+        .collapser-header.collapsed h2::after { transform: rotate(180deg); }
+        .collapsible-content { overflow: hidden; transition: max-height 0.4s ease-out, padding 0.4s ease-out, margin 0.4s ease-out; max-height: 5000px; }
+        .collapsible-content.collapsed { max-height: 0; padding-top: 0 !important; padding-bottom: 0 !important; margin-top: 0 !important; margin-bottom: 0 !important; }
+        .controls { display: flex; flex-wrap: wrap; gap: .5rem; margin-bottom: 1rem; align-items: center; }
+        .controls input { flex: 1; min-width: 200px; padding: .5rem; border: 1px solid #ccc; border-radius: 4px; }
+        .controls button, .filter-controls button { padding: .5rem 1rem; border: none; color: #fff; border-radius: 4px; cursor: pointer; transition: background-color 0.2s; }
+        .filter-controls { display: flex; flex-wrap: wrap; gap: 0.5rem; margin-bottom: 1rem; }
+        #addBtn { background: #28a745; }
+        #addBtn:disabled { opacity: .6; cursor: default; }
+        #hideBadBtn { background: #6c757d; }
+        #hideBadBtn.active { background: #f44336; font-weight: bold; }
+        #mosaicToggleBtn { background: #8e44ad; }
+        .filterByTagsBtn, .resetFilterBtn { background: #4CAF50; color: white; }
+        .filterByTagsBtn.active { background: #2E7D32; font-weight: bold;}
+        #contactBtn { background-color: #007bff; color: white; }
+        .loading { position: relative; }
+        .loading::after { content: ''; position: absolute; top: 50%; right: 10px; width: 16px; height: 16px; margin-top: -8px; border: 2px solid #fff; border-top-color: transparent; border-radius: 50%; animation: spin .6s linear infinite; }
+        @keyframes spin { to { transform: rotate(360deg); } }
+        .tabs input[type="radio"] { display: none; }
+        .tabs label { display: inline-block; padding: .5rem 1.5rem; cursor: pointer; background: #eee; margin-right: .5rem; border-radius: 4px 4px 0 0; font-weight: bold; }
+        #tab-admin_manga:checked ~ .tabs-container label[for="tab-admin_manga"], #tab-admin_game:checked ~ .tabs-container label[for="tab-admin_game"], #tab-new:checked ~ .tabs-container label[for="tab-new"], #tab-ranking:checked ~ .tabs-container label[for="tab-ranking"] { background: #fff; }
+        .tab-content { display: none; padding: 1rem; background: #fff; border: 1px solid #ddd; border-top: none; border-radius: 0 4px 4px 4px; }
+        #tab-admin_manga:checked ~ #admin_manga, #tab-admin_game:checked ~ #admin_game, #tab-new:checked ~ #new, #tab-ranking:checked ~ #ranking { display: block; }
+        .grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(140px,1fr)); gap: 1rem; transition: min-height 0.3s ease-in-out; align-content: start; }
+        .item { position: relative; background: #fafafa; border: 1px solid #ddd; border-radius: 6px; display: flex; flex-direction: column; overflow: hidden; cursor: pointer; height: 320px; transition: box-shadow 0.2s; }
+        .item:hover { box-shadow: 0 4px 12px rgba(0,0,0,0.15); }
+        .item img { width: 100%; height: 180px; object-fit: cover; flex-shrink: 0; }
+        .item-body { flex: 1; overflow-y: auto; padding: 0 .5rem; }
+        .title { font-size: .9rem; margin: .5rem 0; max-height: 2.4em; }
+        .tags { display: flex; flex-wrap: wrap; gap: 4px; }
+        .tag { background: #ddd; border-radius: 4px; padding: 2px 6px; font-size: .75rem; }
+        .item-footer { margin-top: auto; display: flex; justify-content: space-between; align-items: center; padding: .5rem; background: #fff; gap: 0.5rem; flex-shrink: 0; min-height: 38px; }
+        .rating-buttons { display: flex; align-items: center; gap: 4px; }
+        .rating-btn { padding: 2px 6px; font-size: .8rem; border: none; border-radius: 4px; background: #eee; cursor: pointer; }
+        .rating-btn.good.active { background: #4caf50; color: #fff; }
+        .rating-btn.bad.active { background: #f44336; color: #fff; }
+        .score-display { visibility: hidden; font-size: 0.9rem; font-weight: bold; color: #333; margin-left: 0.5rem; }
+        #rankingGrid .score-display { visibility: visible; }
+        .pagination { display: flex; align-items: center; justify-content: center; gap: .5rem; margin-top: 1rem; }
+        .pagination button { padding: .3rem .6rem; font-size: .9rem; border: 1px solid #ccc; background: #fff; cursor: pointer; }
+        .pagination button:disabled { opacity: .5; cursor: default; }
+        .overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.6); z-index: 1999; display: flex; align-items: center; justify-content: center; }
+        .overlay.hidden { display: none; }
+        .modal { width: 90%; max-width: 600px; background: #fff; border-radius: 8px; box-shadow: 0 4px 12px rgba(0,0,0,0.2); display: flex; flex-direction: column; max-height: 80vh; }
+        .modal-header { font-weight: bold; padding: 1rem; border-bottom: 1px solid #ddd; }
+        .modal-body { flex: 1; overflow-y: auto; padding: 1rem; }
+        .tag-panel .modal-body { padding: 0; }
+        .tag-panel .tag-search-input { width: 100%; padding: .75rem; font-size: 1rem; border: none; border-bottom: 1px solid #ddd; }
+        .tag-panel .category-tabs { display: flex; flex-wrap: wrap; gap: .5rem; padding: .75rem; border-bottom: 1px solid #ddd; background: #f7f7f7; }
+        .tag-panel .category-tabs button { padding: .4rem .8rem; font-size: .8rem; border: 1px solid #ccc; border-radius: 1rem; background: #fff; cursor: pointer; }
+        .tag-panel .category-tabs button.active { background: #333; color: #fff; border-color: #333; }
+        .tag-panel .tag-list { padding: .75rem; display: grid; height: 30vh; overflow-y: auto; grid-template-columns: repeat(auto-fill, minmax(150px, 1fr)); gap: .5rem; align-content: start; }
+        .tag-panel .tag-list label { display: flex; align-items: center; gap: .5rem; margin-bottom: 0; font-size: .9rem; cursor: pointer; }
+        .tag-panel .tag-list input { margin: 0; }
+        .modal-footer { display: flex; justify-content: flex-end; gap: 0.75rem; padding: .75rem; background: #f7f7f7; border-top: 1px solid #ddd; }
+        .modal-footer button { padding: 0.6rem 1.2rem; font-size: 0.9rem; font-weight: 600; border-radius: 6px; border: none; cursor: pointer; transition: opacity 0.2s ease; }
+        .modal-footer button:hover { opacity: 0.85; }
+        #modal-close-btn, #tag-panel-reset { background-color: #6c757d; color: white; }
+        #tag-panel-confirm { background-color: #ff9800; color: white; }
+        #filter-mode-select-buttons { display: flex; gap: 0.5rem; margin-right: auto; }
+        #filter-mode-select-buttons button { padding: 0.4rem 0.8rem; font-size: 0.8rem; border-radius: 4px; background-color: #aaa; color: white; }
+        #filter-mode-select-buttons button.active { background-color: #28a745; }
+        .toast { position: fixed; bottom: 1rem; right: 1rem; background: rgba(0,0,0,.8); color: #fff; padding: .5rem 1rem; border-radius: 4px; opacity: 0; transition: opacity .3s; z-index: 3000; }
+        .toast.show { opacity: 1; }
+        body.mosaic-on .item img { filter: blur(8px); transition: filter 0.2s ease-in-out; }
+        body.mosaic-on .item img:hover { filter: blur(0); }
+        .contact-form .form-group { margin-bottom: 1rem; }
+        .contact-form .form-group label { display: block; margin-bottom: 0.25rem; font-weight: bold; font-size: 0.9rem; }
+        .contact-form .form-group input, .contact-form .form-group textarea { width: 100%; padding: 0.6rem; border: 1px solid #ccc; border-radius: 4px; font-size: 1rem; }
+        .contact-form .form-group textarea { min-height: 120px; resize: vertical; }
+        .image-preview-popup { display: none; position: fixed; z-index: 4000; pointer-events: none; border: 2px solid #ccc; box-shadow: 0 5px 15px rgba(0,0,0,0.3); max-width: 400px; max-height: 90vh; overflow: hidden; border-radius: 4px; background-color: #fff; transition: opacity 0.1s; }
+        .image-preview-popup img { display: block; width: 100%; height: auto; }
+        .auth-area { text-align: right; margin-bottom: 1rem; display: flex; justify-content: flex-end; align-items: center; gap: 1rem; }
+        .auth-area #userName { font-weight: bold; }
+        .auth-area button { padding: .4rem .8rem; background-color: #007bff; color:white; border:none; border-radius: 4px; cursor: pointer; }
+        .auth-area button#logoutBtn { background-color: #6c757d; }
+        .requires-auth:disabled { opacity: 0.5; cursor: not-allowed; }
+        .main-nav { display: flex; gap: 0.5rem; margin-bottom: 1rem; padding-bottom: 1rem; border-bottom: 1px solid #eee; }
+        .main-nav button { padding: .5rem 1rem; background: #555; color: white; border: none; border-radius: 4px; font-size: 1rem; }
+        .main-nav button.active { background: #000; font-weight: bold; }
+        .view-container { display: none; }
+        #view-favorites, #view-mylists, #view-public-list { padding-bottom: 2rem; }
+        .card-actions { display: flex; gap: 4px; }
+        .card-actions button { width: 32px; height: 32px; border-radius: 50%; border: 1px solid rgba(0,0,0,0.1); background-color: rgba(255, 255, 255, 0.8); cursor: pointer; font-size: 16px; display: flex; align-items: center; justify-content: center; transition: all 0.2s; }
+        .card-actions button:hover { background-color: white; transform: scale(1.1); }
+        .card-actions .favorite-btn.favorited { color: #e91e63; background-color: white; }
+        .card-actions .add-to-list-btn.in-list { color: #28a745; background-color: white; }
+        .card-actions .remove-from-list-btn { color: #f44336; }
+        .item-footer .card-actions { position: absolute; top: 4px; right: 4px; z-index: 10; opacity: 0; }
+        .item:hover .item-footer .card-actions { opacity: 1; }
+        .add-to-list-popover { position: absolute; z-index: 100; background-color: white; border: 1px solid #ccc; box-shadow: 0 2px 10px rgba(0,0,0,0.2); border-radius: 6px; padding: .75rem; width: 250px; }
+        .add-to-list-popover ul { list-style: none; max-height: 150px; overflow-y: auto; margin-bottom: .75rem; }
+        .add-to-list-popover li label { display: block; padding: .25rem 0; cursor: pointer; display: flex; align-items: center; gap: .5rem; }
+        .add-to-list-popover .new-list-form { display: flex; gap: .5rem; border-top: 1px solid #eee; padding-top: .75rem; }
+        .add-to-list-popover .new-list-form input { flex-grow: 1; padding: .4rem; border: 1px solid #ccc; border-radius: 4px; }
+        .add-to-list-popover .new-list-form button { padding: 0 .8rem; background-color: #28a745; color: white; border: none; border-radius: 4px; cursor: pointer; }
+        #mylists-container { display: flex; gap: 1.5rem; align-items: flex-start; transition: all 0.3s ease; }
+        .mylists-sidebar { flex: 0 0 300px; transition: all 0.3s ease; }
+        .mylists-content { flex-grow: 1; min-width: 0; }
+        #mylists-container.sidebar-collapsed .mylists-sidebar { flex-basis: 0; width: 0; overflow: hidden; padding: 0; margin-left: -1.5rem; opacity: 0; }
+        #toggle-sidebar-btn { background: none; border: 1px solid #ccc; border-radius: 4px; cursor: pointer; padding: 0.1rem 0.4rem; font-size: 1em; line-height: 1; color: #555; }
+        #toggle-sidebar-btn:hover { background: #eee; }
+        .mylists-sidebar h3, .mylists-content h3 { margin-bottom: 1rem; }
+        .mylists-sidebar ul { list-style: none; }
+        .mylists-sidebar li { margin-bottom: .5rem; }
+        .mylists-sidebar .list-group-item { width: 100%; text-align: left; padding: .6rem; border: 1px solid #eee; background: #fff; cursor: pointer; border-radius: 4px; display: flex; justify-content: space-between; align-items: center; }
+        .mylists-sidebar .list-group-item.active { background-color: #333; color: white; border-color: #333; }
+        .list-item-controls { display: flex; gap: 0.5rem; }
+        .list-item-controls button { background: none; border: none; font-size: 1rem; cursor: pointer; padding: 0 .2rem; opacity: 0.5; }
+        .list-group-item:hover .list-item-controls button { opacity: 1; }
+        .list-edit-form { display: flex; width: 100%; gap: 0.5rem; padding: 0.6rem; border: 1px solid #ccc; border-radius: 4px; }
+        .list-edit-form input { flex-grow: 1; border: 1px solid #999; padding: 0.2rem; }
+        .list-edit-form button { background: none; border: none; font-size: 1rem; cursor: pointer; }
+        .list-actions { margin-top: 1rem; margin-bottom: 1rem; }
+        .list-actions .form-group { display: flex; gap: .5rem; margin-bottom: 0.5rem; }
+        .list-actions input { flex-grow: 1; padding: .5rem; }
+        .list-actions button { padding: .5rem; }
+        #share-id-display { user-select: all; background: #eee; padding: 0.5rem; border-radius: 4px; cursor: pointer; }
+        #share-id-display:hover { background: #ddd; }
 
-    /* ▼▼▼【CSS追加】セクション折りたたみ機能のスタイル ▼▼▼ */
-    .collapser-header {
-        cursor: pointer;
-        user-select: none; /* テキスト選択を防ぐ */
-    }
-    .collapser-header h2::after {
-        content: '▲';
-        font-size: 0.8em;
-        margin-left: 0.5em;
-        display: inline-block;
-        transition: transform 0.3s;
-    }
-    .collapser-header.collapsed h2::after {
-        transform: rotate(180deg);
-    }
-    .collapsible-content {
-        overflow: hidden;
-        transition: max-height 0.4s ease-out, padding 0.4s ease-out, margin 0.4s ease-out;
-        max-height: 5000px; /* 十分な高さを確保 */
-    }
-    .collapsible-content.collapsed {
-        max-height: 0;
-        padding-top: 0 !important;
-        padding-bottom: 0 !important;
-        margin-top: 0 !important;
-        margin-bottom: 0 !important;
-    }
-
-
-    /* ===================================
-       操作コントロール (ボタン、入力欄)
-    ====================================== */
-    .controls {
-      display: flex;
-      flex-wrap: wrap;
-      gap: .5rem;
-      margin-bottom: 1rem;
-      align-items: center;
-    }
-    .controls input {
-      flex: 1;
-      min-width: 200px;
-      padding: .5rem;
-      border: 1px solid #ccc;
-      border-radius: 4px;
-    }
-    .controls button {
-      padding: .5rem 1rem;
-      border: none;
-      color: #fff;
-      border-radius: 4px;
-      cursor: pointer;
-      transition: background-color 0.2s;
-    }
-    #addBtn { background: #28a745; }
-    #addBtn:disabled { opacity: .6; cursor: default; }
-    #hideBadBtn { background: #6c757d; }
-    #hideBadBtn.active { background: #f44336; font-weight: bold; }
-    #mosaicToggleBtn { background: #8e44ad; }
-    #filterByTagsBtn, #resetFilterBtn { background: #4CAF50; }
-    #filterByTagsBtn.active { background: #2E7D32; font-weight: bold;}
-    #contactBtn { background-color: #007bff; color: white; }
-    .loading { position: relative; }
-    .loading::after {
-      content: '';
-      position: absolute;
-      top: 50%;
-      right: 10px;
-      width: 16px;
-      height: 16px;
-      margin-top: -8px;
-      border: 2px solid #fff;
-      border-top-color: transparent;
-      border-radius: 50%;
-      animation: spin .6s linear infinite;
-    }
-    @keyframes spin { to { transform: rotate(360deg); } }
-
-    /* ===================================
-       タブ & コンテンツエリア
-    ====================================== */
-    .tabs input[type="radio"] { display: none; }
-    .tabs label {
-      display: inline-block;
-      padding: .5rem 1.5rem;
-      cursor: pointer;
-      background: #eee;
-      margin-right: .5rem;
-      border-radius: 4px 4px 0 0;
-      font-weight: bold;
-    }
-    #tab-admin_manga:checked ~ .tabs-container label[for="tab-admin_manga"],
-    #tab-admin_game:checked ~ .tabs-container label[for="tab-admin_game"],
-    #tab-new:checked ~ .tabs-container label[for="tab-new"],
-    #tab-ranking:checked ~ .tabs-container label[for="tab-ranking"] {
-        background: #fff;
-    }
-    .tab-content {
-      display: none;
-      padding: 1rem;
-      background: #fff;
-      border: 1px solid #ddd;
-      border-top: none;
-      border-radius: 0 4px 4px 4px;
-    }
-    #tab-admin_manga:checked ~ #admin_manga, #tab-admin_game:checked ~ #admin_game,
-    #tab-new:checked ~ #new, #tab-ranking:checked ~ #ranking { display: block; }
-     
-    /* ===================================
-       グリッド & カード表示
-    ====================================== */
-    .grid {
-      display: grid;
-      grid-template-columns: repeat(auto-fill, minmax(140px,1fr));
-      gap: 1rem;
-      transition: min-height 0.3s ease-in-out;
-      align-content: start;
-    }
-    .item {
-      position: relative;
-      background: #fafafa;
-      border: 1px solid #ddd;
-      border-radius: 6px;
-      display: flex;
-      flex-direction: column;
-      overflow: hidden;
-      cursor: pointer;
-      height: 320px;
-      transition: box-shadow 0.2s;
-    }
-    .item:hover { box-shadow: 0 4px 12px rgba(0,0,0,0.15); }
-    .item img {
-      width: 100%;
-      height: 180px;
-      object-fit: cover;
-      flex-shrink: 0;
-    }
-    .item-body {
-      flex: 1;
-      overflow-y: auto;
-      padding: 0 .5rem;
-    }
-    .title {
-      font-size: .9rem;
-      margin: .5rem 0;
-      max-height: 2.4em;
-    }
-    .tags {
-      display: flex;
-      flex-wrap: wrap;
-      gap: 4px;
-    }
-    .tag {
-      background: #ddd;
-      border-radius: 4px;
-      padding: 2px 6px;
-      font-size: .75rem;
-    }
-    .item-footer {
-      margin-top: auto;
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      padding: .5rem;
-      background: #fff;
-      gap: 0.5rem;
-      flex-shrink: 0;
-    }
-    .rating-buttons {
-      display: flex;
-      align-items: center;
-      gap: 4px;
-    }
-    .rating-btn {
-      padding: 2px 6px;
-      font-size: .8rem;
-      border: none;
-      border-radius: 4px;
-      background: #eee;
-      cursor: pointer;
-    }
-    .rating-btn.good.active { background: #4caf50; color: #fff; }
-    .rating-btn.bad.active { background: #f44336; color: #fff; }
-    .score-display {
-      visibility: hidden;
-      font-size: 0.9rem;
-      font-weight: bold;
-      color: #333;
-      margin-left: 0.5rem;
-    }
-    #rankingGrid .score-display { visibility: visible; }
-    #adminMangaGrid .rating-buttons, #adminGameGrid .rating-buttons { display: none; }
-     
-    /* ===================================
-       ページネーション & モーダル等
-    ====================================== */
-    .pagination {
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      gap: .5rem;
-      margin-top: 1rem;
-    }
-    .pagination button {
-      padding: .3rem .6rem;
-      font-size: .9rem;
-      border: 1px solid #ccc;
-      background: #fff;
-      cursor: pointer;
-    }
-    .pagination button:disabled { opacity: .5; cursor: default; }
-    .overlay {
-      position: fixed;
-      top: 0;
-      left: 0;
-      width: 100%;
-      height: 100%;
-      background: rgba(0,0,0,0.6);
-      z-index: 1999;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-    }
-    .overlay.hidden { display: none; }
-    .modal {
-      width: 90%;
-      max-width: 600px;
-      background: #fff;
-      border-radius: 8px;
-      box-shadow: 0 4px 12px rgba(0,0,0,0.2);
-      display: flex;
-      flex-direction: column;
-      max-height: 80vh;
-    }
-    .modal-header {
-      font-weight: bold;
-      padding: 1rem;
-      border-bottom: 1px solid #ddd;
-    }
-    .modal-body {
-      flex: 1;
-      overflow-y: auto;
-      padding: 1rem;
-    }
-    .tag-panel .modal-body { padding: 0; }
-    .tag-panel .tag-search-input { width: 100%; padding: .75rem; font-size: 1rem; border: none; border-bottom: 1px solid #ddd; }
-    .tag-panel .category-tabs { display: flex; flex-wrap: wrap; gap: .5rem; padding: .75rem; border-bottom: 1px solid #ddd; background: #f7f7f7; }
-    .tag-panel .category-tabs button { padding: .4rem .8rem; font-size: .8rem; border: 1px solid #ccc; border-radius: 1rem; background: #fff; cursor: pointer; }
-    .tag-panel .category-tabs button.active { background: #333; color: #fff; border-color: #333; }
-    .tag-panel .tag-list { padding: .75rem; display: grid; height: 30vh; overflow-y: auto; grid-template-columns: repeat(auto-fill, minmax(150px, 1fr)); gap: .5rem; align-content: start; }
-    .tag-panel .tag-list label { display: flex; align-items: center; gap: .5rem; margin-bottom: 0; font-size: .9rem; cursor: pointer; }
-    .tag-panel .tag-list input { margin: 0; }
-    .modal-footer {
-        display: flex;
-        justify-content: flex-end;
-        gap: 0.75rem;
-        padding: .75rem;
-        background: #f7f7f7;
-        border-top: 1px solid #ddd;
-    }
-    .modal-footer button {
-        padding: 0.6rem 1.2rem;
-        font-size: 0.9rem;
-        font-weight: 600;
-        border-radius: 6px;
-        border: none;
-        cursor: pointer;
-        transition: opacity 0.2s ease;
-    }
-    .modal-footer button:hover { opacity: 0.85; }
-    #modal-close-btn, #tag-panel-reset { background-color: #6c757d; color: white; }
-    #tag-panel-confirm { background-color: #ff9800; color: white; }
-    #filter-mode-select-buttons {
-        display: flex;
-        gap: 0.5rem;
-        margin-right: auto;
-    }
-    #filter-mode-select-buttons button {
-        padding: 0.4rem 0.8rem;
-        font-size: 0.8rem;
-        border-radius: 4px;
-        background-color: #aaa;
-        color: white;
-    }
-    #filter-mode-select-buttons button.active {
-        background-color: #28a745;
-    }
-    .toast {
-      position: fixed;
-      bottom: 1rem;
-      right: 1rem;
-      background: rgba(0,0,0,.8);
-      color: #fff;
-      padding: .5rem 1rem;
-      border-radius: 4px;
-      opacity: 0;
-      transition: opacity .3s;
-      z-index: 3000;
-    }
-    .toast.show { opacity: 1; }
-    body.mosaic-on .item img {
-        filter: blur(8px);
-        transition: filter 0.2s ease-in-out;
-    }
-    body.mosaic-on .item img:hover {
-        filter: blur(0);
-    }
-    .contact-form .form-group { margin-bottom: 1rem; }
-    .contact-form .form-group label { display: block; margin-bottom: 0.25rem; font-weight: bold; font-size: 0.9rem; }
-    .contact-form .form-group input,
-    .contact-form .form-group textarea { width: 100%; padding: 0.6rem; border: 1px solid #ccc; border-radius: 4px; font-size: 1rem; }
-    .contact-form .form-group textarea { min-height: 120px; resize: vertical; }
-    
-    .image-preview-popup {
-        display: none;
-        position: fixed;
-        z-index: 4000;
-        pointer-events: none;
-        border: 2px solid #ccc;
-        box-shadow: 0 5px 15px rgba(0,0,0,0.3);
-        max-width: 400px;
-        max-height: 90vh;
-        overflow: hidden;
-        border-radius: 4px;
-        background-color: #fff;
-        transition: opacity 0.1s;
-    }
-    .image-preview-popup img {
-        display: block;
-        width: 100%;
-        height: auto;
-    }
-
-    /* ======================================
-       レスポンシブ (スマホ向けスタイル)
-    ====================================== */
-    @media screen and (max-width: 768px) {
-        body { font-size: 14px; -webkit-text-size-adjust: 100%; }
-        .container { margin: 1rem auto; padding: 0 0.75rem; }
-        .section-header { flex-direction: column; align-items: flex-start; gap: 0.5rem; }
-        h2 { font-size: 1.2rem; }
-        hr { margin: 1.5rem 0; }
-        .controls { flex-direction: column; gap: 0.75rem; align-items: stretch; }
-        .controls input { min-width: 0; width: 100%; padding: .75rem; font-size: 1rem; }
-        .controls button { width: 100%; padding: .75rem 1rem; }
-        .controls:has(#dlsiteUrl) { flex-direction: row; flex-wrap: nowrap; }
-        .controls:has(#dlsiteUrl) #dlsiteUrl { flex: 1; }
-        .controls:has(#dlsiteUrl) #addBtn { flex-shrink: 0; width: auto; padding: .75rem; }
-        .tabs { position: relative; }
-        .tab-content { padding: 0.75rem; }
-        .tabs-container {
-            overflow-x: auto;
-            white-space: nowrap;
-            -webkit-overflow-scrolling: touch;
-            padding-bottom: 8px;
-            border-bottom: 1px solid #ddd;
+        /* レスポンシブ (スマホ向けスタイル) */
+        @media screen and (max-width: 768px) {
+            body { font-size: 14px; -webkit-text-size-adjust: 100%; }
+            .container { margin: 1rem auto; padding: 0 0.75rem; }
+            .site-header h1 { font-size: 1.8rem; }
+            .section-header { flex-direction: column; align-items: flex-start; gap: 0.5rem; }
+            h2 { font-size: 1.2rem; }
+            hr { margin: 1.5rem 0; }
+            .controls { flex-direction: column; gap: 0.75rem; align-items: stretch; }
+            .controls input { min-width: 0; width: 100%; padding: .75rem; font-size: 1rem; }
+            .controls button { width: 100%; }
+            .controls:has(#dlsiteUrl) { flex-direction: row; flex-wrap: nowrap; }
+            .controls:has(#dlsiteUrl) #dlsiteUrl { flex: 1; }
+            .controls:has(#dlsiteUrl) #addBtn { flex-shrink: 0; width: auto; padding: .75rem; }
+            .filter-controls { flex-direction: column; gap: 0.75rem; align-items: stretch; }
+            .filter-controls button { width: 100%; }
+            .tabs { position: relative; }
+            .tab-content { padding: 0.75rem; }
+            .tabs-container { overflow-x: auto; white-space: nowrap; -webkit-overflow-scrolling: touch; padding-bottom: 8px; border-bottom: 1px solid #ddd; }
+            .tabs label { padding: .6rem 1.1rem; font-size: .9rem; margin-right: 4px; }
+            #tab-admin_manga:checked ~ .tabs-container label[for="tab-admin_manga"], #tab-admin_game:checked ~ .tabs-container label[for="tab-admin_game"], #tab-new:checked ~ .tabs-container label[for="tab-new"], #tab-ranking:checked ~ .tabs-container label[for="tab-ranking"] { background: #fff; border: 1px solid #ddd; border-bottom: 1px solid #fff; position: relative; top: 1px; }
+            .grid { grid-template-columns: repeat(2, 1fr); gap: 0.75rem; }
+            .item { height: auto; min-height: 0; }
+            .item img { height: 160px; }
+            .title { font-size: .8rem; margin: .4rem 0; max-height: 3.2em; }
+            .tag { font-size: .7rem; padding: 2px 5px; }
+            .item-footer { padding: .4rem; min-height: auto; }
+            .rating-btn { padding: 3px 7px; }
+            .item-footer .card-actions { position: static; opacity: 1; }
+            .item-footer { flex-direction: column; align-items: stretch; gap: 0.25rem; }
+            .rating-buttons { justify-content: flex-start; }
+            .card-actions { justify-content: flex-end; }
+            .pagination { gap: .25rem; }
+            .pagination button, .pagination span { font-size: 0.85rem; }
+            .pagination button { padding: .4rem .6rem; }
+            .modal { width: 95vw; max-height: 85vh; }
+            .modal-body { padding: 0.75rem; }
+            .tag-panel .tag-list { grid-template-columns: repeat(auto-fill, minmax(120px, 1fr)); height: 40vh; gap: .75rem; }
+            .tag-panel .category-tabs { padding: 0.5rem; gap: 0.25rem; }
+            .tag-panel .category-tabs button { font-size: 0.75rem; }
+            .modal-footer { flex-direction: column; gap: 0.5rem; }
+            #filter-mode-select-buttons { order: -1; width: 100%; justify-content: center; margin-right: 0; }
+            .modal-footer button { width: 100%; }
+            .toast { left: 1rem; right: 1rem; width: auto; text-align: center; }
+            .image-preview-popup { display: none !important; }
+            .main-nav { overflow-x: auto; white-space: nowrap; }
+            #mylists-container { flex-direction: column; }
+            .mylists-sidebar { width: 100%; flex-basis: auto; transition: max-height 0.3s ease-out; }
+            #mylists-container.sidebar-collapsed .mylists-sidebar { max-height: 0; overflow: hidden; padding-top: 0; padding-bottom: 0; margin-bottom: 0; border: none; }
+            #toggle-sidebar-btn { display: block; }
         }
-        .tabs label { padding: .6rem 1.1rem; font-size: .9rem; margin-right: 4px; }
-        #tab-admin_manga:checked ~ .tabs-container label[for="tab-admin_manga"],
-        #tab-admin_game:checked ~ .tabs-container label[for="tab-admin_game"],
-        #tab-new:checked ~ .tabs-container label[for="tab-new"],
-        #tab-ranking:checked ~ .tabs-container label[for="tab-ranking"] {
-            background: #fff;
-            border: 1px solid #ddd;
-            border-bottom: 1px solid #fff;
-            position: relative;
-            top: 1px;
-        }
-        .grid { grid-template-columns: repeat(2, 1fr); gap: 0.75rem; }
-        .item { height: auto; min-height: 0; }
-        .item img { height: 160px; }
-        .title { font-size: .8rem; margin: .4rem 0; max-height: 3.2em; }
-        .tag { font-size: .7rem; padding: 2px 5px; }
-        .item-footer { padding: .4rem; }
-        .rating-btn { padding: 3px 7px; }
-        #adminMangaGrid, #adminGameGrid { min-height: auto; }
-        .pagination { gap: .25rem; }
-        .pagination button, .pagination span { font-size: 0.85rem; }
-        .pagination button { padding: .4rem .6rem; }
-        .modal { width: 95vw; max-height: 85vh; }
-        .modal-body { padding: 0.75rem; }
-        .tag-panel .tag-list { grid-template-columns: repeat(auto-fill, minmax(120px, 1fr)); height: 40vh; gap: .75rem; }
-        .tag-panel .category-tabs { padding: 0.5rem; gap: 0.25rem; }
-        .tag-panel .category-tabs button { font-size: 0.75rem; }
-        .modal-footer { flex-direction: column; gap: 0.5rem; }
-        #filter-mode-select-buttons { order: -1; width: 100%; justify-content: center; margin-right: 0; }
-        .modal-footer button { width: 100%; }
-        .toast { left: 1rem; right: 1rem; width: auto; text-align: center; }
-        .image-preview-popup { display: none !important; }
-    }
-  </style>
+    </style>
 </head>
 <body>
     <div class="container">
-    <header style="text-align: center; margin-bottom: 2rem;">
-      <h1 style="font-size: 2.5rem; margin-bottom: 0.5rem;">DLsiteのおすすめ教えてくれ</h1>
-      <p style="font-size: 0.8rem; color: #888;">
-        当サイトで追加されたリンクは、アフィリエイトプログラムを利用している場合があります。
-      </p>
-    </header>
+        <header class="site-header">
+            <h1>DLsiteのおすすめ教えてくれ</h1>
+            <p>当サイトで追加されたリンクは、アフィリエイトプログラムを利用している場合がございます。</p>
+        </header>
 
-    <div class="controls">
-      <button id="contactBtn">お問い合わせ</button>
-      <button id="filterByTagsBtn">タグで絞り込み</button>
-      <button id="resetFilterBtn" class="hidden">絞り込み解除</button>
-      <button id="hideBadBtn">Bad評価を非表示</button>
-      <button id="mosaicToggleBtn">モザイク ON</button>
-    </div>
-
-    <hr>
-    <div class="section-header collapser-header" data-section="admin">
-        <h2>管理者のおすすめ</h2>
-        <div class="view-options">
-            <label for="adminPageSizeSelector">表示件数:</label>
-            <select id="adminPageSizeSelector"></select>
+        <div class="auth-area">
+            <span id="userName" class="hidden"></span>
+            <button id="loginBtn">Googleでログイン</button>
+            <button id="logoutBtn" class="hidden">ログアウト</button>
         </div>
-    </div>
-    <div class="collapsible-content">
-        <div class="tabs">
-            <input type="radio" id="tab-admin_manga" name="admin_tab" checked>
-            <input type="radio" id="tab-admin_game" name="admin_tab">
-            <div class="tabs-container">
-                <label for="tab-admin_manga">漫画</label>
-                <label for="tab-admin_game">ゲーム</label>
+        <nav class="main-nav">
+            <button id="nav-home" class="active">ホーム</button>
+            <button id="nav-favorites" class="requires-auth" disabled>お気に入り</button>
+            <button id="nav-mylists" class="requires-auth" disabled>マイリスト</button>
+        </nav>
+        <div id="view-main">
+            <div class="controls">
+            <button id="contactBtn">お問い合わせ</button>
+            <button class="filterByTagsBtn">タグで絞り込み</button>
+            <button class="resetFilterBtn hidden">絞り込み解除</button>
+            <button id="hideBadBtn">Bad評価を非表示</button>
+            <button id="mosaicToggleBtn">モザイク ON</button>
+            <button id="infoBtn" style="background-color: #17a2b8;">サイト情報</button>
+        </div>
+            <hr>
+            <div class="section-header collapser-header" data-section="admin">
+                <h2>管理者のおすすめ</h2>
+                <div class="view-options"><label for="adminPageSizeSelector">表示件数:</label><select id="adminPageSizeSelector"></select></div>
             </div>
-            <section id="admin_manga" class="tab-content">
-                <div class="grid" id="adminMangaGrid"></div>
-                <div class="pagination">
-                    <button id="adminMangaPrev" disabled>前へ</button>
-                    <span id="adminMangaCurrent">1</span>/<span id="adminMangaTotal">1</span>
-                    <button id="adminMangaNext" disabled>次へ</button>
+            <div class="collapsible-content">
+                <div class="tabs">
+                    <input type="radio" id="tab-admin_manga" name="admin_tab" checked><input type="radio" id="tab-admin_game" name="admin_tab">
+                    <div class="tabs-container"><label for="tab-admin_manga">漫画</label><label for="tab-admin_game">ゲーム</label></div>
+                    <section id="admin_manga" class="tab-content">
+                        <div class="grid" id="adminMangaGrid"></div>
+                        <div class="pagination"><button id="adminMangaPrev" disabled>前へ</button><span id="adminMangaCurrent">1</span>/<span id="adminMangaTotal">1</span><button id="adminMangaNext" disabled>次へ</button></div>
+                    </section>
+                    <section id="admin_game" class="tab-content">
+                        <div class="grid" id="adminGameGrid"></div>
+                        <div class="pagination"><button id="adminGamePrev" disabled>前へ</button><span id="adminGameCurrent">1</span>/<span id="adminGameTotal">1</span><button id="adminGameNext" disabled>次へ</button></div>
+                    </section>
                 </div>
-            </section>
-            <section id="admin_game" class="tab-content">
-                <div class="grid" id="adminGameGrid"></div>
-                <div class="pagination">
-                    <button id="adminGamePrev" disabled>前へ</button>
-                    <span id="adminGameCurrent">1</span>/<span id="adminGameTotal">1</span>
-                    <button id="adminGameNext" disabled>次へ</button>
-                </div>
-            </section>
-        </div>
-    </div>
-    
-    <hr>
-    <div class="section-header collapser-header" data-section="user">
-        <h2>みんなの投稿</h2>
-        <div class="view-options">
-            <label for="userPageSizeSelector">表示件数:</label>
-            <select id="userPageSizeSelector"></select>
-        </div>
-    </div>
-    <div class="collapsible-content">
-        <div class="controls">
-          <input type="url" id="dlsiteUrl" placeholder="DLsite作品URLを貼り付け" required>
-          <button id="addBtn">追加</button>
-        </div>
-        <div class="tabs">
-            <input type="radio" id="tab-new" name="tab" checked>
-            <input type="radio" id="tab-ranking" name="tab">
-            <div class="tabs-container">
-              <label for="tab-new">新着</label>
-              <label for="tab-ranking">ランキング</label>
             </div>
-            <section id="new" class="tab-content">
-                <div class="grid" id="newGrid"></div>
-                <div class="pagination">
-                    <button id="newPrev" disabled>前へ</button>
-                    <span id="newCurrent">1</span>/<span id="newTotal">1</span>
-                    <button id="newNext" disabled>次へ</button>
+            <hr>
+            <div class="section-header collapser-header" data-section="user">
+                <h2>みんなの投稿</h2>
+                <div class="view-options"><label for="userPageSizeSelector">表示件数:</label><select id="userPageSizeSelector"></select></div>
+            </div>
+            <div class="collapsible-content">
+                <div class="controls"><input type="url" id="dlsiteUrl" placeholder="DLsite作品URLを貼り付け" required><button id="addBtn">追加</button></div>
+                <div class="tabs">
+                    <input type="radio" id="tab-new" name="tab" checked><input type="radio" id="tab-ranking" name="tab">
+                    <div class="tabs-container"><label for="tab-new">新着</label><label for="tab-ranking">ランキング</label></div>
+                    <section id="new" class="tab-content">
+                        <div class="grid" id="newGrid"></div>
+                        <div class="pagination"><button id="newPrev" disabled>前へ</button><span id="newCurrent">1</span>/<span id="newTotal">1</span><button id="newNext" disabled>次へ</button></div>
+                    </section>
+                    <section id="ranking" class="tab-content">
+                        <div class="grid" id="rankingGrid"></div>
+                        <div class="pagination"><button id="rankPrev" disabled>前へ</button><span id="rankCurrent">1</span>/<span id="rankTotal">1</span><button id="rankNext" disabled>次へ</button></div>
+                    </section>
                 </div>
-            </section>
-            <section id="ranking" class="tab-content">
-                <div class="grid" id="rankingGrid"></div>
-                <div class="pagination">
-                    <button id="rankPrev" disabled>前へ</button>
-                    <span id="rankCurrent">1</span>/<span id="rankTotal">1</span>
-                    <button id="rankNext" disabled>次へ</button>
-                </div>
-            </section>
-        </div>
-    </div>
-  </div>
-  
-  <div id="modalOverlay" class="overlay hidden"><div id="modalContent" class="modal"></div></div>
-  <div id="toast" class="toast"></div>
-  <div id="imagePreviewPopup" class="image-preview-popup"></div>
-
-  <script type="module">
-    // --- モジュールのインポート --- 
-    import { initializeApp } from "https://www.gstatic.com/firebasejs/11.10.0/firebase-app.js"; 
-    import { getDatabase, ref, query, onChildAdded, onChildChanged, onChildRemoved, onValue, push, set, remove, serverTimestamp, get, update } from "https://www.gstatic.com/firebasejs/11.10.0/firebase-database.js"; 
-     
-    // --- 定数定義 (アプリケーション全体の設定) --- 
-    const CONSTANTS = { 
-      DL_AFFILIATE_ID: "sukumizuyoujo",
-      FIREBASE_CONFIG: { 
-        apiKey: "AIzaSyByYU-ZNJEDO0Z4LdXyI3Pn_vHhmOqa3Go", 
-        authDomain: "dlsite-share.firebaseapp.com", 
-        databaseURL: "https://dlsite-share-default-rtdb.firebaseio.com", 
-        projectId: "dlsite-share", 
-        storageBucket: "dlsite-share-default-rtdb.appspot.com", 
-        messagingSenderId: "764936540510", 
-        appId: "1:764936540510:web:846938ef579ea0b0cf3fcf", 
-        measurementId: "G-LXNH02PV7J" 
-      }, 
-      DB_PATHS: { WORKS: "works", ADMIN_PICKS: "adminPicks", TAGS: "tags", CATEGORIES: "categories", CONTACTS: "contacts" },
-      PAGE_SIZE_OPTIONS: {
-        mobile: { admin: [8, 10, 12], user: [10, 20, 30] },
-        pc: { admin: [5, 10, 15], user: [10, 20, 40] }
-      }
-    }; 
-
-    // --- 状態管理 (アプリケーションの状態を保持する変数) --- 
-    const state = { 
-      works: {}, adminPicks: {}, tags: {}, tagNameToDataMap: new Map(), categories: {}, 
-      sortedWorkIds: { new: [], ranking: [] }, 
-      sortedAdminIds: { manga: [], game: [] }, 
-      currentPage: { new: 1, ranking: 1, admin_manga: 1, admin_game: 1 }, 
-      pageSize: { admin: 10, user: 40 }, 
-      sectionsCollapsed: { admin: false, user: false }, // ★追加
-      clientId: null, 
-      hideBadlyRated: false, 
-      mosaicActive: false, 
-      highlightTagIds: new Set(), 
-      hideTagIds: new Set(), 
-      currentTagEditMode: 'highlight', 
-    }; 
-
-    // --- DOM要素のキャッシュ --- 
-    const dom = { 
-      container: document.querySelector('.container'),
-      urlInput: document.getElementById("dlsiteUrl"),  
-      addBtn: document.getElementById("addBtn"), 
-      grids: { new: document.getElementById("newGrid"), ranking: document.getElementById("rankingGrid"), admin_manga: document.getElementById("adminMangaGrid"), admin_game: document.getElementById("adminGameGrid") }, 
-      paginations: { 
-        new: { prev: document.getElementById("newPrev"), next: document.getElementById("newNext"), current: document.getElementById("newCurrent"), total: document.getElementById("newTotal") }, 
-        ranking: { prev: document.getElementById("rankPrev"), next: document.getElementById("rankNext"), current: document.getElementById("rankCurrent"), total: document.getElementById("rankTotal") }, 
-        admin_manga: { prev: document.getElementById("adminMangaPrev"), next: document.getElementById("adminMangaNext"), current: document.getElementById("adminMangaCurrent"), total: document.getElementById("adminMangaTotal") }, 
-        admin_game: { prev: document.getElementById("adminGamePrev"), next: document.getElementById("adminGameNext"), current: document.getElementById("adminGameCurrent"), total: document.getElementById("adminGameTotal") }, 
-      },
-      pageSizeSelectors: {
-        admin: document.getElementById('adminPageSizeSelector'),
-        user: document.getElementById('userPageSizeSelector')
-      },
-      toast: document.getElementById("toast"), 
-      modalOverlay: document.getElementById("modalOverlay"),  
-      modalContent: document.getElementById("modalContent"), 
-      contactBtn: document.getElementById("contactBtn"), 
-      hideBadBtn: document.getElementById("hideBadBtn"), 
-      mosaicToggleBtn: document.getElementById("mosaicToggleBtn"), 
-      filterByTagsBtn: document.getElementById("filterByTagsBtn"),  
-      resetFilterBtn: document.getElementById("resetFilterBtn"),
-      imagePreviewPopup: document.getElementById("imagePreviewPopup"),
-    }; 
-
-    // --- ユーティリティ & 分類ロジック --- 
-    const util = { 
-      showToast: (msg, duration = 3000) => { dom.toast.textContent = msg; dom.toast.classList.add("show"); setTimeout(() => dom.toast.classList.remove("show"), duration); }, 
-      getClientId: () => { let id = localStorage.getItem("clientId"); if (!id) { id = crypto.randomUUID(); localStorage.setItem("clientId", id); } return id; }, 
-      calculateTotalPages: (totalItems, pageSize) => Math.max(1, Math.ceil(totalItems / pageSize)), 
-      classifyWork: (work) => { 
-          if (!work) return 'unknown'; 
-          if (work.manualGenre) return work.manualGenre; 
-          if (work.workType) { 
-              const type = work.workType; 
-              if (type === 'Book' || type === 'Comic') return 'manga'; 
-              if (type === 'VideoGame') return 'game'; 
-          } 
-          const url = work.pageUrl || ''; 
-          if (url.includes('/comic/') || url.includes('/books/')) return 'manga'; 
-          if (url.includes('/soft/') || url.includes('/pro/')) return 'game'; 
-          return 'unknown'; 
-      }, 
-      hasAnyOfTags: (work, tagIdsSet) => { 
-        if (!work || !work.tags || tagIdsSet.size === 0) return false; 
-        for (const tagId of tagIdsSet) { 
-          if (work.tags[tagId]) return true; 
-        } 
-        return false; 
-      },
-    }; 
-
-    // --- UI描画関連の関数 --- 
-    /** 作品カードのHTML要素を生成する */ 
-    function makeCard(workId, source) { 
-      const data = source[workId]; 
-      if (!data) return document.createElement('div'); 
-      const { title, coverUrl, pageUrl, tags = {}, votes = {}, score = 0 } = data; 
-      const userVote = source === state.works ? (votes[state.clientId] || 0) : 0; 
-      const card = document.createElement("article"); 
-      card.className = `item`; 
-      card.dataset.id = workId;
-      card.innerHTML = `
-        <img src="${coverUrl}" alt="${title}" loading="lazy">
-        <div class="item-body">
-            <h3 class="title">${title}</h3>
-            <div class="tags">${Object.values(tags).map(n => `<span class="tag">${n}</span>`).join("")}</div>
-        </div>
-        <div class="item-footer">
-            <div class="rating-buttons">
-                <button class="rating-btn good${userVote === 1 ? ' active' : ''}" data-score="1">Good</button>
-                <button class="rating-btn bad${userVote === -1 ? ' active' : ''}" data-score="-1">Bad</button>
-                <span class="score-display">${score}</span>
             </div>
         </div>
-      `;
-      card.addEventListener("click", (e) => { if(e.target.closest('button')) return; window.open(pageUrl, "_blank"); }); 
-      if (source === state.works) { 
-        card.querySelectorAll(".rating-btn").forEach(btn => { btn.addEventListener("click", (e) => { e.stopPropagation(); handleVote(workId, btn); }); }); 
-      } 
-      return card; 
-    } 
+        <div id="view-favorites" class="view-container">
+            <div class="section-header">
+                <h2>お気に入り</h2>
+                <div class="view-options">
+                    <label>表示件数:<select id="favoritesPageSizeSelector"></select></label>
+                </div>
+            </div>
+            <div class="filter-controls">
+                <button class="filterByTagsBtn">タグで絞り込み</button>
+                <button class="resetFilterBtn hidden">絞り込み解除</button>
+            </div>
+            <div class="grid" id="favoritesGrid"></div>
+            <div class="pagination">
+                <button id="favPrev" disabled>前へ</button>
+                <span id="favCurrent">1</span>/<span id="favTotal">1</span>
+                <button id="favNext" disabled>次へ</button>
+            </div>
+        </div>
+        <div id="view-mylists" class="view-container">
+            <div class="section-header">
+                <h2>
+                    マイリスト
+                    <button id="toggle-sidebar-btn" title="サイドバーを開閉">◀</button>
+                </h2>
+            </div>
+            <div id="mylists-container"></div>
+        </div>
+        <div id="view-public-list" class="view-container">
+            <div class="section-header">
+                <h2 id="public-list-name"></h2>
+                <div><button id="import-public-list-btn" class="requires-auth" disabled>このリストを複製</button></div>
+            </div>
+            <p id="public-list-owner"></p>
+            <div id="public-list-grid" class="grid"></div>
+        </div>
+    </div>
 
-    /** PC表示の際にグリッドの高さを調整する関数 */
-    function adjustPcGridHeight(gridElement, pageSize) {
-        if (window.innerWidth <= 768 || !gridElement) {
-            if(gridElement) gridElement.style.minHeight = 'auto';
-            return;
-        }
-        requestAnimationFrame(() => {
-            const gridComputedStyle = window.getComputedStyle(gridElement);
-            const columnCount = gridComputedStyle.gridTemplateColumns.split(' ').length;
-            if (columnCount > 0) {
-                const cardHeight = 320;
-                const rowGap = parseInt(gridComputedStyle.gap, 10) || 16;
-                const rowCount = Math.ceil(pageSize / columnCount);
-                const minHeight = rowCount * cardHeight + (rowCount > 0 ? (rowCount - 1) * rowGap : 0);
-                gridElement.style.minHeight = `${minHeight}px`;
-            }
-        });
-    }
+    <div id="modalOverlay" class="overlay hidden"><div id="modalContent" class="modal"></div></div>
+    <div id="toast" class="toast"></div>
+    <div id="imagePreviewPopup" class="image-preview-popup"></div>
 
-    /** 指定されたタブのページを描画する */
-    function renderPage(type) { 
-      const isAdminSection = type.startsWith('admin_');
-      const pageSize = isAdminSection ? state.pageSize.admin : state.pageSize.user;
-      const source = isAdminSection ? state.adminPicks : state.works;
-      let sortedIds = []; 
-      if (isAdminSection) { 
-          const genre = type.split('_')[1]; 
-          sortedIds = state.sortedAdminIds[genre] || []; 
-      } else { 
-          sortedIds = state.sortedWorkIds[type] || []; 
-      } 
-      let filteredIds = [...sortedIds];  
-      if (state.hideBadlyRated && !isAdminSection) {  
-        filteredIds = filteredIds.filter(id => (state.works[id]?.votes?.[state.clientId] || 0) !== -1);  
-      } 
-      if (!isAdminSection && (state.highlightTagIds.size > 0 || state.hideTagIds.size > 0)) { 
-        const worksMap = {}; 
-        for (const id of filteredIds) { worksMap[id] = state.works[id]; } 
-        const hiddenByTags = new Set(); 
-        const highlightedByTags = new Set(); 
-        const others = new Set(); 
-        for (const workId of filteredIds) { 
-            const work = worksMap[workId]; 
-            const hasHideTag = util.hasAnyOfTags(work, state.hideTagIds); 
-            const hasHighlightTag = util.hasAnyOfTags(work, state.highlightTagIds); 
-            if (hasHideTag) { hiddenByTags.add(workId); } else if (hasHighlightTag) { highlightedByTags.add(workId); } else { others.add(workId); } 
-        } 
-        const finalDisplayedIds = []; 
-        for (const id of sortedIds) { if (highlightedByTags.has(id)) { finalDisplayedIds.push(id); } } 
-        for (const id of sortedIds) { if (others.has(id)) { finalDisplayedIds.push(id); } } 
-        filteredIds = finalDisplayedIds; 
-      } 
-       
-      const grid = dom.grids[type]; 
-      const pagination = dom.paginations[type]; 
-      let currentPage = state.currentPage[type]; 
-      const totalPages = util.calculateTotalPages(filteredIds.length, pageSize); 
-      if (currentPage > totalPages) currentPage = state.currentPage[type] = totalPages; 
-      pagination.current.textContent = currentPage; pagination.total.textContent = totalPages; 
-      pagination.prev.disabled = currentPage <= 1; pagination.next.disabled = currentPage >= totalPages; 
-      const startIndex = (currentPage - 1) * pageSize; 
-      const endIndex = startIndex + pageSize; 
-      const pageIds = filteredIds.slice(startIndex, endIndex); 
-      grid.innerHTML = ""; 
-      pageIds.forEach(id => { if (source[id]) { grid.appendChild(makeCard(id, source)); } }); 
-      adjustPcGridHeight(grid, pageSize);
+    <script type="module">
+        // --- モジュールのインポート ---
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/11.10.0/firebase-app.js";
+        import { getDatabase, ref, query, onValue, push, set, remove, serverTimestamp, get, child, update } from "https://www.gstatic.com/firebasejs/11.10.0/firebase-database.js";
+        import { getAuth, GoogleAuthProvider, signInWithPopup, signOut, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/11.10.0/firebase-auth.js";
 
-      const activeFiltersCount = state.highlightTagIds.size + state.hideTagIds.size; 
-      if (activeFiltersCount > 0) { 
-        dom.filterByTagsBtn.classList.add('active'); 
-        dom.filterByTagsBtn.textContent = `タグで絞り込み (${state.highlightTagIds.size}優先 / ${state.hideTagIds.size}非表示)`; 
-        dom.resetFilterBtn.classList.remove('hidden'); 
-      } else { 
-        dom.filterByTagsBtn.classList.remove('active'); 
-        dom.filterByTagsBtn.textContent = 'タグで絞り込み'; 
-        dom.resetFilterBtn.classList.add('hidden'); 
-      } 
-    } 
+        // --- 定数定義 ---
+        const CONSTANTS = {
+            DL_AFFILIATE_ID: "sukumizuyoujo",
+            FIREBASE_CONFIG: {
+                apiKey: "AIzaSyByYU-ZNJEDO0Z4LdXyI3Pn_vHhmOqa3Go",
+                authDomain: "dlsite-share.firebaseapp.com",
+                databaseURL: "https://dlsite-share-default-rtdb.firebaseio.com",
+                projectId: "dlsite-share",
+                storageBucket: "dlsite-share-default-rtdb.appspot.com",
+                messagingSenderId: "764936540510",
+                appId: "1:764936540510:web:846938ef579ea0b0cf3fcf",
+                measurementId: "G-LXNH02PV7J"
+            },
+            DB_PATHS: {
+                WORKS: "works", ADMIN_PICKS: "adminPicks", TAGS: "tags", CATEGORIES: "categories", CONTACTS: "contacts",
+                FAVORITES: "userFavorites", USER_LISTS: "userLists", LISTS: "lists", LIST_ITEMS: "listItems"
+            },
+            PAGE_SIZE_OPTIONS: {
+                mobile: { admin: [8, 10, 12], user: [10, 20, 30], favorites: [10, 20, 30] },
+                pc: { admin: [5, 10, 15], user: [10, 20, 40], favorites: [10, 20, 40] }
+            },
+            LIST_LIMITS: { MAX_LISTS: 10, MAX_ITEMS_PER_LIST: 100 }
+        };
 
-    function openTagFilterModal() { 
-      dom.modalOverlay.classList.remove("hidden"); 
-      const modal = dom.modalContent; 
-      modal.className = 'modal tag-panel';  
-      let currentHighlightTagIds = new Set(state.highlightTagIds); 
-      let currentHideTagIds = new Set(state.hideTagIds); 
-      modal.innerHTML = `<div class="modal-header">タグで絞り込み</div> <div class="modal-body"> <input type="search" class="tag-search-input" placeholder="お探しのジャンルはなんですか？"> <div class="category-tabs"></div> <div class="tag-list"></div> </div> <div class="modal-footer"> <div id="filter-mode-select-buttons"> <button data-mode="highlight">優先表示タグを選択</button> <button data-mode="hide">非表示タグを選択</button> </div> <button id="tag-panel-reset">現在のリストをリセット</button> <button id="tag-panel-confirm">適用</button> </div>`; 
-      const searchInput = modal.querySelector('.tag-search-input'); 
-      const categoryTabsContainer = modal.querySelector('.category-tabs'); 
-      const tagListContainer = modal.querySelector('.tag-list'); 
-      const modeSelectButtons = modal.querySelector('#filter-mode-select-buttons'); 
-      let activeCategoryId = Object.keys(state.categories)[0] || ''; 
-      let currentEditingTagSet = state.currentTagEditMode === 'highlight' ? currentHighlightTagIds : currentHideTagIds; 
-      const updateModeButtons = () => { modeSelectButtons.querySelectorAll('button').forEach(btn => { btn.classList.remove('active'); if (btn.dataset.mode === state.currentTagEditMode) { btn.classList.add('active'); } }); }; 
-      const renderTagList = () => { 
-        tagListContainer.innerHTML = ''; 
-        const categoryTags = Object.entries(state.tags).filter(([, tag]) => tag.category === activeCategoryId); 
-        categoryTags.filter(([, tag]) => tag.name.toLowerCase().includes(searchInput.value.toLowerCase())).forEach(([tagId, tag]) => { 
-            const label = document.createElement('label'); const checkbox = document.createElement('input'); 
-            checkbox.type = 'checkbox'; checkbox.value = tagId;  
-            checkbox.checked = currentEditingTagSet.has(tagId); 
-            checkbox.onchange = () => { checkbox.checked ? currentEditingTagSet.add(tagId) : currentEditingTagSet.delete(tagId); }; 
-            label.appendChild(checkbox); label.append(` ${tag.name}`); 
-            tagListContainer.appendChild(label); 
-        }); 
-      }; 
-      const renderCategoryTabs = () => { 
-          categoryTabsContainer.innerHTML = ''; 
-          Object.entries(state.categories).forEach(([catId, category]) => { 
-              const btn = document.createElement('button'); btn.textContent = category.name; btn.className = catId === activeCategoryId ? 'active' : ''; 
-              btn.onclick = () => { activeCategoryId = catId; renderCategoryTabs(); renderTagList(); }; 
-              categoryTabsContainer.appendChild(btn); 
-          }); 
-      }; 
-      modeSelectButtons.querySelectorAll('button').forEach(btn => { btn.addEventListener('click', () => { state.currentTagEditMode = btn.dataset.mode; currentEditingTagSet = state.currentTagEditMode === 'highlight' ? currentHighlightTagIds : currentHideTagIds; updateModeButtons(); renderTagList(); }); }); 
-      searchInput.oninput = () => { renderTagList(); }; 
-      modal.querySelector('#tag-panel-reset').onclick = () => { currentEditingTagSet.clear(); renderTagList(); }; 
-      modal.querySelector('#tag-panel-confirm').onclick = () => { state.highlightTagIds = new Set(currentHighlightTagIds); state.hideTagIds = new Set(currentHideTagIds); renderPage('new'); renderPage('ranking'); dom.modalOverlay.classList.add("hidden"); }; 
-      updateModeButtons(); renderCategoryTabs(); renderTagList(); 
-    } 
+        // --- 状態管理 ---
+        const state = {
+            works: {}, adminPicks: {}, tags: {}, tagNameToDataMap: new Map(), categories: {},
+            sortedWorkIds: { new: [], ranking: [], favorites: [] },
+            sortedAdminIds: { manga: [], game: [] },
+            currentPage: { new: 1, ranking: 1, admin_manga: 1, admin_game: 1, favorites: 1 },
+            pageSize: { admin: 10, user: 40, favorites: 40 },
+            sectionsCollapsed: { admin: false, user: false },
+            clientId: null, hideBadlyRated: false, mosaicActive: false,
+            highlightTagIds: new Set(), hideTagIds: new Set(), currentTagEditMode: 'highlight',
+            currentUser: null, favorites: new Set(), myLists: {}, myListItems: {}, activeListId: null, currentView: 'main',
+        };
 
-    function openContactModal() { 
-      dom.modalOverlay.classList.remove("hidden"); 
-      const modal = dom.modalContent; 
-      modal.className = 'modal contact-form'; 
-      modal.innerHTML = `<div class="modal-header">お問い合わせ</div> <form id="contactForm" class="modal-body"> <div class="form-group"> <label for="contactName">お名前<span style="color:red">*</span></label> <input type="text" id="contactName" placeholder="名前またはニックネーム" required> </div> <div class="form-group"> <label for="contactEmail">メール<span style="color:red">*</span></label> <input type="email" id="contactEmail" placeholder="例: info@example.com" required> </div> <div class="form-group"> <label for="contactTitle">タイトル</label> <input type="text" id="contactTitle"> </div> <div class="form-group"> <label for="contactContent">お問い合わせ内容<span style="color:red">*</span></label> <textarea id="contactContent" placeholder="コメントまたはメッセージ" required></textarea> </div> </form> <div class="modal-footer"> <button id="modal-close-btn">閉じる</button> <button id="contact-submit-btn" type="submit" form="contactForm" style="background-color: #28a745; color: white;">送信</button> </div>`; 
-      modal.querySelector('#modal-close-btn').onclick = () => dom.modalOverlay.classList.add("hidden"); 
-      modal.querySelector('#contactForm').onsubmit = handleContactSubmit; 
-    } 
+        // --- DOM要素のキャッシュ ---
+        const dom = {
+            container: document.querySelector('.container'),
+            urlInput: document.getElementById("dlsiteUrl"),
+            authArea: document.querySelector('.auth-area'), userName: document.getElementById('userName'),
+            loginBtn: document.getElementById('loginBtn'), logoutBtn: document.getElementById('logoutBtn'),
+            nav: { home: document.getElementById('nav-home'), favorites: document.getElementById('nav-favorites'), mylists: document.getElementById('nav-mylists') },
+            views: { main: document.getElementById('view-main'), favorites: document.getElementById('view-favorites'), mylists: document.getElementById('view-mylists'), publicList: document.getElementById('view-public-list') },
+            grids: {
+                new: document.getElementById("newGrid"), ranking: document.getElementById("rankingGrid"),
+                admin_manga: document.getElementById("adminMangaGrid"), admin_game: document.getElementById("adminGameGrid"),
+                favorites: document.getElementById('favoritesGrid'), publicList: document.getElementById('public-list-grid')
+            },
+            paginations: {
+                new: { prev: document.getElementById("newPrev"), next: document.getElementById("newNext"), current: document.getElementById("newCurrent"), total: document.getElementById("newTotal") },
+                ranking: { prev: document.getElementById("rankPrev"), next: document.getElementById("rankNext"), current: document.getElementById("rankCurrent"), total: document.getElementById("rankTotal") },
+                admin_manga: { prev: document.getElementById("adminMangaPrev"), next: document.getElementById("adminMangaNext"), current: document.getElementById("adminMangaCurrent"), total: document.getElementById("adminMangaTotal") },
+                admin_game: { prev: document.getElementById("adminGamePrev"), next: document.getElementById("adminGameNext"), current: document.getElementById("adminGameCurrent"), total: document.getElementById("adminGameTotal") },
+                favorites: { prev: document.getElementById("favPrev"), next: document.getElementById("favNext"), current: document.getElementById("favCurrent"), total: document.getElementById("favTotal") }
+            },
+            pageSizeSelectors: {
+                admin: document.getElementById('adminPageSizeSelector'), user: document.getElementById('userPageSizeSelector'),
+                favorites: document.getElementById('favoritesPageSizeSelector')
+            },
+            mylistsContainer: document.getElementById('mylists-container'),
+            publicListName: document.getElementById('public-list-name'), publicListOwner: document.getElementById('public-list-owner'),
+            importPublicListBtn: document.getElementById('import-public-list-btn'),
+            toast: document.getElementById("toast"), modalOverlay: document.getElementById("modalOverlay"), modalContent: document.getElementById("modalContent"),
+            imagePreviewPopup: document.getElementById("imagePreviewPopup"),
+        };
 
-    // --- データベース操作 & ロジック --- 
-    async function handleContactSubmit(event) { 
-        event.preventDefault(); 
-        const btn = document.getElementById('contact-submit-btn'); 
-        const name = document.getElementById('contactName').value.trim(); 
-        const email = document.getElementById('contactEmail').value.trim(); 
-        const title = document.getElementById('contactTitle').value.trim(); 
-        const content = document.getElementById('contactContent').value.trim(); 
-        if (!name || !email || !content) { return util.showToast("必須項目をすべて入力してください"); } 
-        btn.disabled = true; btn.textContent = '送信中...'; 
-        const contactData = { name, email, title, content, timestamp: serverTimestamp(), isRead: false }; 
-        try { await push(ref(getDatabase(), CONSTANTS.DB_PATHS.CONTACTS), contactData); util.showToast("お問い合わせを送信しました。ありがとうございます。"); dom.modalOverlay.classList.add("hidden"); } catch (error) { util.showToast(`送信に失敗しました: ${error.message}`); btn.disabled = false; btn.textContent = '送信'; } 
-    } 
+        // --- ユーティリティ ---
+        const util = {
+            showToast: (msg, duration = 3000) => { dom.toast.textContent = msg; dom.toast.classList.add("show"); setTimeout(() => dom.toast.classList.remove("show"), duration); },
+            getClientId: () => { let id = localStorage.getItem("clientId"); if (!id) { id = crypto.randomUUID(); localStorage.setItem("clientId", id); } return id; },
+            calculateTotalPages: (totalItems, pageSize) => Math.max(1, Math.ceil(totalItems / pageSize)),
+            classifyWork: (work) => { if (!work) return 'unknown'; if (work.manualGenre) return work.manualGenre; if (work.workType) { const type = work.workType; if (type === 'Book' || type === 'Comic') return 'manga'; if (type === 'VideoGame') return 'game'; } const url = work.pageUrl || ''; if (url.includes('/comic/') || url.includes('/books/')) return 'manga'; if (url.includes('/soft/') || url.includes('/pro/')) return 'game'; return 'unknown'; },
+            hasAnyOfTags: (work, tagIdsSet) => { if (!work || !work.tags || tagIdsSet.size === 0) return false; for (const tagId of tagIdsSet) { if (work.tags[tagId]) return true; } return false; },
+            escapeHTML: (str) => str ? str.replace(/[&<>"']/g, match => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[match])) : '',
+        };
 
-    async function addWork(url) { 
-        const originalUrl = url.trim(); 
-        if (!originalUrl.includes("dlsite.com")) return util.showToast("有効なDLsiteのURLを入力してください"); 
-        const workIdMatch = originalUrl.match(/(RJ|VJ|BJ)\d{6,}/i); 
-        if (!workIdMatch) { return util.showToast("URLから有効な作品IDが見つかりませんでした。"); } 
-        const workId = workIdMatch[0].toUpperCase(); 
-        const affiliateUrl = `https://dlaf.jp/maniax/dlaf/=/t/n/link/work/aid/${CONSTANTS.DL_AFFILIATE_ID}/id/${workId}.html`; 
-        if (Object.values(state.works).some(w => w.pageUrl === affiliateUrl)) { return util.showToast("この作品は既に追加されています"); } 
-        const btn = dom.addBtn; const input = dom.urlInput; btn.disabled = true; btn.classList.add('loading'); 
-        try { 
-            const proxyUrl = `https://api.allorigins.win/raw?url=${encodeURIComponent(originalUrl)}`; 
-            const response = await fetch(proxyUrl, { signal: AbortSignal.timeout(8000) }); 
-            if (!response.ok) throw new Error('作品情報の取得に失敗'); 
-            const html = await response.text(); 
-            const doc = new DOMParser().parseFromString(html, "text/html"); 
-            const title = doc.querySelector('meta[property="og:title"]')?.content || ""; 
-            const coverUrl = doc.querySelector('meta[property="og:image"]')?.content || ""; 
-            if (!title || !coverUrl) throw new Error("タイトル・画像の取得に失敗"); 
-            let workType = 'unknown'; let extractedTagNames = []; 
-            const jsonLdElement = doc.querySelector('script[type="application/ld+json"]'); 
-            if (jsonLdElement) { try { const data = JSON.parse(jsonLdElement.textContent); workType = data["@type"] || 'unknown'; if (data.keywords) { extractedTagNames = data.keywords.split(',').map(k => k.trim()); } } catch(e){} } 
-            const matchedTags = {}; 
-            [...new Set(extractedTagNames)].filter(Boolean).forEach(tagName => { if (state.tagNameToDataMap.has(tagName)) { const foundTag = state.tagNameToDataMap.get(tagName); matchedTags[foundTag.id] = foundTag.name; } }); 
-            const newWorkData = { title: title.replace(/\[DLsite.*\]/, '').trim(), coverUrl, pageUrl: affiliateUrl, workType, timestamp: serverTimestamp(), tags: matchedTags, votes: {} }; 
-            await push(ref(getDatabase(), CONSTANTS.DB_PATHS.WORKS), newWorkData); 
-            util.showToast(`作品を追加しました`); input.value = ""; 
-        } catch (err) { util.showToast(`エラー: ${err.message}`); 
-        } finally { btn.disabled = false; btn.classList.remove('loading'); } 
-    } 
-     
-    async function handleVote(workId, btn) { 
-        const score = Number(btn.dataset.score); 
-        const currentVote = state.works[workId]?.votes?.[state.clientId] || 0; 
-        const newVote = currentVote === score ? 0 : score; 
-        const ratingButtons = btn.closest('.rating-buttons'); 
-        ratingButtons.querySelector('.active')?.classList.remove('active'); 
-        if (newVote !== 0) { ratingButtons.querySelector(`[data-score="${newVote}"]`).classList.add('active'); } 
-        try { 
-            const voteRef = ref(getDatabase(), `${CONSTANTS.DB_PATHS.WORKS}/${workId}/votes/${state.clientId}`); 
-            await (newVote === 0 ? remove(voteRef) : set(voteRef, newVote)); 
-        } catch (error) { util.showToast(`投票エラー: ${error.message}`); ratingButtons.querySelector('.active')?.classList.remove('active'); if (currentVote !== 0) { ratingButtons.querySelector(`[data-score="${currentVote}"]`).classList.add('active'); } } 
-    } 
-     
-    function updateSortedArrays() { 
-      const workValues = Object.values(state.works); 
-      state.sortedWorkIds.ranking = workValues.sort((a, b) => (b.score || 0) - (a.score || 0)).map(w => w.id); 
-      state.sortedWorkIds.new = workValues.sort((a, b) => b.timestamp - a.timestamp).map(w => w.id); 
-      const adminPickValues = Object.values(state.adminPicks).sort((a, b) => { 
-          const orderA = a.order ?? a.timestamp; const orderB = b.order ?? b.timestamp; 
-          if (orderA !== undefined && orderB !== undefined) { return orderA - orderB; } return 0;  
-      }); 
-      state.sortedAdminIds.manga = adminPickValues.filter(w => util.classifyWork(w) === 'manga').map(w => w.id); 
-      state.sortedAdminIds.game = adminPickValues.filter(w => util.classifyWork(w) === 'game').map(w => w.id); 
-    } 
-     
-    // --- リアルタイムリスナー --- 
-    function initializeListeners() { 
-        const db = getDatabase(); 
-        onValue(ref(db, CONSTANTS.DB_PATHS.CATEGORIES), (snap) => { state.categories = snap.val() || {}; }); 
-        onValue(ref(db, CONSTANTS.DB_PATHS.TAGS), (snap) => { state.tags = snap.val() || {}; state.tagNameToDataMap.clear(); Object.entries(state.tags).forEach(([id, data]) => { state.tagNameToDataMap.set(data.name, { id, ...data }); }); }); 
-        const worksQuery = query(ref(db, CONSTANTS.DB_PATHS.WORKS)); 
-        const refreshUserSection = () => { updateSortedArrays(); renderPage('new'); renderPage('ranking'); }; 
-        const userWorkChange = (snap) => { state.works[snap.key] = { id: snap.key, ...snap.val(), score: Object.values(snap.val()?.votes || {}).reduce((s,v)=>s+v,0) }; refreshUserSection(); }; 
-        onChildAdded(worksQuery, userWorkChange); onChildChanged(worksQuery, userWorkChange); 
-        onChildRemoved(worksQuery, (snap) => { delete state.works[snap.key]; refreshUserSection(); }); 
-        const adminPicksQuery = query(ref(db, CONSTANTS.DB_PATHS.ADMIN_PICKS)); 
-        const refreshAdminSection = () => { updateSortedArrays(); renderPage('admin_manga'); renderPage('admin_game'); }; 
-        const adminWorkChange = (snap) => { state.adminPicks[snap.key] = { id: snap.key, ...snap.val() }; refreshAdminSection(); }; 
-        onChildAdded(adminPicksQuery, adminWorkChange); onChildChanged(adminPicksQuery, adminWorkChange); 
-        onChildRemoved(adminPicksQuery, (snap) => { delete state.adminPicks[snap.key]; refreshAdminSection(); }); 
-    } 
+        // --- Firebase 初期化 ---
+        const firebaseApp = initializeApp(CONSTANTS.FIREBASE_CONFIG);
+        const db = getDatabase(firebaseApp);
+        const auth = getAuth(firebaseApp);
+        let activePopover = null;
 
-    // --- イベントリスナーと初期化 --- 
-    function initializePageSizeSelectors() {
-        const isMobile = window.innerWidth <= 768;
-        const deviceType = isMobile ? 'mobile' : 'pc';
-        for (const type of ['admin', 'user']) {
-            const selector = dom.pageSizeSelectors[type];
-            const options = CONSTANTS.PAGE_SIZE_OPTIONS[deviceType][type];
-            const currentSize = state.pageSize[type];
-            selector.innerHTML = '';
-            options.forEach(size => {
-                const option = document.createElement('option');
-                option.value = size;
-                option.textContent = size;
-                if (size == currentSize) { option.selected = true; }
-                selector.appendChild(option);
-            });
-        }
-    }
-    
-    // ▼▼▼【JS追加】セクション折りたたみ機能のセットアップ ▼▼▼
-    function setupCollapsers() {
-        const headers = document.querySelectorAll('.collapser-header');
-        headers.forEach(header => {
-            const content = header.nextElementSibling;
-            if (!content || !content.classList.contains('collapsible-content')) return;
+        // --- UI描画関連 ---
+        function makeCard(workId, context = '') {
+            const data = state.works[workId] || state.adminPicks[workId] || Object.values(state.adminPicks).find(p => p.pageUrl.includes(workId));
+            if (!data) return document.createElement('div');
             
-            const sectionName = header.dataset.section;
+            const canonicalWorkId = data.pageUrl?.match(/(RJ|VJ|BJ)\d{6,}/i)?.[0].toUpperCase() || workId;
 
-            // ローカルストレージから読み込んだ初期状態を適用
-            if (state.sectionsCollapsed[sectionName]) {
-                header.classList.add('collapsed');
-                content.classList.add('collapsed');
+            const { title, coverUrl, pageUrl, tags = {}, votes = {}, score = 0 } = data;
+            const userVote = votes[state.clientId] || 0;
+            const isFavorited = state.favorites.has(canonicalWorkId);
+            const isInAnyList = Object.keys(state.myListItems).some(listId => state.myListItems[listId]?.[canonicalWorkId]);
+            const authDisabled = state.currentUser ? '' : 'disabled';
+            const card = document.createElement("article");
+            card.className = `item`;
+            card.dataset.id = workId;
+            
+            let cardActionsHTML = `
+                <button class="favorite-btn ${isFavorited ? 'favorited' : ''}" title="お気に入り" ${authDisabled}>♥</button>
+                <button class="add-to-list-btn ${isInAnyList ? 'in-list' : ''}" title="リストに追加" ${authDisabled}>+</button>
+            `;
+            if (context === 'myList' && state.activeListId) {
+                cardActionsHTML += `<button class="remove-from-list-btn" title="リストから削除" data-list-id="${state.activeListId}">×</button>`;
             }
 
-            header.addEventListener('click', (e) => {
-                // セレクターのクリックではトグルさせない
-                if (e.target.tagName === 'SELECT' || e.target.tagName === 'LABEL') return;
+            let footerHTML = `
+                <div class="rating-buttons">
+                    <button class="rating-btn good${userVote === 1 ? ' active' : ''}" data-score="1">Good</button>
+                    <button class="rating-btn bad${userVote === -1 ? ' active' : ''}" data-score="-1">Bad</button>
+                    <span class="score-display">${score}</span>
+                </div>
+                <div class="card-actions">${cardActionsHTML}</div>`;
+            
+            if (['favorites', 'admin', 'myList', 'publicList'].includes(context)) {
+                footerHTML = `<div class="card-actions">${cardActionsHTML}</div>`;
+            }
 
-                const isCollapsed = header.classList.toggle('collapsed');
-                content.classList.toggle('collapsed');
-                state.sectionsCollapsed[sectionName] = isCollapsed;
-                localStorage.setItem(`${sectionName}SectionCollapsed`, isCollapsed);
-            });
-        });
-    }
-
-    function setupEventListeners() { 
-      dom.addBtn.addEventListener("click", () => addWork(dom.urlInput.value.trim())); 
-      Object.keys(dom.paginations).forEach(type => { 
-        const pagination = dom.paginations[type]; 
-        pagination.prev.addEventListener('click', () => { if (state.currentPage[type] > 1) { state.currentPage[type]--; renderPage(type); } }); 
-        pagination.next.addEventListener('click', () => { 
-          const isAdmin = type.startsWith('admin_');
-          const pageSize = isAdmin ? state.pageSize.admin : state.pageSize.user;
-          let ids; 
-          if(isAdmin) { ids = state.sortedAdminIds[type.split('_')[1]]; } 
-          else { ids = state.sortedWorkIds[type]; } 
-          if (state.hideBadlyRated && !isAdmin) { ids = ids.filter(id => (state.works[id]?.votes?.[state.clientId] || 0) !== -1); } 
-          const totalPages = util.calculateTotalPages(ids.length, pageSize); 
-          if (state.currentPage[type] < totalPages) { state.currentPage[type]++; renderPage(type); } 
-        }); 
-      }); 
-      dom.pageSizeSelectors.admin.addEventListener('change', (e) => {
-        state.pageSize.admin = parseInt(e.target.value, 10);
-        localStorage.setItem('pageSizeAdmin', state.pageSize.admin);
-        renderPage('admin_manga');
-        renderPage('admin_game');
-      });
-      dom.pageSizeSelectors.user.addEventListener('change', (e) => {
-        state.pageSize.user = parseInt(e.target.value, 10);
-        localStorage.setItem('pageSizeUser', state.pageSize.user);
-        renderPage('new');
-        renderPage('ranking');
-      });
-      dom.modalOverlay.addEventListener("click", (e) => { if (e.target === dom.modalOverlay) { dom.modalOverlay.classList.add("hidden"); } }); 
-      dom.hideBadBtn.addEventListener("click", () => { state.hideBadlyRated = !state.hideBadlyRated; dom.hideBadBtn.classList.toggle('active', state.hideBadlyRated); dom.hideBadBtn.textContent = state.hideBadlyRated ? 'Bad評価を再表示' : 'Bad評価を非表示'; renderPage('new'); renderPage('ranking'); }); 
-      dom.mosaicToggleBtn.addEventListener("click", () => { state.mosaicActive = !state.mosaicActive; localStorage.setItem('mosaicActive', state.mosaicActive); document.body.classList.toggle('mosaic-on', state.mosaicActive); dom.mosaicToggleBtn.textContent = state.mosaicActive ? 'モザイク OFF' : 'モザイク ON'; }); 
-      dom.filterByTagsBtn.addEventListener('click', openTagFilterModal); 
-      dom.resetFilterBtn.addEventListener('click', () => { state.highlightTagIds.clear(); state.hideTagIds.clear(); renderPage('new'); renderPage('ranking'); }); 
-      dom.contactBtn.addEventListener('click', openContactModal); 
-    } 
-
-    // ▼▼▼【JS修正】フローティングプレビュー（固定表示）のイベントリスナー ▼▼▼
-    function setupImagePreviewListeners() {
-        if (window.innerWidth <= 768) return; 
-
-        const popup = dom.imagePreviewPopup;
-        if (!popup || !dom.container) return;
+            card.innerHTML = `<img src="${coverUrl}" alt="${title}" loading="lazy"> <div class="item-body"> <h3 class="title">${util.escapeHTML(title)}</h3> <div class="tags">${Object.values(tags).map(n => `<span class="tag">${util.escapeHTML(n)}</span>`).join("")}</div> </div> <div class="item-footer">${footerHTML}</div>`;
+            
+            card.addEventListener("click", (e) => { if (!e.target.closest('button')) window.open(pageUrl, "_blank"); });
+            card.querySelectorAll(".rating-btn").forEach(btn => btn.addEventListener("click", (e) => { e.stopPropagation(); handleVote(workId, btn); }));
+            card.querySelectorAll('.favorite-btn').forEach(btn => btn.addEventListener('click', (e) => { e.stopPropagation(); toggleFavorite(canonicalWorkId); }));
+            card.querySelectorAll('.add-to-list-btn').forEach(btn => btn.addEventListener('click', (e) => { e.stopPropagation(); openAddToListPopover(canonicalWorkId, e.currentTarget); }));
+            card.querySelectorAll('.remove-from-list-btn').forEach(btn => btn.addEventListener('click', (e) => {
+                e.stopPropagation();
+                const listId = e.currentTarget.dataset.listId;
+                if (confirm(`「${util.escapeHTML(state.myLists[listId]?.name || '')}」からこの作品を削除しますか？`)) {
+                    removeWorkFromList(canonicalWorkId, listId);
+                }
+            }));
+            return card;
+        }
         
-        dom.container.addEventListener('mouseover', (e) => {
-            if (e.target.tagName !== 'IMG' || !e.target.closest('.item')) return;
-            
-            const card = e.target.closest('.item');
-            const workId = card.dataset.id;
-            const isAdmin = card.closest('#adminMangaGrid, #adminGameGrid');
-            const source = isAdmin ? state.adminPicks : state.works;
-            const work = source[workId];
-            
-            if (work && work.coverUrl) {
-                popup.innerHTML = `<img src="${work.coverUrl}" alt="Preview">`;
-                
-                // ポップアップを一旦非表示で表示してサイズを取得
-                popup.style.visibility = 'hidden';
-                popup.style.display = 'block';
-                const popupRect = popup.getBoundingClientRect();
-                
-                // カードの位置を取得
-                const cardRect = card.getBoundingClientRect();
-
-                // 位置を計算
-                let left = cardRect.right + 10;
-                if (left + popupRect.width > window.innerWidth) {
-                    left = cardRect.left - popupRect.width - 10;
+        function adjustPcGridHeight(gridElement, pageSize) {
+            if (window.innerWidth <= 768 || !gridElement) { if (gridElement) gridElement.style.minHeight = 'auto'; return; }
+            requestAnimationFrame(() => {
+                const gridComputedStyle = window.getComputedStyle(gridElement);
+                const columnCount = gridComputedStyle.gridTemplateColumns.split(' ').length;
+                if (columnCount > 0) {
+                    const cardHeight = 320;
+                    const rowGap = parseInt(gridComputedStyle.gap, 10) || 16;
+                    const rowCount = Math.ceil(pageSize / columnCount);
+                    const minHeight = rowCount * cardHeight + (rowCount > 0 ? (rowCount - 1) * rowGap : 0);
+                    gridElement.style.minHeight = `${minHeight}px`;
                 }
-                
-                let top = cardRect.top;
-                if (top + popupRect.height > window.innerHeight) {
-                    top = window.innerHeight - popupRect.height - 10;
-                }
+            });
+        }
+        
+        function renderPage(type) {
+            const isAdminSection = type.startsWith('admin_');
+            const isFavoritesSection = type === 'favorites';
+            let pageSize, sortedIds, context, source;
 
-                popup.style.left = `${left}px`;
-                popup.style.top = `${top}px`;
-                popup.style.visibility = 'visible';
-
-                e.target.addEventListener('mouseleave', () => {
-                    popup.style.display = 'none';
-                }, { once: true });
+            if (isAdminSection) {
+                pageSize = state.pageSize.admin; source = state.adminPicks;
+                const genre = type.split('_')[1]; sortedIds = state.sortedAdminIds[genre] || [];
+                context = 'admin';
+            } else if (isFavoritesSection) {
+                pageSize = state.pageSize.favorites; source = {...state.works, ...state.adminPicks};
+                sortedIds = state.sortedWorkIds.favorites || []; context = 'favorites';
+            } else {
+                pageSize = state.pageSize.user; source = state.works;
+                sortedIds = state.sortedWorkIds[type] || []; context = 'user';
             }
-        });
+
+            let filteredIds = [...sortedIds];
+            if (state.hideBadlyRated && !isAdminSection && !isFavoritesSection) {
+                filteredIds = filteredIds.filter(id => (source[id]?.votes?.[state.clientId] || 0) !== -1);
+            }
+            if (!isAdminSection && (state.highlightTagIds.size > 0 || state.hideTagIds.size > 0)) {
+                const worksMap = {};
+                for (const id of filteredIds) { worksMap[id] = source[id]; }
+                const hiddenByTags = new Set(), highlightedByTags = new Set(), others = new Set();
+                for (const workId of filteredIds) {
+                    const work = worksMap[workId];
+                    if (!work) continue;
+                    const hasHideTag = util.hasAnyOfTags(work, state.hideTagIds);
+                    const hasHighlightTag = util.hasAnyOfTags(work, state.highlightTagIds);
+                    if (hasHideTag) { hiddenByTags.add(workId); } else if (hasHighlightTag) { highlightedByTags.add(workId); } else { others.add(workId); }
+                }
+                const finalDisplayedIds = [];
+                for (const id of sortedIds) { if (highlightedByTags.has(id)) { finalDisplayedIds.push(id); } }
+                for (const id of sortedIds) { if (others.has(id)) { finalDisplayedIds.push(id); } }
+                filteredIds = finalDisplayedIds;
+            }
+
+            const grid = dom.grids[type];
+            if (!grid) return;
+            const viewContainer = grid.closest('.view-container');
+            
+            const pagination = dom.paginations[type];
+            let currentPage = state.currentPage[type];
+            const totalPages = util.calculateTotalPages(filteredIds.length, pageSize);
+            if (currentPage > totalPages) currentPage = state.currentPage[type] = totalPages;
+            if (pagination) {
+                pagination.current.textContent = currentPage; pagination.total.textContent = totalPages;
+                pagination.prev.disabled = currentPage <= 1; pagination.next.disabled = currentPage >= totalPages;
+            }
+
+            const startIndex = (currentPage - 1) * pageSize;
+            const endIndex = startIndex + pageSize;
+            const pageIds = filteredIds.slice(startIndex, endIndex);
+
+            grid.innerHTML = "";
+            pageIds.forEach(id => { if (source[id]) { grid.appendChild(makeCard(id, context)); } });
+            
+            adjustPcGridHeight(grid, pageSize);
+
+            if (viewContainer) {
+                const filterBtn = viewContainer.querySelector('.filterByTagsBtn');
+                const resetBtn = viewContainer.querySelector('.resetFilterBtn');
+                if(filterBtn && resetBtn) {
+                    const activeFiltersCount = state.highlightTagIds.size + state.hideTagIds.size;
+                    if (activeFiltersCount > 0) {
+                        filterBtn.classList.add('active');
+                        filterBtn.textContent = `タグ絞り込み (${state.highlightTagIds.size}優先 / ${state.hideTagIds.size}非表示)`;
+                        resetBtn.classList.remove('hidden');
+                    } else {
+                        filterBtn.classList.remove('active');
+                        filterBtn.textContent = 'タグで絞り込み';
+                        resetBtn.classList.add('hidden');
+                    }
+                }
+            }
+        }
+        
+        function openTagFilterModal() {
+            dom.modalOverlay.classList.remove("hidden");
+            const modal = dom.modalContent;
+            modal.className = 'modal tag-panel';
+            let currentHighlightTagIds = new Set(state.highlightTagIds);
+            let currentHideTagIds = new Set(state.hideTagIds);
+            modal.innerHTML = `<div class="modal-header">タグで絞り込み</div> <div class="modal-body"> <input type="search" class="tag-search-input" placeholder="お探しのジャンルはなんですか？"> <div class="category-tabs"></div> <div class="tag-list"></div> </div> <div class="modal-footer"> <div id="filter-mode-select-buttons"> <button data-mode="highlight">優先表示タグを選択</button> <button data-mode="hide">非表示タグを選択</button> </div> <button id="tag-panel-reset">現在のリストをリセット</button> <button id="tag-panel-confirm">適用</button> </div>`;
+            const searchInput = modal.querySelector('.tag-search-input');
+            const categoryTabsContainer = modal.querySelector('.category-tabs');
+            const tagListContainer = modal.querySelector('.tag-list');
+            const modeSelectButtons = modal.querySelector('#filter-mode-select-buttons');
+            let activeCategoryId = Object.keys(state.categories)[0] || '';
+            let currentEditingTagSet = state.currentTagEditMode === 'highlight' ? currentHighlightTagIds : currentHideTagIds;
+            const updateModeButtons = () => { modeSelectButtons.querySelectorAll('button').forEach(btn => { btn.classList.toggle('active', btn.dataset.mode === state.currentTagEditMode); }); };
+            const renderTagList = () => {
+                tagListContainer.innerHTML = '';
+                Object.entries(state.tags)
+                    .filter(([, tag]) => tag.category === activeCategoryId && tag.name.toLowerCase().includes(searchInput.value.toLowerCase()))
+                    .forEach(([tagId, tag]) => {
+                        const label = document.createElement('label'); const checkbox = document.createElement('input');
+                        checkbox.type = 'checkbox'; checkbox.value = tagId;
+                        checkbox.checked = currentEditingTagSet.has(tagId);
+                        checkbox.onchange = () => { checkbox.checked ? currentEditingTagSet.add(tagId) : currentEditingTagSet.delete(tagId); };
+                        label.appendChild(checkbox); label.append(` ${tag.name}`);
+                        tagListContainer.appendChild(label);
+                    });
+            };
+            const renderCategoryTabs = () => {
+                categoryTabsContainer.innerHTML = '';
+                Object.entries(state.categories).forEach(([catId, category]) => {
+                    const btn = document.createElement('button'); btn.textContent = category.name; btn.className = catId === activeCategoryId ? 'active' : '';
+                    btn.onclick = () => { activeCategoryId = catId; renderCategoryTabs(); renderTagList(); };
+                    categoryTabsContainer.appendChild(btn);
+                });
+            };
+            modeSelectButtons.querySelectorAll('button').forEach(btn => {
+                btn.addEventListener('click', () => {
+                    state.currentTagEditMode = btn.dataset.mode;
+                    currentEditingTagSet = state.currentTagEditMode === 'highlight' ? currentHighlightTagIds : currentHideTagIds;
+                    updateModeButtons(); renderTagList();
+                });
+            });
+            searchInput.oninput = renderTagList;
+            modal.querySelector('#tag-panel-reset').onclick = () => { currentEditingTagSet.clear(); renderTagList(); };
+            modal.querySelector('#tag-panel-confirm').onclick = () => {
+                state.highlightTagIds = new Set(currentHighlightTagIds); state.hideTagIds = new Set(currentHideTagIds);
+                refreshAllGrids(); dom.modalOverlay.classList.add("hidden");
+            };
+            updateModeButtons(); renderCategoryTabs(); renderTagList();
+        }
+        
+        function openContactModal() {
+            dom.modalOverlay.classList.remove("hidden");
+            const modal = dom.modalContent;
+            modal.className = 'modal contact-form';
+            modal.innerHTML = `<div class="modal-header">お問い合わせ</div> <form id="contactForm" class="modal-body"> <div class="form-group"> <label for="contactName">お名前<span style="color:red">*</span></label> <input type="text" id="contactName" placeholder="名前またはニックネーム" required> </div> <div class="form-group"> <label for="contactEmail">メール<span style="color:red">*</span></label> <input type="email" id="contactEmail" placeholder="例: info@example.com" required> </div> <div class="form-group"> <label for="contactTitle">タイトル</label> <input type="text" id="contactTitle"> </div> <div class="form-group"> <label for="contactContent">お問い合わせ内容<span style="color:red">*</span></label> <textarea id="contactContent" placeholder="コメントまたはメッセージ" required></textarea> </div> </form> <div class="modal-footer"> <button id="modal-close-btn">閉じる</button> <button id="contact-submit-btn" type="submit" form="contactForm" style="background-color: #28a745; color: white;">送信</button> </div>`;
+            modal.querySelector('#modal-close-btn').onclick = () => dom.modalOverlay.classList.add("hidden");
+            modal.querySelector('#contactForm').onsubmit = handleContactSubmit;
+        }
+
+        function openInfoModal() {
+            dom.modalOverlay.classList.remove("hidden");
+            const modal = dom.modalContent;
+            modal.className = 'modal info-panel';
+            modal.innerHTML = `
+                <div class="modal-header">このサイトについて</div>
+                <div class="modal-body">
+                    <p>このサイトは、DLsiteのおすすめ作品をみんなで気軽に共有する非公式サイトです。好きな作品のURLを投稿したり、ほかの人の評価を見たり、自分だけのリストを作成したりできます。</p>
+                    <hr>
+                    <h3 style="margin-top: 1rem; margin-bottom: 0.5rem;">⚠️ 注意事項</h3>
+                    <ul style="list-style-position: inside; padding-left: 0.5rem; font-size: 0.9rem; line-height: 1.6;">
+                        <li>作品情報の取得には外部の無料プロキシサービスを経由しています。そのため、アクセスが集中している時間帯にはタイムアウトや応答遅延が発生する場合があります。</li>
+                        <li>タグによる絞り込み機能は、自動タグ付与機能を未実装のため現在まともに機能していません。</li>
+                        <li>本サイトは個人が運営しております。予告なくサービスを停止、あるいはデータを変更・削除する場合がございますので、あらかじめご了承ください。</li>
+                        <li>掲載コンテンツの著作権は各権利者に帰属します。掲載内容に問題がある場合は「お問い合わせ」よりお知らせください。</li>
+                        <li>一部のリンクにはアフィリエイトプログラムを利用しているものが含まれます。</li>
+                    </ul>
+                </div>
+                <div class="modal-footer">
+                    <button id="modal-close-btn">閉じる</button>
+                </div>`;
+            modal.querySelector('#modal-close-btn').onclick = () => dom.modalOverlay.classList.add("hidden");
+        }
+        
+        function openAddToListPopover(workId, button) {
+            if (activePopover) activePopover.remove();
+            const popover = document.createElement('div');
+            popover.className = 'add-to-list-popover';
+            activePopover = popover;
+            document.body.appendChild(popover);
+
+            let listHtml = '<ul>';
+            if (Object.keys(state.myLists).length > 0) {
+                for (const listId in state.myLists) {
+                    const list = state.myLists[listId];
+                    const isChecked = state.myListItems[listId]?.[workId] ? 'checked' : '';
+                    listHtml += `<li><label><input type="checkbox" data-list-id="${listId}" ${isChecked}> ${util.escapeHTML(list.name)}</label></li>`;
+                }
+            } else { listHtml += '<li>リストがありません</li>'; }
+            listHtml += '</ul>';
+            popover.innerHTML = `${listHtml} <form class="new-list-form"><input type="text" placeholder="新規リスト名" required><button type="submit">+</button></form>`;
+
+            const btnRect = button.getBoundingClientRect();
+            const popoverRect = popover.getBoundingClientRect();
+            let top = window.scrollY + btnRect.bottom + 5;
+            let left = window.scrollX + btnRect.right - popoverRect.width;
+            if (left < 0) { left = window.scrollX + btnRect.left; }
+            if (top + popoverRect.height > window.innerHeight + window.scrollY) { top = window.scrollY + btnRect.top - popoverRect.height - 5; }
+            popover.style.left = `${left}px`;
+            popover.style.top = `${top}px`;
+            
+            popover.addEventListener('click', e => e.stopPropagation());
+            popover.querySelectorAll('input[type="checkbox"]').forEach(cb => cb.addEventListener('change', () => toggleWorkInList(workId, cb.dataset.listId, cb.checked)));
+            popover.querySelector('form').addEventListener('submit', async (e) => {
+                e.preventDefault();
+                const input = e.target.querySelector('input');
+                const newListId = await createNewList(input.value);
+                if (newListId) await toggleWorkInList(workId, newListId, true);
+                if (activePopover) activePopover.remove();
+            });
+            
+            setTimeout(() => document.addEventListener('click', () => { if (activePopover) { activePopover.remove(); activePopover = null; } }, { once: true }), 0);
+        }
+        
+        // ▼▼▼ この関数をまるごと置き換えてください ▼▼▼
+        async function renderMyListsPage() { // asyncキーワードを追加
+            dom.mylistsContainer.innerHTML = `<div class="mylists-sidebar"><h3>マイリスト一覧 (${Object.keys(state.myLists).length}/${CONSTANTS.LIST_LIMITS.MAX_LISTS})</h3><ul id="mylists-sidebar-list"></ul><div class="list-actions"><div class="form-group"><input type="text" id="new-list-name-main" placeholder="新規リスト名"><button id="create-list-btn-main">作成</button></div></div><hr><h3>リストをインポート</h3><div class="list-actions"><div class="form-group"><input type="text" id="import-list-id" placeholder="共有ID"><button id="import-list-btn">追加</button></div></div></div><div class="mylists-content"><h3 id="current-list-name">リストを選択してください</h3><div class="list-actions" id="current-list-actions" style="display:none;"><p>共有ID: <span id="share-id-display"></span></p></div><div id="current-list-grid" class="grid"></div></div>`;
+            const listUl = dom.mylistsContainer.querySelector('#mylists-sidebar-list');
+            listUl.innerHTML = '';
+            Object.values(state.myLists).sort((a, b) => a.createdAt - b.createdAt).forEach(list => {
+                const li = document.createElement('li');
+                li.dataset.listId = list.id;
+                li.innerHTML = `<div class="list-group-item ${list.id === state.activeListId ? 'active' : ''}"><span class="list-name-text">${util.escapeHTML(list.name)}</span><div class="list-item-controls"><button class="edit-list-btn" title="リスト名を編集">✏️</button><button class="delete-list-btn" title="リストを削除">🗑️</button></div></div>`;
+                listUl.appendChild(li);
+            });
+            listUl.onclick = (e) => {
+                const target = e.target;
+                const li = target.closest('li[data-list-id]');
+                if (!li) return;
+                const listId = li.dataset.listId;
+                if (target.closest('.edit-list-btn')) {
+                    e.stopPropagation();
+                    const currentName = state.myLists[listId].name;
+                    li.innerHTML = `<div class="list-edit-form"><input type="text" value="${util.escapeHTML(currentName)}"><button class="save-list-btn">✔️</button><button class="cancel-edit-btn">❌</button></div>`;
+                    li.querySelector('input').focus();
+                } else if (target.closest('.delete-list-btn')) {
+                    e.stopPropagation();
+                    deleteList(listId);
+                } else if (target.closest('.save-list-btn')) {
+                    e.stopPropagation();
+                    const newName = li.querySelector('input').value.trim();
+                    if (newName && newName !== state.myLists[listId].name) { renameList(listId, newName); } else { renderMyListsPage(); }
+                } else if (target.closest('.cancel-edit-btn')) {
+                    e.stopPropagation();
+                    renderMyListsPage();
+                } else if (state.activeListId !== listId) {
+                    state.activeListId = listId;
+                    renderMyListsPage();
+                }
+            };
+            dom.mylistsContainer.querySelector('#create-list-btn-main').onclick = () => { const input = dom.mylistsContainer.querySelector('#new-list-name-main'); if (input.value) createNewList(input.value).then(() => { input.value = ''; }); };
+            dom.mylistsContainer.querySelector('#import-list-btn').onclick = () => { const input = dom.mylistsContainer.querySelector('#import-list-id'); if (input.value) importList(input.value.trim()).then(() => { input.value = ''; }); };
+            
+            // ▼▼▼ ここからが追加/修正部分 ▼▼▼
+            if (state.activeListId && state.myLists[state.activeListId]) {
+                const list = state.myLists[state.activeListId];
+                const listItems = state.myListItems[state.activeListId] || {};
+                const itemIds = Object.keys(listItems).sort((a, b) => listItems[b].addedAt - listItems[a].addedAt);
+                
+                dom.mylistsContainer.querySelector('#current-list-name').textContent = util.escapeHTML(list.name);
+                const grid = dom.mylistsContainer.querySelector('#current-list-grid');
+                grid.innerHTML = '読み込み中...'; // ローディング表示
+
+                // 足りない作品情報をDBから取得
+                const neededWorkIds = itemIds.filter(id => !state.works[id] && !state.adminPicks[id]);
+                if (neededWorkIds.length > 0) {
+                    const workPromises = neededWorkIds.map(workId =>
+                        get(child(ref(db), `${CONSTANTS.DB_PATHS.WORKS}/${workId}`)).then(snap => {
+                            if (snap.exists()) {
+                                // 取得した情報を一時的にstateにキャッシュ
+                                state.works[snap.key] = { id: snap.key, ...snap.val() };
+                            }
+                        })
+                    );
+                    await Promise.all(workPromises);
+                }
+
+                // 再度レンダリング
+                grid.innerHTML = '';
+                itemIds.forEach(workId => {
+                    // state.works と state.adminPicks の両方から作品情報を探す
+                    if (state.works[workId] || state.adminPicks[workId]) {
+                        grid.appendChild(makeCard(workId, 'myList'));
+                    }
+                });
+                const actions = dom.mylistsContainer.querySelector('#current-list-actions');
+                actions.style.display = 'block';
+                const shareIdSpan = actions.querySelector('#share-id-display');
+                shareIdSpan.textContent = list.id;
+                shareIdSpan.onclick = () => {
+                    navigator.clipboard.writeText(list.id).then(() => util.showToast('IDをコピーしました！'), () => util.showToast('コピーに失敗しました'));
+                };
+            }
+            // ▲▲▲ ここまでが追加/修正部分 ▲▲▲
+        }
+        
+        function renderPublicListPage({ info, items, works }) {
+            showView('publicList');
+            dom.publicListName.textContent = util.escapeHTML(info.name);
+            dom.publicListOwner.textContent = `作成者: ${util.escapeHTML(info.ownerName || '匿名')}`;
+            dom.importPublicListBtn.dataset.listId = info.id;
+            const grid = dom.grids.publicList;
+            grid.innerHTML = '';
+
+            const allAvailableWorks = { ...state.works, ...state.adminPicks, ...works };
+            const sortedItems = Object.entries(items).sort((a, b) => b[1].addedAt - a[1].addedAt);
+            
+            sortedItems.forEach(([workId]) => {
+                if (allAvailableWorks[workId]) {
+                     grid.appendChild(makeCard(workId, 'publicList'));
+                }
+            });
+        }
+        
+        function showView(viewName) {
+            state.currentView = viewName;
+            Object.keys(dom.views).forEach(key => { dom.views[key].style.display = key === viewName ? 'block' : 'none'; });
+            Object.keys(dom.nav).forEach(key => {
+                const viewForNav = key === 'home' ? 'main' : (key === 'mylists' ? 'mylists' : key);
+                dom.nav[key].classList.toggle('active', viewForNav === viewName || (viewForNav === 'main' && viewName === 'publicList'));
+            });
+            const url = new URL(window.location);
+            if (viewName === 'publicList') { /* URL is already set */ }
+            else if (viewName !== 'main') { url.searchParams.set('view', viewName); url.searchParams.delete('list'); window.history.pushState({ view: viewName }, '', url); }
+            else { url.searchParams.delete('view'); url.searchParams.delete('list'); window.history.pushState({ view: 'main' }, '', url); }
+            if (viewName === 'favorites') renderPage('favorites');
+            if (viewName === 'mylists') renderMyListsPage();
+        }
+        
+        // --- データベース操作 & ロジック ---
+        async function handleContactSubmit(event) {
+            event.preventDefault();
+            const btn = document.getElementById('contact-submit-btn');
+            const name = document.getElementById('contactName').value.trim();
+            const email = document.getElementById('contactEmail').value.trim();
+            const title = document.getElementById('contactTitle').value.trim();
+            const content = document.getElementById('contactContent').value.trim();
+            if (!name || !email || !content) { return util.showToast("必須項目をすべて入力してください"); }
+            btn.disabled = true; btn.textContent = '送信中...';
+            const contactData = { name, email, title, content, timestamp: serverTimestamp(), isRead: false };
+            try { await push(ref(db, CONSTANTS.DB_PATHS.CONTACTS), contactData); util.showToast("お問い合わせを送信しました。"); dom.modalOverlay.classList.add("hidden"); }
+            catch (error) { util.showToast(`送信に失敗しました: ${error.message}`); btn.disabled = false; btn.textContent = '送信'; }
+        }
+        
+        async function addWork(url) {
+        const originalUrl = url.trim();
+        if (!originalUrl.includes("dlsite.com")) return util.showToast("有効なDLsiteのURLを入力してください");
+        
+        const workIdMatch = originalUrl.match(/(RJ|VJ|BJ)\d{6,}/i);
+        if (!workIdMatch) {
+            return util.showToast("URLから有効な作品IDが見つかりませんでした。");
+        }
+        const workId = workIdMatch[0].toUpperCase();
+        
+        const workRef = ref(db, `${CONSTANTS.DB_PATHS.WORKS}/${workId}`);
+        
+        const workSnapshot = await get(workRef);
+        if (workSnapshot.exists()) {
+            return util.showToast("この作品は既に追加されています");
+        }
+
+        const btn = document.getElementById('addBtn');
+        const input = dom.urlInput;
+        btn.disabled = true;
+        btn.classList.add('loading');
+        
+        try {
+            const proxyUrl = `https://api.allorigins.win/raw?url=${encodeURIComponent(originalUrl)}`;
+            const response = await fetch(proxyUrl, { signal: AbortSignal.timeout(20000) });
+            if (!response.ok) throw new Error(`作品情報の取得に失敗 (${response.status})`);
+            
+            const html = await response.text();
+            const doc = new DOMParser().parseFromString(html, "text/html");
+            const title = doc.querySelector('meta[property="og:title"]')?.content || "";
+            const coverUrl = doc.querySelector('meta[property="og:image"]')?.content || "";
+            if (!title || !coverUrl) throw new Error("タイトル・画像の取得に失敗");
+            
+            const affiliateUrl = `https://dlaf.jp/maniax/dlaf/=/t/n/link/work/aid/${CONSTANTS.DL_AFFILIATE_ID}/id/${workId}.html`;
+            let workType = 'unknown';
+            let extractedTagNames = [];
+            const jsonLdElement = doc.querySelector('script[type="application/ld+json"]');
+            if (jsonLdElement) {
+                try {
+                    const data = JSON.parse(jsonLdElement.textContent);
+                    workType = data["@type"] || 'unknown';
+                    if (data.keywords) {
+                        extractedTagNames = data.keywords.split(',').map(k => k.trim());
+                    }
+                } catch (e) {
+                    console.error("JSON-LD parse error:", e)
+                }
+            }
+            
+            const matchedTags = {};
+            [...new Set(extractedTagNames)].filter(Boolean).forEach(tagName => {
+                if (state.tagNameToDataMap.has(tagName)) {
+                    const foundTag = state.tagNameToDataMap.get(tagName);
+                    matchedTags[foundTag.id] = foundTag.name;
+                }
+            });
+            
+            const newWorkData = {
+                title: title.replace(/\[DLsite.*\]/, '').trim(),
+                coverUrl,
+                pageUrl: affiliateUrl,
+                workType,
+                timestamp: serverTimestamp(),
+                tags: matchedTags,
+                votes: {}
+            };
+
+            await set(workRef, newWorkData);
+            
+            util.showToast(`作品を追加しました`);
+            input.value = "";
+        } catch (err) {
+            util.showToast(`エラー: ${err.message}`);
+        } finally {
+            btn.disabled = false;
+            btn.classList.remove('loading');
+        }
     }
+        
+        async function handleVote(workId, btn) {
+            const score = Number(btn.dataset.score);
+            const data = state.works[workId] || state.adminPicks[workId];
+            if(!data) return;
+            const currentVote = data.votes?.[state.clientId] || 0;
+            const newVote = currentVote === score ? 0 : score;
+            const workPath = state.works[workId] ? CONSTANTS.DB_PATHS.WORKS : CONSTANTS.DB_PATHS.ADMIN_PICKS;
+            const voteRef = ref(db, `${workPath}/${workId}/votes/${state.clientId}`);
+            try { await (newVote === 0 ? remove(voteRef) : set(voteRef, newVote)); }
+            catch (error) { util.showToast(`投票エラー: ${error.message}`); }
+        }
+        
+        async function deleteList(listId) {
+            if (!state.currentUser) return;
+            const listName = state.myLists[listId]?.name || 'このリスト';
+            if (!confirm(`「${util.escapeHTML(listName)}」を完全に削除しますか？この操作は取り消せません。`)) return;
+            const updates = {};
+            updates[`${CONSTANTS.DB_PATHS.LISTS}/${listId}`] = null;
+            updates[`${CONSTANTS.DB_PATHS.LIST_ITEMS}/${listId}`] = null;
+            updates[`${CONSTANTS.DB_PATHS.USER_LISTS}/${state.currentUser.uid}/${listId}`] = null;
+            try {
+                await update(ref(db), updates);
+                util.showToast('リストを削除しました。');
+                if(state.activeListId === listId) { state.activeListId = null; }
+            } catch (error) { util.showToast(`削除エラー: ${error.message}`); }
+        }
+        
+        async function renameList(listId, newName) {
+            if (!state.currentUser || !newName) return;
+            const listRef = ref(db, `${CONSTANTS.DB_PATHS.LISTS}/${listId}/name`);
+            try { await set(listRef, newName); util.showToast("リスト名を変更しました。");
+            } catch (error) { util.showToast(`エラー: ${error.message}`); }
+        }
+        
+        async function removeWorkFromList(workId, listId) {
+            if (!state.currentUser) return;
+            const itemRef = ref(db, `${CONSTANTS.DB_PATHS.LIST_ITEMS}/${listId}/${workId}`);
+            try { await remove(itemRef); util.showToast("リストから作品を削除しました。");
+            } catch (error) { util.showToast(`削除エラー: ${error.message}`); }
+        }
+        
+        let userListeners = [];
+        function subscribeUserData(user) {
+            unsubscribeUserData();
+            if (!user) return;
+            const uid = user.uid;
+            
+            const favListener = onValue(ref(db, `${CONSTANTS.DB_PATHS.FAVORITES}/${uid}`), snapshot => {
+                state.favorites.clear();
+                if (snapshot.exists()) { Object.keys(snapshot.val()).forEach(workId => state.favorites.add(workId)); }
+                updateSortedArrays();
+                refreshAllGrids();
+            });
+            userListeners.push(favListener);
 
-    function main() { 
-      initializeApp(CONSTANTS.FIREBASE_CONFIG); 
-      
-      const savedAdminSize = localStorage.getItem('pageSizeAdmin');
-      const savedUserSize = localStorage.getItem('pageSizeUser');
-      if (savedAdminSize) state.pageSize.admin = parseInt(savedAdminSize, 10);
-      if (savedUserSize) state.pageSize.user = parseInt(savedUserSize, 10);
+            const listMetaListener = onValue(ref(db, `${CONSTANTS.DB_PATHS.USER_LISTS}/${uid}`), async snapshot => {
+                const oldListIds = Object.keys(state.myLists);
+                const newListIds = snapshot.exists() ? Object.keys(snapshot.val()) : [];
+                
+                const removedListIds = oldListIds.filter(id => !newListIds.includes(id));
+                removedListIds.forEach(id => {
+                    delete state.myLists[id];
+                    delete state.myListItems[id];
+                });
 
-      state.sectionsCollapsed.admin = localStorage.getItem('adminSectionCollapsed') === 'true';
-      state.sectionsCollapsed.user = localStorage.getItem('userSectionCollapsed') === 'true';
-      
-      const savedMosaic = localStorage.getItem('mosaicActive'); 
-      if (savedMosaic === 'true') { 
-        state.mosaicActive = true; 
-        document.body.classList.add('mosaic-on'); 
-        dom.mosaicToggleBtn.textContent = 'モザイク OFF'; 
-      } 
+                const listPromises = newListIds.map(id => get(child(ref(db), `${CONSTANTS.DB_PATHS.LISTS}/${id}`)).then(s => s.exists() ? { id: s.key, ...s.val() } : null));
+                const lists = (await Promise.all(listPromises)).filter(Boolean);
+                
+                let needsRender = false;
+                for (const l of lists) {
+                    const needsListener = !state.myLists[l.id];
+                    state.myLists[l.id] = l;
+                    if(needsListener) {
+                        needsRender = true;
+                        const itemsListener = onValue(ref(db, `${CONSTANTS.DB_PATHS.LIST_ITEMS}/${l.id}`), itemSnap => {
+                            state.myListItems[l.id] = itemSnap.val() || {};
+                            refreshAllGrids();
+                        });
+                        userListeners.push(itemsListener);
+                    }
+                }
+                if (needsRender || removedListIds.length > 0) {
+                     if (state.currentView === 'mylists') { renderMyListsPage(); }
+                }
+            });
+            userListeners.push(listMetaListener);
+        }
+        
+        function unsubscribeUserData() {
+            userListeners.forEach(listener => listener());
+            userListeners.length = 0;
+            state.favorites.clear(); state.myLists = {}; state.myListItems = {};
+            if (state.currentUser === null) { updateSortedArrays(); refreshAllGrids(); }
+        }
+        
+        async function toggleFavorite(workId) {
+            if (!state.currentUser) return util.showToast('ログインが必要です。');
+            const favRef = ref(db, `${CONSTANTS.DB_PATHS.FAVORITES}/${state.currentUser.uid}/${workId}`);
+            await (state.favorites.has(workId) ? remove(favRef) : set(favRef, serverTimestamp()));
+        }
+        
+        async function createNewList(name) {
+            if (!state.currentUser) { util.showToast('ログインが必要です。'); return null; }
+            if (Object.keys(state.myLists).length >= CONSTANTS.LIST_LIMITS.MAX_LISTS) { util.showToast(`作成できるリストは${CONSTANTS.LIST_LIMITS.MAX_LISTS}個までです。`); return null; }
+            const newListRef = push(ref(db, CONSTANTS.DB_PATHS.LISTS));
+            await set(newListRef, { ownerId: state.currentUser.uid, ownerName: state.currentUser.displayName, name: name.trim(), createdAt: serverTimestamp() });
+            await set(ref(db, `${CONSTANTS.DB_PATHS.USER_LISTS}/${state.currentUser.uid}/${newListRef.key}`), true);
+            return newListRef.key;
+        }
+        
+        async function toggleWorkInList(workId, listId, shouldBeInList) {
+            if (!state.currentUser) return false;
+            const itemRef = ref(db, `${CONSTANTS.DB_PATHS.LIST_ITEMS}/${listId}/${workId}`);
+            if (shouldBeInList) {
+                if (Object.keys(state.myListItems[listId] || {}).length >= CONSTANTS.LIST_LIMITS.MAX_ITEMS_PER_LIST) {
+                    util.showToast(`リストには${CONSTANTS.LIST_LIMITS.MAX_ITEMS_PER_LIST}件まで登録できます。`);
+                    const checkbox = document.querySelector(`.add-to-list-popover input[data-list-id="${listId}"]`);
+                    if (checkbox) checkbox.checked = false;
+                    return false;
+                }
+                await set(itemRef, { addedAt: serverTimestamp() });
+            } else { await remove(itemRef); }
+            return true;
+        }
+        
+        async function getPublicListData(listId) {
+            const listSnap = await get(child(ref(db), `${CONSTANTS.DB_PATHS.LISTS}/${listId}`));
+            if (!listSnap.exists()) throw new Error("指定されたリストは見つかりませんでした。");
 
-      state.clientId = util.getClientId();
-      initializePageSizeSelectors();
-      setupCollapsers(); // ★追加
-      initializeListeners(); 
-      setupEventListeners();
-      setupImagePreviewListeners();
-    } 
-     
-    main(); 
-  </script>
+            const itemsSnap = await get(child(ref(db), `${CONSTANTS.DB_PATHS.LIST_ITEMS}/${listId}`));
+            const items = itemsSnap.exists() ? itemsSnap.val() : {};
+            const workIds = Object.keys(items);
+
+            const workPromises = workIds.map(workId =>
+                get(child(ref(db), `${CONSTANTS.DB_PATHS.WORKS}/${workId}`))
+            );
+            const workSnapshots = await Promise.all(workPromises);
+
+            const worksForList = {};
+            workSnapshots.forEach(snap => {
+                if (snap.exists()) {
+                    worksForList[snap.key] = { id: snap.key, ...snap.val() };
+                }
+            });
+            
+            return { 
+                info: { id: listSnap.key, ...listSnap.val() }, 
+                items: items,
+                works: worksForList
+            };
+        }
+        
+        async function importList(listId) {
+            if (!state.currentUser) { util.showToast('ログインが必要です。'); return; }
+            if (Object.keys(state.myLists).length >= CONSTANTS.LIST_LIMITS.MAX_LISTS) { util.showToast(`作成できるリストは${CONSTANTS.LIST_LIMITS.MAX_LISTS}個までです。`); return; }
+            try {
+                const { info, items } = await getPublicListData(listId);
+                const newListName = `${info.name} (コピー)`;
+                const newListId = await createNewList(newListName);
+                if (!newListId) return;
+                const itemEntries = Object.entries(items);
+                if (itemEntries.length > CONSTANTS.LIST_LIMITS.MAX_ITEMS_PER_LIST) {
+                    util.showToast(`コピー元リストのアイテム数が上限を超えています。先頭${CONSTANTS.LIST_LIMITS.MAX_ITEMS_PER_LIST}件のみインポートします。`);
+                    itemEntries.length = CONSTANTS.LIST_LIMITS.MAX_ITEMS_PER_LIST;
+                }
+                const updates = {};
+                itemEntries.forEach(([workId]) => { updates[`${CONSTANTS.DB_PATHS.LIST_ITEMS}/${newListId}/${workId}`] = { addedAt: serverTimestamp() }; });
+                await update(ref(db), updates);
+                util.showToast(`「${util.escapeHTML(newListName)}」をインポートしました。`);
+                state.activeListId = newListId;
+            } catch (error) { util.showToast(error.message || 'リストのインポートに失敗しました。'); }
+        }
+        
+        function updateSortedArrays() {
+            const allWorks = {...state.works, ...state.adminPicks};
+            
+            state.sortedWorkIds.ranking = Object.values(state.works).sort((a, b) => (b.score || 0) - (a.score || 0)).map(w => w.id);
+            state.sortedWorkIds.new = Object.values(state.works).sort((a, b) => b.timestamp - a.timestamp).map(w => w.id);
+            
+            state.sortedWorkIds.favorites = [...state.favorites].map(favId => {
+                return allWorks[favId] || Object.values(allWorks).find(p => p.pageUrl?.includes(favId));
+            }).filter(Boolean) 
+              .sort((a, b) => (b?.timestamp || 0) - (a?.timestamp || 0))
+              .map(w => w.id);
+            
+            const adminPicks = Object.values(state.adminPicks).sort((a, b) => (a.order ?? a.timestamp) - (b.order ?? b.timestamp));
+            state.sortedAdminIds.manga = adminPicks.filter(w => util.classifyWork(w) === 'manga').map(w => w.id);
+            state.sortedAdminIds.game = adminPicks.filter(w => util.classifyWork(w) === 'game').map(w => w.id);
+        }
+        
+        function refreshAllGrids() {
+            renderPage('new'); renderPage('ranking');
+            renderPage('admin_manga'); renderPage('admin_game');
+            renderPage('favorites');
+            if (state.currentView === 'mylists') { renderMyListsPage(); }
+        }
+        
+        function initializeListeners() {
+            onValue(ref(db, CONSTANTS.DB_PATHS.CATEGORIES), (snap) => { state.categories = snap.val() || {}; });
+            onValue(ref(db, CONSTANTS.DB_PATHS.TAGS), (snap) => {
+                state.tags = snap.val() || {}; state.tagNameToDataMap.clear();
+                Object.entries(state.tags).forEach(([id, data]) => { state.tagNameToDataMap.set(data.name, { id, ...data }); });
+            });
+            const worksRef = ref(db, CONSTANTS.DB_PATHS.WORKS);
+            onValue(worksRef, (snapshot) => {
+                const newWorks = {};
+                snapshot.forEach(childSnap => {
+                    const data = childSnap.val();
+                    newWorks[childSnap.key] = { id: childSnap.key, ...data, score: Object.values(data?.votes || {}).reduce((s, v) => s + v, 0) };
+                });
+                state.works = newWorks;
+                updateSortedArrays();
+                refreshAllGrids();
+            });
+            const adminPicksRef = ref(db, CONSTANTS.DB_PATHS.ADMIN_PICKS);
+            onValue(adminPicksRef, (snapshot) => {
+                const newAdminPicks = {};
+                snapshot.forEach(childSnap => {
+                    newAdminPicks[childSnap.key] = { id: childSnap.key, ...childSnap.val() };
+                });
+                state.adminPicks = newAdminPicks;
+                updateSortedArrays();
+                refreshAllGrids();
+            });
+        }
+        
+        function initializePageSizeSelectors() {
+            const isMobile = window.innerWidth <= 768;
+            const deviceType = isMobile ? 'mobile' : 'pc';
+            for (const type of ['admin', 'user', 'favorites']) {
+                const selector = dom.pageSizeSelectors[type];
+                if (!selector) continue;
+                const options = CONSTANTS.PAGE_SIZE_OPTIONS[deviceType][type];
+                let currentSize = state.pageSize[type];
+                if (!options.includes(currentSize)) { currentSize = options[0]; }
+                selector.innerHTML = '';
+                options.forEach(size => {
+                    const option = document.createElement('option');
+                    option.value = size; option.textContent = size;
+                    if (size == currentSize) { option.selected = true; }
+                    selector.appendChild(option);
+                });
+            }
+        }
+        
+        function setupCollapsers() {
+            document.querySelectorAll('.collapser-header').forEach(header => {
+                const content = header.nextElementSibling;
+                if (!content || !content.classList.contains('collapsible-content')) return;
+                const sectionName = header.dataset.section;
+                if (state.sectionsCollapsed[sectionName]) { header.classList.add('collapsed'); content.classList.add('collapsed'); }
+                header.addEventListener('click', (e) => {
+                    if (e.target.tagName === 'SELECT' || e.target.tagName === 'LABEL') return;
+                    const isCollapsed = header.classList.toggle('collapsed');
+                    content.classList.toggle('collapsed');
+                    state.sectionsCollapsed[sectionName] = isCollapsed;
+                    localStorage.setItem(`${sectionName}SectionCollapsed`, isCollapsed);
+                });
+            });
+        }
+        
+        function setupEventListeners() {
+            dom.loginBtn.addEventListener('click', () => { const p = new GoogleAuthProvider(); signInWithPopup(auth, p).catch(err => util.showToast(`Login failed: ${err.code}`)); });
+            dom.logoutBtn.addEventListener('click', () => signOut(auth));
+            dom.nav.home.addEventListener('click', () => showView('main'));
+            dom.nav.favorites.addEventListener('click', () => showView('favorites'));
+            dom.nav.mylists.addEventListener('click', () => showView('mylists'));
+            dom.importPublicListBtn.addEventListener('click', (e) => importList(e.currentTarget.dataset.listId));
+            document.getElementById('addBtn').addEventListener("click", () => addWork(dom.urlInput.value.trim()));
+            Object.keys(dom.paginations).forEach(type => {
+                const pagination = dom.paginations[type];
+                if (!pagination) return;
+                pagination.prev.addEventListener('click', () => { if (state.currentPage[type] > 1) { state.currentPage[type]--; renderPage(type); } });
+                pagination.next.addEventListener('click', () => {
+                    const isAdminSection = type.startsWith('admin_');
+                    const isFavoritesSection = type === 'favorites';
+                    let sortedIds;
+                    if(isAdminSection) sortedIds = state.sortedAdminIds[type.split('_')[1]];
+                    else if(isFavoritesSection) sortedIds = state.sortedWorkIds.favorites;
+                    else sortedIds = state.sortedWorkIds[type];
+                    
+                    const pageSizeKey = isAdminSection ? 'admin' : (isFavoritesSection ? 'favorites' : 'user');
+                    const pageSize = state.pageSize[pageSizeKey];
+                    const totalPages = util.calculateTotalPages(sortedIds.length, pageSize);
+                    if (state.currentPage[type] < totalPages) { state.currentPage[type]++; renderPage(type); }
+                });
+            });
+            dom.pageSizeSelectors.admin.addEventListener('change', (e) => { state.pageSize.admin = parseInt(e.target.value, 10); localStorage.setItem('pageSizeAdmin', state.pageSize.admin); renderPage('admin_manga'); renderPage('admin_game'); });
+            dom.pageSizeSelectors.user.addEventListener('change', (e) => { state.pageSize.user = parseInt(e.target.value, 10); localStorage.setItem('pageSizeUser', state.pageSize.user); renderPage('new'); renderPage('ranking'); });
+            dom.pageSizeSelectors.favorites.addEventListener('change', (e) => { state.pageSize.favorites = parseInt(e.target.value, 10); localStorage.setItem('pageSizeFavorites', state.pageSize.favorites); renderPage('favorites'); });
+            dom.modalOverlay.addEventListener("click", (e) => { if (e.target === dom.modalOverlay) dom.modalOverlay.classList.add("hidden"); });
+            document.getElementById('infoBtn').addEventListener('click', openInfoModal);
+            document.getElementById('hideBadBtn').addEventListener("click", () => { state.hideBadlyRated = !state.hideBadlyRated; const btn = document.getElementById('hideBadBtn'); btn.classList.toggle('active', state.hideBadlyRated); btn.textContent = state.hideBadlyRated ? 'Bad評価を再表示' : 'Bad評価を非表示'; renderPage('new'); renderPage('ranking'); });
+            document.getElementById('mosaicToggleBtn').addEventListener("click", () => { state.mosaicActive = !state.mosaicActive; localStorage.setItem('mosaicActive', state.mosaicActive); document.body.classList.toggle('mosaic-on', state.mosaicActive); document.getElementById('mosaicToggleBtn').textContent = state.mosaicActive ? 'モザイク OFF' : 'モザイク ON'; });
+            document.querySelectorAll('.filterByTagsBtn').forEach(btn => btn.addEventListener('click', openTagFilterModal));
+            document.querySelectorAll('.resetFilterBtn').forEach(btn => btn.addEventListener('click', () => { state.highlightTagIds.clear(); state.hideTagIds.clear(); refreshAllGrids(); }));
+            document.getElementById('contactBtn').addEventListener('click', openContactModal);
+            document.getElementById('toggle-sidebar-btn').addEventListener('click', (e) => {
+                const isCollapsed = dom.mylistsContainer.classList.toggle('sidebar-collapsed');
+                e.currentTarget.textContent = isCollapsed ? '▶' : '◀';
+            });
+        }
+        
+        function setupImagePreviewListeners() {
+            const popup = dom.imagePreviewPopup; if (!popup || !dom.container) return;
+            dom.container.addEventListener('mouseover', (e) => {
+                if (window.innerWidth <= 768) return;
+                if (e.target.tagName !== 'IMG' || !e.target.closest('.item')) return;
+                const card = e.target.closest('.item'); const workId = card.dataset.id;
+                const work = state.works[workId] || state.adminPicks[workId];
+                if (work && work.coverUrl) {
+                    popup.innerHTML = `<img src="${work.coverUrl}" alt="Preview">`;
+                    popup.style.visibility = 'hidden'; popup.style.display = 'block';
+                    const popupRect = popup.getBoundingClientRect(); const cardRect = card.getBoundingClientRect();
+                    let left = cardRect.right + 10; if (left + popupRect.width > window.innerWidth) { left = cardRect.left - popupRect.width - 10; }
+                    let top = cardRect.top; if (top + popupRect.height > window.innerHeight) { top = window.innerHeight - popupRect.height - 10; }
+                    popup.style.left = `${left}px`; popup.style.top = `${top}px`; popup.style.visibility = 'visible';
+                    e.target.addEventListener('mouseleave', () => { popup.style.display = 'none'; }, { once: true });
+                }
+            });
+        }
+        
+        function updateUIforAuthState(user) {
+            state.currentUser = user;
+            if (user) {
+                dom.loginBtn.classList.add('hidden'); dom.logoutBtn.classList.remove('hidden');
+                dom.userName.textContent = user.displayName || '名無しさん'; dom.userName.classList.remove('hidden');
+                document.querySelectorAll('.requires-auth').forEach(el => el.disabled = false);
+            } else {
+                dom.loginBtn.classList.remove('hidden'); dom.logoutBtn.classList.add('hidden');
+                dom.userName.classList.add('hidden');
+                document.querySelectorAll('.requires-auth').forEach(el => el.disabled = true);
+            }
+        }
+        
+        function handleUrlBasedView() {
+            const params = new URLSearchParams(window.location.search);
+            const listId = params.get('list'); const view = params.get('view');
+            if (listId) {
+                getPublicListData(listId)
+                    .then(renderPublicListPage)
+                    .catch(err => { console.error(err); util.showToast(err.message); showView('main'); });
+            } else if (view && dom.views[view]) {
+                if(dom.views[view].querySelector('.requires-auth') && !state.currentUser) {
+                    showView('main');
+                } else {
+                    showView(view);
+                }
+            }
+            else { showView('main'); }
+        }
+        
+        function main() {
+            ['pageSizeAdmin', 'pageSizeUser', 'pageSizeFavorites'].forEach(key => {
+                const savedSize = localStorage.getItem(key);
+                if (savedSize) {
+                    const type = key.replace('pageSize', '').toLowerCase();
+                    state.pageSize[type] = parseInt(savedSize, 10);
+                }
+            });
+            state.sectionsCollapsed.admin = localStorage.getItem('adminSectionCollapsed') === 'true';
+            state.sectionsCollapsed.user = localStorage.getItem('userSectionCollapsed') === 'true';
+            if (localStorage.getItem('mosaicActive') === 'true') {
+                state.mosaicActive = true; document.body.classList.add('mosaic-on');
+                document.getElementById('mosaicToggleBtn').textContent = 'モザイク OFF';
+            }
+            
+            initializeListeners();
+
+            onAuthStateChanged(auth, (user) => {
+                updateUIforAuthState(user);
+                if (user) {
+                    subscribeUserData(user);
+                } else {
+                    unsubscribeUserData();
+                }
+                handleUrlBasedView();
+            });
+
+            state.clientId = util.getClientId();
+            initializePageSizeSelectors();
+            setupCollapsers();
+            setupEventListeners();
+            setupImagePreviewListeners();
+        }
+        
+        main();
+    </script>
 </body>
 </html>

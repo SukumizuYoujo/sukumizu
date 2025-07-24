@@ -5,201 +5,928 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>DLsiteおすすめ共有</title>
     <style>
-        /* ===================================
-            基本スタイル & 全体レイアウト
-        ====================================== */
-        * { box-sizing: border-box; margin: 0; padding: 0; }
-        body { font-family: sans-serif; background: #f5f5f5; color: #333; }
-        .container { max-width: 960px; margin: 2rem auto; padding: 0 1rem; }
-        .site-header { text-align: center; margin-bottom: 2rem; }
-        .site-header h1 { font-size: 2.5rem; margin-bottom: 0.5rem; }
-        .site-header p { font-size: 0.8rem; color: #888; }
-        .section-header { display: flex; justify-content: space-between; align-items: center; border-bottom: 2px solid #ccc; padding-bottom: 0.5rem; margin-top: 2.5rem; }
-        h2 { margin: 0; padding: 0; border: none; display: flex; align-items: center; gap: 0.5rem;}
-        hr { border: none; border-top: 1px solid #eee; margin: 2rem 0; }
-        .hidden { display: none !important; }
-        .view-options { display: flex; align-items: center; gap: 0.5rem; }
-        .view-options label { font-size: 0.85rem; color: #555; }
-        .view-options select { padding: 0.2rem 0.4rem; border: 1px solid #ccc; border-radius: 4px; background-color: #fff; }
-        .collapser-header { cursor: pointer; user-select: none; }
-        .collapser-header h2::after { content: '▲'; font-size: 0.8em; margin-left: 0.5em; display: inline-block; transition: transform 0.3s; }
-        .collapser-header.collapsed h2::after { transform: rotate(180deg); }
-        .collapsible-content { overflow: hidden; transition: max-height 0.4s ease-out, padding 0.4s ease-out, margin 0.4s ease-out; max-height: 5000px; }
-        .collapsible-content.collapsed { max-height: 0; padding-top: 0 !important; padding-bottom: 0 !important; margin-top: 0 !important; margin-bottom: 0 !important; }
-        .controls { display: flex; flex-wrap: wrap; gap: .5rem; margin-bottom: 1rem; align-items: center; }
-        .controls input { flex: 1; min-width: 200px; padding: .5rem; border: 1px solid #ccc; border-radius: 4px; }
-        .controls button, .filter-controls button { padding: .5rem 1rem; border: none; color: #fff; border-radius: 4px; cursor: pointer; transition: background-color 0.2s; }
-        .filter-controls { display: flex; flex-wrap: wrap; gap: 0.5rem; margin-bottom: 1rem; }
-        #addBtn { background: #28a745; }
-        #addBtn:disabled { opacity: .6; cursor: default; }
-        #hideBadBtn { background: #6c757d; }
-        #hideBadBtn.active { background: #f44336; font-weight: bold; }
-        #mosaicToggleBtn { background: #8e44ad; }
-        .filterByTagsBtn, .resetFilterBtn { background: #4CAF50; color: white; }
-        .filterByTagsBtn.active { background: #2E7D32; font-weight: bold;}
-        #contactBtn { background-color: #007bff; color: white; }
-        .loading { position: relative; }
-        .loading::after { content: ''; position: absolute; top: 50%; right: 10px; width: 16px; height: 16px; margin-top: -8px; border: 2px solid #fff; border-top-color: transparent; border-radius: 50%; animation: spin .6s linear infinite; }
-        @keyframes spin { to { transform: rotate(360deg); } }
-        .tabs input[type="radio"] { display: none; }
-        .tabs label { display: inline-block; padding: .5rem 1.5rem; cursor: pointer; background: #eee; margin-right: .5rem; border-radius: 4px 4px 0 0; font-weight: bold; }
-        #tab-admin_manga:checked ~ .tabs-container label[for="tab-admin_manga"], #tab-admin_game:checked ~ .tabs-container label[for="tab-admin_game"], #tab-new:checked ~ .tabs-container label[for="tab-new"], #tab-ranking:checked ~ .tabs-container label[for="tab-ranking"] { background: #fff; }
-        .tab-content { display: none; padding: 1rem; background: #fff; border: 1px solid #ddd; border-top: none; border-radius: 0 4px 4px 4px; }
-        #tab-admin_manga:checked ~ #admin_manga, #tab-admin_game:checked ~ #admin_game, #tab-new:checked ~ #new, #tab-ranking:checked ~ #ranking { display: block; }
-        .grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(140px,1fr)); gap: 1rem; transition: min-height 0.3s ease-in-out; align-content: start; }
-        .item { position: relative; background: #fafafa; border: 1px solid #ddd; border-radius: 6px; display: flex; flex-direction: column; overflow: hidden; cursor: pointer; height: 320px; transition: box-shadow 0.2s; }
-        .item:hover { box-shadow: 0 4px 12px rgba(0,0,0,0.15); }
-        .item img { width: 100%; height: 180px; object-fit: cover; flex-shrink: 0; }
-        .item-body { flex: 1; overflow-y: auto; padding: 0 .5rem; }
-        .title { font-size: .9rem; margin: .5rem 0; max-height: 2.4em; }
-        .tags { display: flex; flex-wrap: wrap; gap: 4px; }
-        .tag { background: #ddd; border-radius: 4px; padding: 2px 6px; font-size: .75rem; }
-        .item-footer { margin-top: auto; display: flex; justify-content: space-between; align-items: center; padding: .5rem; background: #fff; gap: 0.5rem; flex-shrink: 0; min-height: 38px; }
-        .rating-buttons { display: flex; align-items: center; gap: 4px; }
-        .rating-btn { padding: 2px 6px; font-size: .8rem; border: none; border-radius: 4px; background: #eee; cursor: pointer; }
-        .rating-btn.good.active { background: #4caf50; color: #fff; }
-        .rating-btn.bad.active { background: #f44336; color: #fff; }
-        .score-display { visibility: hidden; font-size: 0.9rem; font-weight: bold; color: #333; margin-left: 0.5rem; }
-        #rankingGrid .score-display { visibility: visible; }
-        .pagination { display: flex; align-items: center; justify-content: center; gap: .5rem; margin-top: 1rem; }
-        .pagination button { padding: .3rem .6rem; font-size: .9rem; border: 1px solid #ccc; background: #fff; cursor: pointer; }
-        .pagination button:disabled { opacity: .5; cursor: default; }
-        .overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.6); z-index: 1999; display: flex; align-items: center; justify-content: center; }
-        .overlay.hidden { display: none; }
-        .modal { width: 90%; max-width: 600px; background: #fff; border-radius: 8px; box-shadow: 0 4px 12px rgba(0,0,0,0.2); display: flex; flex-direction: column; max-height: 80vh; }
-        .modal-header { font-weight: bold; padding: 1rem; border-bottom: 1px solid #ddd; }
-        .modal-body { flex: 1; overflow-y: auto; padding: 1rem; }
-        .tag-panel .modal-body { padding: 0; }
-        .tag-panel .tag-search-input { width: 100%; padding: .75rem; font-size: 1rem; border: none; border-bottom: 1px solid #ddd; }
-        .tag-panel .category-tabs { display: flex; flex-wrap: wrap; gap: .5rem; padding: .75rem; border-bottom: 1px solid #ddd; background: #f7f7f7; }
-        .tag-panel .category-tabs button { padding: .4rem .8rem; font-size: .8rem; border: 1px solid #ccc; border-radius: 1rem; background: #fff; cursor: pointer; }
-        .tag-panel .category-tabs button.active { background: #333; color: #fff; border-color: #333; }
-        .tag-panel .tag-list { padding: .75rem; display: grid; height: 30vh; overflow-y: auto; grid-template-columns: repeat(auto-fill, minmax(150px, 1fr)); gap: .5rem; align-content: start; }
-        .tag-panel .tag-list label { display: flex; align-items: center; gap: .5rem; margin-bottom: 0; font-size: .9rem; cursor: pointer; }
-        .tag-panel .tag-list input { margin: 0; }
-        .modal-footer { display: flex; justify-content: flex-end; gap: 0.75rem; padding: .75rem; background: #f7f7f7; border-top: 1px solid #ddd; }
-        .modal-footer button { padding: 0.6rem 1.2rem; font-size: 0.9rem; font-weight: 600; border-radius: 6px; border: none; cursor: pointer; transition: opacity 0.2s ease; }
-        .modal-footer button:hover { opacity: 0.85; }
-        #modal-close-btn, #tag-panel-reset { background-color: #6c757d; color: white; }
-        #tag-panel-confirm { background-color: #ff9800; color: white; }
-        #filter-mode-select-buttons { display: flex; gap: 0.5rem; margin-right: auto; }
-        #filter-mode-select-buttons button { padding: 0.4rem 0.8rem; font-size: 0.8rem; border-radius: 4px; background-color: #aaa; color: white; }
-        #filter-mode-select-buttons button.active { background-color: #28a745; }
-        .toast { position: fixed; bottom: 1rem; right: 1rem; background: rgba(0,0,0,.8); color: #fff; padding: .5rem 1rem; border-radius: 4px; opacity: 0; transition: opacity .3s; z-index: 3000; }
-        .toast.show { opacity: 1; }
-        body.mosaic-on .item img { filter: blur(8px); transition: filter 0.2s ease-in-out; }
-        body.mosaic-on .item img:hover { filter: blur(0); }
-        .contact-form .form-group { margin-bottom: 1rem; }
-        .contact-form .form-group label { display: block; margin-bottom: 0.25rem; font-weight: bold; font-size: 0.9rem; }
-        .contact-form .form-group input, .contact-form .form-group textarea { width: 100%; padding: 0.6rem; border: 1px solid #ccc; border-radius: 4px; font-size: 1rem; }
-        .contact-form .form-group textarea { min-height: 120px; resize: vertical; }
-        .image-preview-popup { display: none; position: fixed; z-index: 4000; pointer-events: none; border: 2px solid #ccc; box-shadow: 0 5px 15px rgba(0,0,0,0.3); max-width: 400px; max-height: 90vh; overflow: hidden; border-radius: 4px; background-color: #fff; transition: opacity 0.1s; }
-        .image-preview-popup img { display: block; width: 100%; height: auto; }
-        .auth-area { text-align: right; margin-bottom: 1rem; display: flex; justify-content: flex-end; align-items: center; gap: 1rem; }
-        .auth-area #userName { font-weight: bold; }
-        .auth-area button { padding: .4rem .8rem; background-color: #007bff; color:white; border:none; border-radius: 4px; cursor: pointer; }
-        .auth-area button#logoutBtn { background-color: #6c757d; }
-        .requires-auth:disabled { opacity: 0.5; cursor: not-allowed; }
-        .main-nav { display: flex; gap: 0.5rem; margin-bottom: 1rem; padding-bottom: 1rem; border-bottom: 1px solid #eee; }
-        .main-nav button { padding: .5rem 1rem; background: #555; color: white; border: none; border-radius: 4px; font-size: 1rem; }
-        .main-nav button.active { background: #000; font-weight: bold; }
-        .view-container { display: none; }
-        #view-favorites, #view-mylists, #view-public-list { padding-bottom: 2rem; }
-        .card-actions { display: flex; gap: 4px; }
-        .card-actions button { width: 32px; height: 32px; border-radius: 50%; border: 1px solid rgba(0,0,0,0.1); background-color: rgba(255, 255, 255, 0.8); cursor: pointer; font-size: 16px; display: flex; align-items: center; justify-content: center; transition: all 0.2s; }
-        .card-actions button:hover { background-color: white; transform: scale(1.1); }
-        .card-actions .favorite-btn.favorited { color: #e91e63; background-color: white; }
-        .card-actions .add-to-list-btn.in-list { color: #28a745; background-color: white; }
-        .card-actions .remove-from-list-btn { color: #f44336; }
-        .item-footer .card-actions { position: absolute; top: 4px; right: 4px; z-index: 10; opacity: 0; }
-        .item:hover .item-footer .card-actions { opacity: 1; }
-        .add-to-list-popover { position: absolute; z-index: 100; background-color: white; border: 1px solid #ccc; box-shadow: 0 2px 10px rgba(0,0,0,0.2); border-radius: 6px; padding: .75rem; width: 250px; }
-        .add-to-list-popover ul { list-style: none; max-height: 150px; overflow-y: auto; margin-bottom: .75rem; }
-        .add-to-list-popover li label { display: block; padding: .25rem 0; cursor: pointer; display: flex; align-items: center; gap: .5rem; }
-        .add-to-list-popover .new-list-form { display: flex; gap: .5rem; border-top: 1px solid #eee; padding-top: .75rem; }
-        .add-to-list-popover .new-list-form input { flex-grow: 1; padding: .4rem; border: 1px solid #ccc; border-radius: 4px; }
-        .add-to-list-popover .new-list-form button { padding: 0 .8rem; background-color: #28a745; color: white; border: none; border-radius: 4px; cursor: pointer; }
-        #mylists-container { display: flex; gap: 1.5rem; align-items: flex-start; transition: all 0.3s ease; }
-        .mylists-sidebar { flex: 0 0 300px; transition: all 0.3s ease; }
-        .mylists-content { flex-grow: 1; min-width: 0; }
-        #mylists-container.sidebar-collapsed .mylists-sidebar { flex-basis: 0; width: 0; overflow: hidden; padding: 0; margin-left: -1.5rem; opacity: 0; }
-        #toggle-sidebar-btn { background: none; border: 1px solid #ccc; border-radius: 4px; cursor: pointer; padding: 0.1rem 0.4rem; font-size: 1em; line-height: 1; color: #555; }
-        #toggle-sidebar-btn:hover { background: #eee; }
-        .mylists-sidebar h3, .mylists-content h3 { margin-bottom: 1rem; }
-        .mylists-sidebar ul { list-style: none; }
-        .mylists-sidebar li { margin-bottom: .5rem; }
-        .mylists-sidebar .list-group-item { width: 100%; text-align: left; padding: .6rem; border: 1px solid #eee; background: #fff; cursor: pointer; border-radius: 4px; display: flex; justify-content: space-between; align-items: center; }
-        .mylists-sidebar .list-group-item.active { background-color: #333; color: white; border-color: #333; }
-        .list-item-controls { display: flex; gap: 0.5rem; }
-        .list-item-controls button { background: none; border: none; font-size: 1rem; cursor: pointer; padding: 0 .2rem; opacity: 0.5; }
-        .list-group-item:hover .list-item-controls button { opacity: 1; }
-        .list-edit-form { display: flex; width: 100%; gap: 0.5rem; padding: 0.6rem; border: 1px solid #ccc; border-radius: 4px; }
-        .list-edit-form input { flex-grow: 1; border: 1px solid #999; padding: 0.2rem; }
-        .list-edit-form button { background: none; border: none; font-size: 1rem; cursor: pointer; }
-        .list-actions { margin-top: 1rem; margin-bottom: 1rem; }
-        .list-actions .form-group { display: flex; gap: .5rem; margin-bottom: 0.5rem; }
-        .list-actions input { flex-grow: 1; padding: .5rem; }
-        .list-actions button { padding: .5rem; }
-        #share-id-display { user-select: all; background: #eee; padding: 0.5rem; border-radius: 4px; cursor: pointer; }
-        #share-id-display:hover { background: #ddd; }
+  /* ==========================================================================
+     1. 基本設定 (リセット、全体レイアウト、タイポグラフィ)
+     ========================================================================== */
 
-        /* レスポンシブ (スマホ向けスタイル) */
-        @media screen and (max-width: 768px) {
-            body { font-size: 14px; -webkit-text-size-adjust: 100%; }
-            .container { margin: 1rem auto; padding: 0 0.75rem; }
-            .site-header h1 { font-size: 1.8rem; }
-            .section-header { flex-direction: column; align-items: flex-start; gap: 0.5rem; }
-            h2 { font-size: 1.2rem; }
-            hr { margin: 1.5rem 0; }
-            .controls { flex-direction: column; gap: 0.75rem; align-items: stretch; }
-            .controls input { min-width: 0; width: 100%; padding: .75rem; font-size: 1rem; }
-            .controls button { width: 100%; }
-            .controls:has(#dlsiteUrl) { flex-direction: row; flex-wrap: nowrap; }
-            .controls:has(#dlsiteUrl) #dlsiteUrl { flex: 1; }
-            .controls:has(#dlsiteUrl) #addBtn { flex-shrink: 0; width: auto; padding: .75rem; }
-            .filter-controls { flex-direction: column; gap: 0.75rem; align-items: stretch; }
-            .filter-controls button { width: 100%; }
-            .tabs { position: relative; }
-            .tab-content { padding: 0.75rem; }
-            .tabs-container { overflow-x: auto; white-space: nowrap; -webkit-overflow-scrolling: touch; padding-bottom: 8px; border-bottom: 1px solid #ddd; }
-            .tabs label { padding: .6rem 1.1rem; font-size: .9rem; margin-right: 4px; }
-            #tab-admin_manga:checked ~ .tabs-container label[for="tab-admin_manga"], #tab-admin_game:checked ~ .tabs-container label[for="tab-admin_game"], #tab-new:checked ~ .tabs-container label[for="tab-new"], #tab-ranking:checked ~ .tabs-container label[for="tab-ranking"] { background: #fff; border: 1px solid #ddd; border-bottom: 1px solid #fff; position: relative; top: 1px; }
-            .grid { grid-template-columns: repeat(2, 1fr); gap: 0.75rem; }
-            .item { height: auto; min-height: 0; }
-            .item img { height: 160px; }
-            .title { font-size: .8rem; margin: .4rem 0; max-height: 3.2em; }
-            .tag { font-size: .7rem; padding: 2px 5px; }
-            .item-footer { padding: .4rem; min-height: auto; }
-            .rating-btn { padding: 3px 7px; }
-            .item-footer .card-actions { position: static; opacity: 1; }
-            .item-footer { flex-direction: column; align-items: stretch; gap: 0.25rem; }
-            .rating-buttons { justify-content: flex-start; }
-            .card-actions { justify-content: flex-end; }
-            .pagination { gap: .25rem; }
-            .pagination button, .pagination span { font-size: 0.85rem; }
-            .pagination button { padding: .4rem .6rem; }
-            .modal { width: 95vw; max-height: 85vh; }
-            .modal-body { padding: 0.75rem; }
-            .tag-panel .tag-list { grid-template-columns: repeat(auto-fill, minmax(120px, 1fr)); height: 40vh; gap: .75rem; }
-            .tag-panel .category-tabs { padding: 0.5rem; gap: 0.25rem; }
-            .tag-panel .category-tabs button { font-size: 0.75rem; }
-            .modal-footer { flex-direction: column; gap: 0.5rem; }
-            #filter-mode-select-buttons { order: -1; width: 100%; justify-content: center; margin-right: 0; }
-            .modal-footer button { width: 100%; }
-            .toast { left: 1rem; right: 1rem; width: auto; text-align: center; }
-            .image-preview-popup { display: none !important; }
-            .main-nav { overflow-x: auto; white-space: nowrap; }
-            #mylists-container { flex-direction: column; }
-            .mylists-sidebar { width: 100%; flex-basis: auto; transition: max-height 0.3s ease-out; }
-            #mylists-container.sidebar-collapsed .mylists-sidebar { max-height: 0; overflow: hidden; padding-top: 0; padding-bottom: 0; margin-bottom: 0; border: none; }
-            #toggle-sidebar-btn { display: block; }
-        }
-    </style>
+  /* 全ての要素に適用する基本的なリセット */
+  * {
+    box-sizing: border-box; /* paddingとborderをwidth/heightに含める */
+    margin: 0;
+    padding: 0;
+  }
+
+  /* ページ全体の基本的なスタイル */
+  body {
+    font-family: sans-serif;
+    background: #f5f5f5;
+    color: #333;
+  }
+
+  /* サイト全体のコンテンツを中央に配置するラッパー */
+  .container {
+    max-width: 960px;
+    margin: 2rem auto;
+    padding: 0 1rem;
+  }
+
+  /* h2, hr などの共通要素 */
+  h2 {
+    margin: 0;
+    padding: 0;
+    border: none;
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+  }
+
+  hr {
+    border: none;
+    border-top: 1px solid #eee;
+    margin: 2rem 0;
+  }
+
+  /* ==========================================================================
+     2. 汎用・ユーティリティクラス
+     ========================================================================== */
+
+  /* 要素を非表示にするための汎用クラス */
+  .hidden {
+    display: none !important;
+  }
+
+  /* 読み込み中を示すスピナーアニメーション */
+  .loading {
+    position: relative;
+  }
+  .loading::after {
+    content: '';
+    position: absolute;
+    top: 50%;
+    right: 10px;
+    width: 16px;
+    height: 16px;
+    margin-top: -8px;
+    border: 2px solid #fff;
+    border-top-color: transparent;
+    border-radius: 50%;
+    animation: spin .6s linear infinite;
+  }
+
+  /* スピナーの回転アニメーション定義 */
+  @keyframes spin {
+    to {
+      transform: rotate(360deg);
+    }
+  }
+  
+  /* 作品画像のモザイク表示 */
+  body.mosaic-on .item img {
+    filter: blur(8px);
+    transition: filter 0.2s ease-in-out;
+  }
+  body.mosaic-on .item img:hover {
+    filter: blur(0);
+  }
+
+  /* ==========================================================================
+     3. ヘッダーとナビゲーション
+     ========================================================================== */
+  
+  /* サイトヘッダー */
+  .site-header {
+    text-align: center;
+    margin-bottom: 2rem;
+  }
+  .site-header h1 {
+    font-size: 2.5rem;
+    margin-bottom: 0.5rem;
+  }
+  .site-header p {
+    font-size: 0.8rem;
+    color: #888;
+  }
+  
+  /* 認証エリア（ログイン/ログアウト） */
+  .auth-area {
+    text-align: right;
+    margin-bottom: 1rem;
+    display: flex;
+    justify-content: flex-end;
+    align-items: center;
+    gap: 1rem;
+  }
+  .auth-area #userName {
+    font-weight: bold;
+  }
+  .auth-area button {
+    padding: .4rem .8rem;
+    background-color: #007bff;
+    color:white;
+    border:none;
+    border-radius: 4px;
+    cursor: pointer;
+  }
+  .auth-area button#logoutBtn {
+    background-color: #6c757d;
+  }
+  .requires-auth:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+  }
+  
+  /* メインナビゲーション */
+  .main-nav {
+    display: flex;
+    gap: 0.5rem;
+    margin-bottom: 1rem;
+    padding-bottom: 1rem;
+    border-bottom: 1px solid #eee;
+  }
+  .main-nav button {
+    padding: .5rem 1rem;
+    background: #555;
+    color: white;
+    border: none;
+    border-radius: 4px;
+    font-size: 1rem;
+  }
+  .main-nav button.active {
+    background: #000;
+    font-weight: bold;
+  }
+
+  /* 各ビューのコンテナ */
+  .view-container {
+    display: none;
+  }
+  #view-favorites, #view-mylists, #view-public-list {
+    padding-bottom: 2rem;
+  }
+  
+  /* ==========================================================================
+     4. セクションと操作コントロール
+     ========================================================================== */
+
+  /* 各セクションの見出し */
+  .section-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    border-bottom: 2px solid #ccc;
+    padding-bottom: 0.5rem;
+    margin-top: 2.5rem;
+  }
+
+  /* 表示件数などのオプション */
+  .view-options {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+  }
+  .view-options label {
+    font-size: 0.85rem;
+    color: #555;
+  }
+  .view-options select {
+    padding: 0.2rem 0.4rem;
+    border: 1px solid #ccc;
+    border-radius: 4px;
+    background-color: #fff;
+  }
+
+  /* 開閉可能なセクション */
+  .collapser-header {
+    cursor: pointer;
+    user-select: none;
+  }
+  .collapser-header h2::after {
+    content: '▲';
+    font-size: 0.8em;
+    margin-left: 0.5em;
+    display: inline-block;
+    transition: transform 0.3s;
+  }
+  .collapser-header.collapsed h2::after {
+    transform: rotate(180deg);
+  }
+  .collapsible-content {
+    overflow: hidden;
+    transition: max-height 0.4s ease-out, padding 0.4s ease-out, margin 0.4s ease-out;
+    max-height: 5000px; /* 十分に大きい高さを指定 */
+  }
+  .collapsible-content.collapsed {
+    max-height: 0;
+    padding-top: 0 !important;
+    padding-bottom: 0 !important;
+    margin-top: 0 !important;
+    margin-bottom: 0 !important;
+  }
+  
+  /* URL入力欄やフィルターボタンなどの操作エリア */
+  .controls {
+    display: flex;
+    flex-wrap: wrap;
+    gap: .5rem;
+    margin-bottom: 1rem;
+    align-items: center;
+  }
+  .controls input {
+    flex: 1;
+    min-width: 200px;
+    padding: .5rem;
+    border: 1px solid #ccc;
+    border-radius: 4px;
+  }
+  
+  /* フィルター専用の操作エリア */
+  .filter-controls {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.5rem;
+    margin-bottom: 1rem;
+  }
+
+  /* 各種ボタンの共通スタイルと個別スタイル */
+  .controls button, .filter-controls button {
+    padding: .5rem 1rem;
+    border: none;
+    color: #fff;
+    border-radius: 4px;
+    cursor: pointer;
+    transition: background-color 0.2s;
+  }
+  #addBtn { background: #28a745; }
+  #addBtn:disabled { opacity: .6; cursor: default; }
+  #hideBadBtn { background: #6c757d; }
+  #hideBadBtn.active { background: #f44336; font-weight: bold; }
+  #mosaicToggleBtn { background: #8e44ad; }
+  .filterByTagsBtn, .resetFilterBtn { background: #4CAF50; color: white; }
+  .filterByTagsBtn.active { background: #2E7D32; font-weight: bold;}
+  #contactBtn { background-color: #007bff; color: white; }
+  #infoBtn { background-color: #17a2b8; } /* サイト情報ボタン */
+  
+  /* ==========================================================================
+     5. タブ UI
+     ========================================================================== */
+
+  .tabs input[type="radio"] {
+    display: none; /* ラジオボタン自体は非表示 */
+  }
+  .tabs label {
+    display: inline-block;
+    padding: .5rem 1.5rem;
+    cursor: pointer;
+    background: #eee;
+    margin-right: .5rem;
+    border-radius: 4px 4px 0 0;
+    font-weight: bold;
+  }
+  /* 選択されているタブのスタイル */
+  #tab-admin_manga:checked ~ .tabs-container label[for="tab-admin_manga"],
+  #tab-admin_game:checked ~ .tabs-container label[for="tab-admin_game"],
+  #tab-new:checked ~ .tabs-container label[for="tab-new"],
+  #tab-ranking:checked ~ .tabs-container label[for="tab-ranking"] {
+    background: #fff;
+  }
+  .tab-content {
+    display: none; /* タブの中身は通常非表示 */
+    padding: 1rem;
+    background: #fff;
+    border: 1px solid #ddd;
+    border-top: none;
+    border-radius: 0 4px 4px 4px;
+  }
+  /* 選択されているタブの中身だけ表示 */
+  #tab-admin_manga:checked ~ #admin_manga,
+  #tab-admin_game:checked ~ #admin_game,
+  #tab-new:checked ~ #new,
+  #tab-ranking:checked ~ #ranking {
+    display: block;
+  }
+  
+  /* ==========================================================================
+     6. 作品カード（グリッドとアイテム）
+     ========================================================================== */
+  
+  /* カードを並べるグリッドレイアウト */
+  .grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(140px, 1fr));
+    gap: 1rem;
+    transition: min-height 0.3s ease-in-out;
+    align-content: start;
+  }
+
+  /* 作品カードのコンテナ */
+  .item {
+    position: relative;
+    background: #fafafa;
+    border: 1px solid #ddd;
+    border-radius: 6px;
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
+    cursor: pointer;
+    height: 320px;
+    transition: box-shadow 0.2s;
+  }
+  .item:hover {
+    box-shadow: 0 4px 12px rgba(0,0,0,0.15); /* カーソルを合わせた時の影 */
+  }
+
+  /* カード内の各パーツ */
+  .item img {
+    width: 100%;
+    height: 180px;
+    object-fit: cover;
+    flex-shrink: 0;
+  }
+  .item-body {
+    flex: 1;
+    overflow-y: auto;
+    padding: 0 .5rem;
+  }
+  .title {
+    font-size: .9rem;
+    margin: .5rem 0;
+    max-height: 2.4em;
+  }
+  .tags {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 4px;
+  }
+  .tag {
+    background: #ddd;
+    border-radius: 4px;
+    padding: 2px 6px;
+    font-size: .75rem;
+  }
+  .item-footer {
+    margin-top: auto;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: .5rem;
+    background: #fff;
+    gap: 0.5rem;
+    flex-shrink: 0;
+    min-height: 38px;
+  }
+
+  /* Good/Bad 評価ボタン */
+  .rating-buttons {
+    display: flex;
+    align-items: center;
+    gap: 4px;
+  }
+  .rating-btn {
+    padding: 2px 6px;
+    font-size: .8rem;
+    border: none;
+    border-radius: 4px;
+    background: #eee;
+    cursor: pointer;
+  }
+  .rating-btn.good.active {
+    background: #4caf50;
+    color: #fff;
+  }
+  .rating-btn.bad.active {
+    background: #f44336;
+    color: #fff;
+  }
+  .score-display {
+    visibility: hidden; /* ランキング以外では非表示 */
+    font-size: 0.9rem;
+    font-weight: bold;
+    color: #333;
+    margin-left: 0.5rem;
+  }
+  #rankingGrid .score-display {
+    visibility: visible; /* ランキングタブでのみ表示 */
+  }
+
+  /* カード上のアクションボタン（お気に入り、リスト追加など） */
+  .card-actions {
+    display: flex;
+    gap: 4px;
+  }
+  .card-actions button {
+    width: 32px;
+    height: 32px;
+    border-radius: 50%;
+    border: 1px solid rgba(0,0,0,0.1);
+    background-color: rgba(255, 255, 255, 0.8);
+    cursor: pointer;
+    font-size: 16px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: all 0.2s;
+  }
+  .card-actions button:hover {
+    background-color: white;
+    transform: scale(1.1);
+  }
+  .card-actions .favorite-btn.favorited { color: #e91e63; background-color: white; }
+  .card-actions .add-to-list-btn.in-list { color: #28a745; background-color: white; }
+  .card-actions .remove-from-list-btn { color: #f44336; }
+
+  /* カード上のアクションボタンをホバー時のみ表示 */
+  .item-footer .card-actions {
+    position: absolute;
+    top: 4px;
+    right: 4px;
+    z-index: 10;
+    opacity: 0;
+  }
+  .item:hover .item-footer .card-actions {
+    opacity: 1;
+  }
+
+  /* ページネーション */
+  .pagination {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: .5rem;
+    margin-top: 1rem;
+  }
+  .pagination button {
+    padding: .3rem .6rem;
+    font-size: .9rem;
+    border: 1px solid #ccc;
+    background: #fff;
+    cursor: pointer;
+  }
+  .pagination button:disabled {
+    opacity: .5;
+    cursor: default;
+  }
+  
+  /* ==========================================================================
+     7. ポップアップ・モーダル
+     ========================================================================== */
+
+  /* モーダルの背景 */
+  .overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: rgba(0, 0, 0, 0.6);
+    z-index: 1999;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+  .overlay.hidden {
+    display: none;
+  }
+
+  /* モーダルの本体 */
+  .modal {
+    width: 90%;
+    max-width: 600px;
+    background: #fff;
+    border-radius: 8px;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
+    display: flex;
+    flex-direction: column;
+    max-height: 80vh;
+  }
+  .modal-header {
+    font-weight: bold;
+    padding: 1rem;
+    border-bottom: 1px solid #ddd;
+  }
+  .modal-body {
+    flex: 1;
+    overflow-y: auto;
+    padding: 1rem;
+  }
+  .modal-footer {
+    display: flex;
+    justify-content: flex-end;
+    gap: 0.75rem;
+    padding: .75rem;
+    background: #f7f7f7;
+    border-top: 1px solid #ddd;
+  }
+  .modal-footer button {
+    padding: 0.6rem 1.2rem;
+    font-size: 0.9rem;
+    font-weight: 600;
+    border-radius: 6px;
+    border: none;
+    cursor: pointer;
+    transition: opacity 0.2s ease;
+  }
+  .modal-footer button:hover {
+    opacity: 0.85;
+  }
+  
+  /* 個別のモーダルボタンの色 */
+  #modal-close-btn, #tag-panel-reset {
+    background-color: #6c757d;
+    color: white;
+  }
+  #tag-panel-confirm {
+    background-color: #ff9800;
+    color: white;
+  }
+
+  /* タグ絞り込みモーダルの特別スタイル */
+  .tag-panel .modal-body { padding: 0; }
+  .tag-panel .tag-search-input { width: 100%; padding: .75rem; font-size: 1rem; border: none; border-bottom: 1px solid #ddd; }
+  .tag-panel .category-tabs { display: flex; flex-wrap: wrap; gap: .5rem; padding: .75rem; border-bottom: 1px solid #ddd; background: #f7f7f7; }
+  .tag-panel .category-tabs button { padding: .4rem .8rem; font-size: .8rem; border: 1px solid #ccc; border-radius: 1rem; background: #fff; cursor: pointer; }
+  .tag-panel .category-tabs button.active { background: #333; color: #fff; border-color: #333; }
+  .tag-panel .tag-list { padding: .75rem; display: grid; height: 30vh; overflow-y: auto; grid-template-columns: repeat(auto-fill, minmax(150px, 1fr)); gap: .5rem; align-content: start; }
+  .tag-panel .tag-list label { display: flex; align-items: center; gap: .5rem; margin-bottom: 0; font-size: .9rem; cursor: pointer; }
+  .tag-panel .tag-list input { margin: 0; }
+  #filter-mode-select-buttons { display: flex; gap: 0.5rem; margin-right: auto; }
+  #filter-mode-select-buttons button { padding: 0.4rem 0.8rem; font-size: 0.8rem; border-radius: 4px; background-color: #aaa; color: white; }
+  #filter-mode-select-buttons button.active { background-color: #28a745; }
+
+  /* お問い合わせフォームのスタイル */
+  .contact-form .form-group { margin-bottom: 1rem; }
+  .contact-form .form-group label { display: block; margin-bottom: 0.25rem; font-weight: bold; font-size: 0.9rem; }
+  .contact-form .form-group input, .contact-form .form-group textarea { width: 100%; padding: 0.6rem; border: 1px solid #ccc; border-radius: 4px; font-size: 1rem; }
+  .contact-form .form-group textarea { min-height: 120px; resize: vertical; }
+
+  /* 右下に表示される通知 */
+  .toast {
+    position: fixed;
+    bottom: 1rem;
+    right: 1rem;
+    background: rgba(0, 0, 0, .8);
+    color: #fff;
+    padding: .5rem 1rem;
+    border-radius: 4px;
+    opacity: 0;
+    transition: opacity .3s;
+    z-index: 3000;
+  }
+  .toast.show {
+    opacity: 1;
+  }
+  
+  /* 画像プレビューのポップアップ */
+  .image-preview-popup {
+    display: none;
+    position: fixed;
+    z-index: 4000;
+    pointer-events: none;
+    border: 2px solid #ccc;
+    box-shadow: 0 5px 15px rgba(0, 0, 0, 0.3);
+    max-width: 400px;
+    max-height: 90vh;
+    overflow: hidden;
+    border-radius: 4px;
+    background-color: #fff;
+    transition: opacity 0.1s;
+  }
+  .image-preview-popup img {
+    display: block;
+    width: 100%;
+    height: auto;
+  }
+  
+  /* リスト追加時のポップオーバー */
+  .add-to-list-popover {
+    position: absolute;
+    z-index: 100;
+    background-color: white;
+    border: 1px solid #ccc;
+    box-shadow: 0 2px 10px rgba(0, 0, 0, 0.2);
+    border-radius: 6px;
+    padding: .75rem;
+    width: 250px;
+  }
+  .add-to-list-popover ul { list-style: none; max-height: 150px; overflow-y: auto; margin-bottom: .75rem; }
+  .add-to-list-popover li label { display: block; padding: .25rem 0; cursor: pointer; display: flex; align-items: center; gap: .5rem; }
+  .add-to-list-popover .new-list-form { display: flex; gap: .5rem; border-top: 1px solid #eee; padding-top: .75rem; }
+  .add-to-list-popover .new-list-form input { flex-grow: 1; padding: .4rem; border: 1px solid #ccc; border-radius: 4px; }
+  .add-to-list-popover .new-list-form button { padding: 0 .8rem; background-color: #28a745; color: white; border: none; border-radius: 4px; cursor: pointer; }
+
+  /* ==========================================================================
+     8. マイリストページ
+     ========================================================================== */
+
+  #mylists-container {
+    display: flex;
+    gap: 1.5rem;
+    align-items: flex-start;
+    transition: all 0.3s ease;
+  }
+  .mylists-sidebar {
+    flex: 0 0 300px; /* サイドバーの幅を固定 */
+    transition: all 0.3s ease;
+  }
+  .mylists-content {
+    flex-grow: 1;
+    min-width: 0;
+  }
+  /* サイドバーが折りたたまれた時のスタイル */
+  #mylists-container.sidebar-collapsed .mylists-sidebar {
+    flex-basis: 0;
+    width: 0;
+    overflow: hidden;
+    padding: 0;
+    margin-left: -1.5rem;
+    opacity: 0;
+  }
+  #toggle-sidebar-btn {
+    background: none;
+    border: 1px solid #ccc;
+    border-radius: 4px;
+    cursor: pointer;
+    padding: 0.1rem 0.4rem;
+    font-size: 1em;
+    line-height: 1;
+    color: #555;
+  }
+  #toggle-sidebar-btn:hover { background: #eee; }
+  
+  .mylists-sidebar h3, .mylists-content h3 { margin-bottom: 1rem; }
+  .mylists-sidebar ul { list-style: none; }
+  .mylists-sidebar li { margin-bottom: .5rem; }
+  .mylists-sidebar .list-group-item {
+    width: 100%;
+    text-align: left;
+    padding: .6rem;
+    border: 1px solid #eee;
+    background: #fff;
+    cursor: pointer;
+    border-radius: 4px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+  }
+  .mylists-sidebar .list-group-item.active {
+    background-color: #333;
+    color: white;
+    border-color: #333;
+  }
+  .list-item-controls {
+    display: flex;
+    gap: 0.5rem;
+  }
+  .list-item-controls button {
+    background: none;
+    border: none;
+    font-size: 1rem;
+    cursor: pointer;
+    padding: 0 .2rem;
+    opacity: 0.5;
+  }
+  .list-group-item:hover .list-item-controls button { opacity: 1; }
+  
+  /* リスト名編集フォーム */
+  .list-edit-form {
+    display: flex;
+    width: 100%;
+    gap: 0.5rem;
+    padding: 0.6rem;
+    border: 1px solid #ccc;
+    border-radius: 4px;
+  }
+  .list-edit-form input { flex-grow: 1; border: 1px solid #999; padding: 0.2rem; }
+  .list-edit-form button { background: none; border: none; font-size: 1rem; cursor: pointer; }
+  
+  /* リスト作成・インポートエリア */
+  .list-actions { margin-top: 1rem; margin-bottom: 1rem; }
+  .list-actions .form-group { display: flex; gap: .5rem; margin-bottom: 0.5rem; }
+  .list-actions input { flex-grow: 1; padding: .5rem; }
+  .list-actions button { padding: .5rem; }
+  #share-id-display { user-select: all; background: #eee; padding: 0.5rem; border-radius: 4px; cursor: pointer; }
+  #share-id-display:hover { background: #ddd; }
+
+  /* ==========================================================================
+     9. レスポンシブデザイン（スマホ向けスタイル）
+     ========================================================================== */
+
+  /* PC表示では改行を無効にする */
+  br.mobile-only {
+    display: none;
+  }
+
+  /* 画面幅が768px以下の場合に適用 */
+  @media screen and (max-width: 768px) {
+    body {
+      font-size: 14px;
+      -webkit-text-size-adjust: 100%;
+    }
+    .container {
+      margin: 1rem auto;
+      padding: 0 0.75rem;
+    }
+    .site-header h1 {
+      font-size: 1.8rem;
+    }
+    br.mobile-only {
+      display: inline; /* スマホ表示でのみ改行を有効にする */
+    }
+    .section-header {
+      flex-direction: column;
+      align-items: flex-start;
+      gap: 0.5rem;
+    }
+    h2 {
+      font-size: 1.2rem;
+    }
+    hr {
+      margin: 1.5rem 0;
+    }
+    .controls {
+      flex-direction: column;
+      gap: 0.75rem;
+      align-items: stretch;
+    }
+    .controls input {
+      min-width: 0;
+      width: 100%;
+      padding: .75rem;
+      font-size: 1rem;
+    }
+    .controls button {
+      width: 100%;
+    }
+    .controls:has(#dlsiteUrl) {
+      flex-direction: row;
+      flex-wrap: nowrap;
+    }
+    .controls:has(#dlsiteUrl) #dlsiteUrl {
+      flex: 1;
+    }
+    .controls:has(#dlsiteUrl) #addBtn {
+      flex-shrink: 0;
+      width: auto;
+      padding: .75rem;
+    }
+    .filter-controls {
+      flex-direction: column;
+      gap: 0.75rem;
+      align-items: stretch;
+    }
+    .filter-controls button {
+      width: 100%;
+    }
+    .tabs {
+      position: relative;
+    }
+    .tab-content {
+      padding: 0.75rem;
+    }
+    .tabs-container {
+      overflow-x: auto;
+      white-space: nowrap;
+      -webkit-overflow-scrolling: touch;
+      padding-bottom: 8px;
+      border-bottom: 1px solid #ddd;
+    }
+    .tabs label {
+      padding: .6rem 1.1rem;
+      font-size: .9rem;
+      margin-right: 4px;
+    }
+    #tab-admin_manga:checked ~ .tabs-container label[for="tab-admin_manga"],
+    #tab-admin_game:checked ~ .tabs-container label[for="tab-admin_game"],
+    #tab-new:checked ~ .tabs-container label[for="tab-new"],
+    #tab-ranking:checked ~ .tabs-container label[for="tab-ranking"] {
+      background: #fff;
+      border: 1px solid #ddd;
+      border-bottom: 1px solid #fff;
+      position: relative;
+      top: 1px;
+    }
+    .grid {
+      grid-template-columns: repeat(2, 1fr);
+      gap: 0.75rem;
+    }
+    .item {
+      height: auto;
+      min-height: 0;
+    }
+    .item img {
+      height: 160px;
+    }
+    .title {
+      font-size: .8rem;
+      margin: .4rem 0;
+      max-height: 3.2em;
+    }
+    .tag {
+      font-size: .7rem;
+      padding: 2px 5px;
+    }
+    .item-footer {
+      padding: .4rem;
+      min-height: auto;
+    }
+    .rating-btn {
+      padding: 3px 7px;
+    }
+    .item-footer .card-actions {
+      position: static; /* ホバーではなく常に表示 */
+      opacity: 1;
+    }
+    .item-footer {
+      flex-direction: column;
+      align-items: stretch;
+      gap: 0.25rem;
+    }
+    .rating-buttons {
+      justify-content: flex-start;
+    }
+    .card-actions {
+      justify-content: flex-end;
+    }
+    .pagination {
+      gap: .25rem;
+    }
+    .pagination button,
+    .pagination span {
+      font-size: 0.85rem;
+    }
+    .pagination button {
+      padding: .4rem .6rem;
+    }
+    .modal {
+      width: 95vw;
+      max-height: 85vh;
+    }
+    .modal-body {
+      padding: 0.75rem;
+    }
+    .tag-panel .tag-list {
+      grid-template-columns: repeat(auto-fill, minmax(120px, 1fr));
+      height: 40vh;
+      gap: .75rem;
+    }
+    .tag-panel .category-tabs {
+      padding: 0.5rem;
+      gap: 0.25rem;
+    }
+    .tag-panel .category-tabs button {
+      font-size: 0.75rem;
+    }
+    .modal-footer {
+      flex-direction: column;
+      gap: 0.5rem;
+    }
+    #filter-mode-select-buttons {
+      order: -1;
+      width: 100%;
+      justify-content: center;
+      margin-right: 0;
+    }
+    .modal-footer button {
+      width: 100%;
+    }
+    .toast {
+      left: 1rem;
+      right: 1rem;
+      width: auto;
+      text-align: center;
+    }
+    .image-preview-popup {
+      display: none !important; /* スマホではプレビューを無効化 */
+    }
+    .main-nav {
+      overflow-x: auto;
+      white-space: nowrap;
+    }
+    #mylists-container {
+      flex-direction: column;
+    }
+    .mylists-sidebar {
+      width: 100%;
+      flex-basis: auto;
+      transition: max-height 0.3s ease-out;
+    }
+    #mylists-container.sidebar-collapsed .mylists-sidebar {
+      max-height: 0;
+      overflow: hidden;
+      padding-top: 0;
+      padding-bottom: 0;
+      margin-bottom: 0;
+      border: none;
+    }
+    #toggle-sidebar-btn {
+      display: block;
+    }
+  }
+</style>
 </head>
 <body>
     <div class="container">
         <header class="site-header">
-            <h1>DLsiteのおすすめ教えてくれ</h1>
+            <h1>DLsiteのおすすめ<br class="mobile-only">教えてくれ</h1>
             <p>当サイトで追加されたリンクは、アフィリエイトプログラムを利用している場合がございます。</p>
         </header>
 
@@ -610,7 +1337,7 @@
                     <h3 style="margin-top: 1rem; margin-bottom: 0.5rem;">⚠️ 注意事項</h3>
                     <ul style="list-style-position: inside; padding-left: 0.5rem; font-size: 0.9rem; line-height: 1.6;">
                         <li>作品情報の取得には外部の無料プロキシサービスを経由しています。そのため、アクセスが集中している時間帯にはタイムアウトや応答遅延が発生する場合があります。</li>
-                        <li>タグによる絞り込み機能は、自動タグ付与機能を未実装のため現在まともに機能していません。</li>
+                        <li>タグによる絞り込み機能は、自動タグ付与機能が未実装のため現在まともに機能していません。</li>
                         <li>本サイトは個人が運営しております。予告なくサービスを停止、あるいはデータを変更・削除する場合がございますので、あらかじめご了承ください。</li>
                         <li>掲載コンテンツの著作権は各権利者に帰属します。掲載内容に問題がある場合は「お問い合わせ」よりお知らせください。</li>
                         <li>一部のリンクにはアフィリエイトプログラムを利用しているものが含まれます。</li>

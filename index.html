@@ -1190,36 +1190,18 @@
         }
         
         function adjustPcGridHeight(gridElement, pageSize) {
-          // グリッド要素がなければ何もしない
-          if (!gridElement) return;
-
-          // PCかスマホかを画面幅で判定
-          const isMobile = window.innerWidth <= 768;
-
-          // ブラウザの描画タイミングに合わせて処理
-          requestAnimationFrame(() => {
-              const gridComputedStyle = window.getComputedStyle(gridElement);
-              // グリッドの列数を自動で取得 (PCでは可変、スマホでは通常2列)
-              const columnCount = gridComputedStyle.gridTemplateColumns.split(' ').length;
-              
-              if (columnCount > 0) {
-                  // PCとスマホで、計算に使うカードの高さを変える
-                  // PC用はCSSの height: 320px と合わせる
-                  // スマホ用はCSSの height: auto を考慮した「目安の高さ」を設定する
-                  const cardHeight = isMobile ? 260 : 320; 
-                  
-                  const rowGap = parseInt(gridComputedStyle.gap, 10) || (isMobile ? 12 : 16); // gapも画面サイズで変える
-                  
-                  // 表示件数から必要な行数を計算
-                  const rowCount = Math.ceil(pageSize / columnCount);
-                  
-                  // 必要な最小の高さを計算
-                  const minHeight = rowCount * cardHeight + (rowCount > 0 ? (rowCount - 1) * rowGap : 0);
-                  
-                  // グリッドの最小の高さをCSSとして設定
-                  gridElement.style.minHeight = `${minHeight}px`;
-              }
-          });
+            if (window.innerWidth <= 768 || !gridElement) { if (gridElement) gridElement.style.minHeight = 'auto'; return; }
+            requestAnimationFrame(() => {
+                const gridComputedStyle = window.getComputedStyle(gridElement);
+                const columnCount = gridComputedStyle.gridTemplateColumns.split(' ').length;
+                if (columnCount > 0) {
+                    const cardHeight = 320;
+                    const rowGap = parseInt(gridComputedStyle.gap, 10) || 16;
+                    const rowCount = Math.ceil(pageSize / columnCount);
+                    const minHeight = rowCount * cardHeight + (rowCount > 0 ? (rowCount - 1) * rowGap : 0);
+                    gridElement.style.minHeight = `${minHeight}px`;
+                }
+            });
         }
         
         function renderPage(type) {

@@ -922,13 +922,23 @@
     }
     /* 「リストに追加」ポップオーバーを画面中央に固定 */
     .add-to-list-popover {
-      position: fixed;
-      top: 50%;
-      left: 50%;
-      transform: translate(-50%, -50%);
       width: 90vw; /* 画面幅の90% */
       max-width: 300px; /* 最大幅は300pxに */
     }
+    /* リスト追加ポップオーバー専用の背景オーバーレイ */
+  .popover-overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: rgba(0, 0, 0, 0.6);
+    z-index: 2000; /* 他の要素より手前に表示 */
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 1rem;
+  }
   }
 </style>
 </head>
@@ -1434,48 +1444,86 @@
         }
         
         function openAddToListPopover(workId, button) {
-            if (activePopover) activePopover.remove();
-            const popover = document.createElement('div');
-            popover.className = 'add-to-list-popover';
-            activePopover = popover;
-            document.body.appendChild(popover);
+          if (activePopover) activePopover.remove(); // 既存のポップオーバーがあれば削除
+          
+          const isMobile = window.innerWidth <= 768;
 
-            let listHtml = '<ul>';
-            if (Object.keys(state.myLists).length > 0) {
-                for (const listId in state.myLists) {
-                    const list = state.myLists[listId];
-                    const isChecked = state.myListItems[listId]?.[workId] ? 'checked' : '';
-                    listHtml += `<li><label><input type="checkbox" data-list-id="${listId}" ${isChecked}> ${util.escapeHTML(list.name)}</label></li>`;
-                }
-            } else { listHtml += '<li>リストがありません</li>'; }
-            listHtml += '</ul>';
-            popover.innerHTML = `${listHtml} <form class="new-list-form"><input type="text" placeholder="新規リスト名" required><button type="submit">+</button></form>`;
-            
-            if (window.innerWidth > 768) {
-              const btnRect = button.getBoundingClientRect();
-              const popoverRect = popover.getBoundingClientRect();
-              let top = window.scrollY + btnRect.bottom + 5;
-              let left = window.scrollX + btnRect.right - popoverRect.width;
-              if (left < 0) { left = window.scrollX + btnRect.left; }
-              if (top + popoverRect.height > window.innerHeight + window.scrollY) { top = window.scrollY + btnRect.top - popoverRect.height - 5; }
-              popover.style.left = `${left}px`;
-              popover.style.top = `${top}px`;
+          // ポップオーバー本体を作成
+          const popover = document.createElement('div');
+          popover.className = 'add-to-list-popover';
+          
+          let listHtml = '<ul>';
+          if (Object.keys(state.myLists).length > 0) {
+            for (const listId in state.myLists) {
+              const list = state.myLists[listId];
+              const isChecked = state.myListItems[listId]?.[workId] ? 'checked' : '';
+              listHtml += `<li><label><input type="checkbox" data-list-id="${listId}" ${isChecked}> ${util.escapeHTML(list.name)}</label></li>`;
             }
+          } else {
+            listHtml += '<li>リストがありません</li>';
+          }
+          listHtml += '</ul>';
+          popover.innerHTML = `${listHtml} <form class="new-list-form"><input type="text" placeholder="新規リスト名" required><button type="submit">+</button></form>`;
+
+          // ポップオーバー内部のクリックで閉じないようにする
+          popover.addEventListener('click', e => e.stopPropagation());
+          
+          if (isMobile) {
+            // --- スマホの場合：オーバーレイを生成して中央に表示 ---
+            const overlay = document.createElement('div');
+            overlay.className = 'popover-overlay';
+            overlay.appendChild(popover); // ポップオーバーをオーバーレイの中に入れる
+            document.body.appendChild(overlay);
+            activePopover = overlay; // 閉じる対象はオーバーレイ全体
+
+            // オーバーレイ（背景）のクリックで閉じる
+            overlay.addEventListener('click', () => {
+              if (activePopover) {
+                activePopover.remove();
+                activePopover = null;
+              }
+            }, { once: true });
+
+          } else {
+            // --- PCの場合：これまで通りボタンの近くに表示 ---
+            document.body.appendChild(popover);
+            activePopover = popover; // 閉じる対象はポップオーバー自身
+
+            // 位置を計算して設定
+            const btnRect = button.getBoundingClientRect();
+            const popoverRect = popover.getBoundingClientRect();
+            let top = window.scrollY + btnRect.bottom + 5;
+            let left = window.scrollX + btnRect.right - popoverRect.width;
+            if (left < 0) { left = window.scrollX + btnRect.left; }
+            if (top + popoverRect.height > window.innerHeight + window.scrollY) { top = window.scrollY + btnRect.top - popoverRect.height - 5; }
+            popover.style.left = `${left}px`;
+            popover.style.top = `${top}px`;
+
+            // 画面のどこかをクリックしたら閉じる
+            setTimeout(() => document.addEventListener('click', () => {
+              if (activePopover && !activePopover.classList.contains('popover-overlay')) {
+                activePopover.remove();
+                activePopover = null;
+              }
+            }, { once: true }), 0);
+          }
+          
+          // ポップオーバー内部のイベントリスナーを設定（共通）
+          popover.querySelectorAll('input[type="checkbox"]').forEach(cb => cb.addEventListener('change', () => toggleWorkInList(workId, cb.dataset.listId, cb.checked)));
+          popover.querySelector('form').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const input = e.target.querySelector('input');
+            const newListId = await createNewList(input.value);
+            if (newListId) await toggleWorkInList(workId, newListId, true);
             
-            popover.addEventListener('click', e => e.stopPropagation());
-            popover.querySelectorAll('input[type="checkbox"]').forEach(cb => cb.addEventListener('change', () => toggleWorkInList(workId, cb.dataset.listId, cb.checked)));
-            popover.querySelector('form').addEventListener('submit', async (e) => {
-                e.preventDefault();
-                const input = e.target.querySelector('input');
-                const newListId = await createNewList(input.value);
-                if (newListId) await toggleWorkInList(workId, newListId, true);
-                if (activePopover) activePopover.remove();
-            });
-            
-            setTimeout(() => document.addEventListener('click', () => { if (activePopover) { activePopover.remove(); activePopover = null; } }, { once: true }), 0);
+            // 閉じる処理
+            if (activePopover) {
+              activePopover.remove();
+              activePopover = null;
+            }
+          });
         }
         
-        // ▼▼▼ この関数をまるごと置き換えてください ▼▼▼
         async function renderMyListsPage() { // asyncキーワードを追加
             dom.mylistsContainer.innerHTML = `<div class="mylists-sidebar"><h3>マイリスト一覧 (${Object.keys(state.myLists).length}/${CONSTANTS.LIST_LIMITS.MAX_LISTS})</h3><ul id="mylists-sidebar-list"></ul><div class="list-actions"><div class="form-group"><input type="text" id="new-list-name-main" placeholder="新規リスト名"><button id="create-list-btn-main">作成</button></div></div><hr><h3>リストをインポート</h3><div class="list-actions"><div class="form-group"><input type="text" id="import-list-id" placeholder="共有ID"><button id="import-list-btn">追加</button></div></div></div><div class="mylists-content"><h3 id="current-list-name">リストを選択してください</h3><div class="list-actions" id="current-list-actions" style="display:none;"><p>共有ID: <span id="share-id-display"></span></p></div><div id="current-list-grid" class="grid"></div></div>`;
             const listUl = dom.mylistsContainer.querySelector('#mylists-sidebar-list');

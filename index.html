@@ -1321,8 +1321,8 @@
           };
           
           // 最初へ & 前へ
-          container.appendChild(createButton('最初へ', 1, currentPage === 1));
-          container.appendChild(createButton('前へ', currentPage - 1, currentPage === 1));
+          container.appendChild(createButton('<<', 1, currentPage === 1));
+          container.appendChild(createButton('<', currentPage - 1, currentPage === 1));
 
           // ページ番号ボタンのロジック
           let startPage, endPage;
@@ -1345,8 +1345,8 @@
           }
 
           // 次へ & 最後へ
-          container.appendChild(createButton('次へ', currentPage + 1, currentPage === totalPages));
-          container.appendChild(createButton('最後へ', totalPages, currentPage === totalPages));
+          container.appendChild(createButton('>', currentPage + 1, currentPage === totalPages));
+          container.appendChild(createButton('>>', totalPages, currentPage === totalPages));
           
           // クリックイベント
           container.addEventListener('click', (e) => {

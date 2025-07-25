@@ -920,6 +920,15 @@
     #toggle-sidebar-btn {
       display: block;
     }
+    /* 「リストに追加」ポップオーバーを画面中央に固定 */
+    .add-to-list-popover {
+      position: fixed;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+      width: 90vw; /* 画面幅の90% */
+      max-width: 300px; /* 最大幅は300pxに */
+    }
   }
 </style>
 </head>
@@ -959,13 +968,13 @@
                     <input type="radio" id="tab-admin_manga" name="admin_tab" checked><input type="radio" id="tab-admin_game" name="admin_tab">
                     <div class="tabs-container"><label for="tab-admin_manga">漫画</label><label for="tab-admin_game">ゲーム</label></div>
                     <section id="admin_manga" class="tab-content">
-                        <div class="grid" id="adminMangaGrid"></div>
-                        <div class="pagination"><button id="adminMangaPrev" disabled>前へ</button><span id="adminMangaCurrent">1</span>/<span id="adminMangaTotal">1</span><button id="adminMangaNext" disabled>次へ</button></div>
+                      <div class="grid" id="adminMangaGrid"></div>
+                      <div class="pagination" id="adminMangaPagination"></div>
                     </section>
                     <section id="admin_game" class="tab-content">
-                        <div class="grid" id="adminGameGrid"></div>
-                        <div class="pagination"><button id="adminGamePrev" disabled>前へ</button><span id="adminGameCurrent">1</span>/<span id="adminGameTotal">1</span><button id="adminGameNext" disabled>次へ</button></div>
-                    </section>
+                      <div class="grid" id="adminGameGrid"></div>
+                      <div class="pagination" id="adminGamePagination"></div>
+                  </section>
                 </div>
             </div>
             <hr>
@@ -980,12 +989,12 @@
                     <div class="tabs-container"><label for="tab-new">新着</label><label for="tab-ranking">ランキング</label></div>
                     <section id="new" class="tab-content">
                         <div class="grid" id="newGrid"></div>
-                        <div class="pagination"><button id="newPrev" disabled>前へ</button><span id="newCurrent">1</span>/<span id="newTotal">1</span><button id="newNext" disabled>次へ</button></div>
+                        <div class="pagination" id="newPagination"></div>
                     </section>
                     <section id="ranking" class="tab-content">
-                        <div class="grid" id="rankingGrid"></div>
-                        <div class="pagination"><button id="rankPrev" disabled>前へ</button><span id="rankCurrent">1</span>/<span id="rankTotal">1</span><button id="rankNext" disabled>次へ</button></div>
-                    </section>
+                      <div class="grid" id="rankingGrid"></div>
+                      <div class="pagination" id="rankingPagination"></div>
+                  </section>
                 </div>
             </div>
         </div>
@@ -1001,10 +1010,8 @@
                 <button class="resetFilterBtn hidden">絞り込み解除</button>
             </div>
             <div class="grid" id="favoritesGrid"></div>
-            <div class="pagination">
-                <button id="favPrev" disabled>前へ</button>
-                <span id="favCurrent">1</span>/<span id="favTotal">1</span>
-                <button id="favNext" disabled>次へ</button>
+            <div id="view-favorites" class="view-container">
+              <div class="pagination" id="favoritesPagination"></div>
             </div>
         </div>
         <div id="view-mylists" class="view-container">
@@ -1193,15 +1200,21 @@
             let pageSize, sortedIds, context, source;
 
             if (isAdminSection) {
-                pageSize = state.pageSize.admin; source = state.adminPicks;
-                const genre = type.split('_')[1]; sortedIds = state.sortedAdminIds[genre] || [];
-                context = 'admin';
+              pageSize = state.pageSize.admin;
+              source = state.adminPicks;
+              const genre = type.split('_')[1];
+              sortedIds = state.sortedAdminIds[genre] || [];
+              context = 'admin';
             } else if (isFavoritesSection) {
-                pageSize = state.pageSize.favorites; source = {...state.works, ...state.adminPicks};
-                sortedIds = state.sortedWorkIds.favorites || []; context = 'favorites';
+              pageSize = state.pageSize.favorites;
+              source = { ...state.works, ...state.adminPicks };
+              sortedIds = state.sortedWorkIds.favorites || [];
+              context = 'favorites';
             } else {
-                pageSize = state.pageSize.user; source = state.works;
-                sortedIds = state.sortedWorkIds[type] || []; context = 'user';
+              pageSize = state.pageSize.user;
+              source = state.works;
+              sortedIds = state.sortedWorkIds[type] || [];
+              context = 'user';
             }
 
             let filteredIds = [...sortedIds];
@@ -1230,20 +1243,37 @@
             const viewContainer = grid.closest('.view-container');
             
             const pagination = dom.paginations[type];
-            let currentPage = state.currentPage[type];
             const totalPages = util.calculateTotalPages(filteredIds.length, pageSize);
-            if (currentPage > totalPages) currentPage = state.currentPage[type] = totalPages;
-            if (pagination) {
-                pagination.current.textContent = currentPage; pagination.total.textContent = totalPages;
-                pagination.prev.disabled = currentPage <= 1; pagination.next.disabled = currentPage >= totalPages;
+            let currentPage = state.currentPage[type];
+            if (currentPage > totalPages) {
+                currentPage = state.currentPage[type] = totalPages;
+            }
+            
+            // 新しいページネーションを描画
+            let paginationContainerId = '';
+            if (isAdminSection) {
+                paginationContainerId = type === 'admin_manga' ? 'adminMangaPagination' : 'adminGamePagination';
+            } else if (isFavoritesSection) {
+                paginationContainerId = 'favoritesPagination';
+            } else {
+                paginationContainerId = type === 'new' ? 'newPagination' : 'rankingPagination';
             }
 
+            renderPaginationButtons(paginationContainerId, currentPage, totalPages, (newPage) => {
+                state.currentPage[type] = newPage;
+                renderPage(type);
+            });
+            
             const startIndex = (currentPage - 1) * pageSize;
             const endIndex = startIndex + pageSize;
             const pageIds = filteredIds.slice(startIndex, endIndex);
 
             grid.innerHTML = "";
-            pageIds.forEach(id => { if (source[id]) { grid.appendChild(makeCard(id, context)); } });
+            pageIds.forEach(id => {
+                if (source[id]) {
+                    grid.appendChild(makeCard(id, context));
+                }
+            });
             
             adjustPcGridHeight(grid, pageSize);
 
@@ -1263,6 +1293,60 @@
                     }
                 }
             }
+          }
+
+        function renderPaginationButtons(containerId, currentPage, totalPages, onPageClick) {
+          const container = document.getElementById(containerId);
+          if (!container) return;
+          container.innerHTML = '';
+
+          // ボタンを生成するヘルパー関数
+          const createButton = (text, page, isDisabled = false, isCurrent = false) => {
+            const btn = document.createElement('button');
+            btn.textContent = text;
+            btn.dataset.page = page;
+            if (isDisabled) btn.disabled = true;
+            if (isCurrent) btn.classList.add('active'); // CSSで .pagination button.active { background:#333; color:white; } などを追加すると見やすい
+            return btn;
+          };
+          
+          // 最初へ & 前へ
+          container.appendChild(createButton('最初へ', 1, currentPage === 1));
+          container.appendChild(createButton('前へ', currentPage - 1, currentPage === 1));
+
+          // ページ番号ボタンのロジック
+          let startPage, endPage;
+          if (totalPages <= 5) {
+            startPage = 1;
+            endPage = totalPages;
+          } else if (currentPage <= 3) {
+            startPage = 1;
+            endPage = 5;
+          } else if (currentPage > totalPages - 3) {
+            startPage = totalPages - 4;
+            endPage = totalPages;
+          } else {
+            startPage = currentPage - 2;
+            endPage = currentPage + 2;
+          }
+
+          for (let i = startPage; i <= endPage; i++) {
+            container.appendChild(createButton(i, i, false, i === currentPage));
+          }
+
+          // 次へ & 最後へ
+          container.appendChild(createButton('次へ', currentPage + 1, currentPage === totalPages));
+          container.appendChild(createButton('最後へ', totalPages, currentPage === totalPages));
+          
+          // クリックイベント
+          container.addEventListener('click', (e) => {
+            if (e.target.tagName === 'BUTTON' && e.target.dataset.page) {
+              const newPage = parseInt(e.target.dataset.page, 10);
+              if (newPage !== currentPage) {
+                onPageClick(newPage);
+              }
+            }
+          });
         }
         
         function openTagFilterModal() {
@@ -1366,15 +1450,17 @@
             } else { listHtml += '<li>リストがありません</li>'; }
             listHtml += '</ul>';
             popover.innerHTML = `${listHtml} <form class="new-list-form"><input type="text" placeholder="新規リスト名" required><button type="submit">+</button></form>`;
-
-            const btnRect = button.getBoundingClientRect();
-            const popoverRect = popover.getBoundingClientRect();
-            let top = window.scrollY + btnRect.bottom + 5;
-            let left = window.scrollX + btnRect.right - popoverRect.width;
-            if (left < 0) { left = window.scrollX + btnRect.left; }
-            if (top + popoverRect.height > window.innerHeight + window.scrollY) { top = window.scrollY + btnRect.top - popoverRect.height - 5; }
-            popover.style.left = `${left}px`;
-            popover.style.top = `${top}px`;
+            
+            if (window.innerWidth > 768) {
+              const btnRect = button.getBoundingClientRect();
+              const popoverRect = popover.getBoundingClientRect();
+              let top = window.scrollY + btnRect.bottom + 5;
+              let left = window.scrollX + btnRect.right - popoverRect.width;
+              if (left < 0) { left = window.scrollX + btnRect.left; }
+              if (top + popoverRect.height > window.innerHeight + window.scrollY) { top = window.scrollY + btnRect.top - popoverRect.height - 5; }
+              popover.style.left = `${left}px`;
+              popover.style.top = `${top}px`;
+            }
             
             popover.addEventListener('click', e => e.stopPropagation());
             popover.querySelectorAll('input[type="checkbox"]').forEach(cb => cb.addEventListener('change', () => toggleWorkInList(workId, cb.dataset.listId, cb.checked)));
@@ -1867,24 +1953,6 @@
             dom.nav.mylists.addEventListener('click', () => showView('mylists'));
             dom.importPublicListBtn.addEventListener('click', (e) => importList(e.currentTarget.dataset.listId));
             document.getElementById('addBtn').addEventListener("click", () => addWork(dom.urlInput.value.trim()));
-            Object.keys(dom.paginations).forEach(type => {
-                const pagination = dom.paginations[type];
-                if (!pagination) return;
-                pagination.prev.addEventListener('click', () => { if (state.currentPage[type] > 1) { state.currentPage[type]--; renderPage(type); } });
-                pagination.next.addEventListener('click', () => {
-                    const isAdminSection = type.startsWith('admin_');
-                    const isFavoritesSection = type === 'favorites';
-                    let sortedIds;
-                    if(isAdminSection) sortedIds = state.sortedAdminIds[type.split('_')[1]];
-                    else if(isFavoritesSection) sortedIds = state.sortedWorkIds.favorites;
-                    else sortedIds = state.sortedWorkIds[type];
-                    
-                    const pageSizeKey = isAdminSection ? 'admin' : (isFavoritesSection ? 'favorites' : 'user');
-                    const pageSize = state.pageSize[pageSizeKey];
-                    const totalPages = util.calculateTotalPages(sortedIds.length, pageSize);
-                    if (state.currentPage[type] < totalPages) { state.currentPage[type]++; renderPage(type); }
-                });
-            });
             dom.pageSizeSelectors.admin.addEventListener('change', (e) => { state.pageSize.admin = parseInt(e.target.value, 10); localStorage.setItem('pageSizeAdmin', state.pageSize.admin); renderPage('admin_manga'); renderPage('admin_game'); });
             dom.pageSizeSelectors.user.addEventListener('change', (e) => { state.pageSize.user = parseInt(e.target.value, 10); localStorage.setItem('pageSizeUser', state.pageSize.user); renderPage('new'); renderPage('ranking'); });
             dom.pageSizeSelectors.favorites.addEventListener('change', (e) => { state.pageSize.favorites = parseInt(e.target.value, 10); localStorage.setItem('pageSizeFavorites', state.pageSize.favorites); renderPage('favorites'); });

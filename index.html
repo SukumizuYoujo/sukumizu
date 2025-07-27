@@ -1714,55 +1714,34 @@
             catch (error) { util.showToast(`送信に失敗しました: ${error.message}`); btn.disabled = false; btn.textContent = '送信'; }
         }
         
+        // --- データベース操作 & ロジック ---
         async function addWork(url) {
-        const originalUrl = url.trim();
-        if (!originalUrl.includes("dlsite.com")) {
-          return util.showToast("有効なDLsiteのURLを入力してください");
+            const originalUrl = url.trim();
+            if (!originalUrl.includes("dlsite.com")) {
+                return util.showToast("有効なDLsiteのURLを入力してください");
+            }
+            
+            const btn = document.getElementById('addBtn');
+            const input = dom.urlInput;
+            btn.disabled = true;
+            btn.classList.add('loading');
+
+            // Cloud Functionを呼び出す
+            const addWorkFromUrl = httpsCallable(functions, 'addWorkFromUrl');
+            
+            try {
+                const result = await addWorkFromUrl({ url: originalUrl });
+                util.showToast(result.data.message);
+                input.value = "";
+            } catch (error) {
+                // HttpsErrorの場合、error.messageにサーバー側で設定したメッセージが入る
+                util.showToast(`エラー: ${error.message}`);
+                console.error(error);
+            } finally {
+                btn.disabled = false;
+                btn.classList.remove('loading');
+            }
         }
-
-        const functionUrl = "https://addworkfromurl-vubh7ebq4a-uc.a.run.app"; // 例: https://us-central1-dlsite-share.cloudfunctions.net/addWorkFromUrl
-
-        const btn = document.getElementById('addBtn');
-        const input = dom.urlInput;
-        btn.disabled = true;
-        btn.classList.add('loading');
-
-        try {
-          // httpsCallableの代わりに、ブラウザ標準のfetchを使用
-          const response = await fetch(functionUrl, {
-            method: 'POST',
-            headers: {
-              'Content-Type': 'application/json',
-            },
-            // データを { data: { ... } } の形式で送信
-            body: JSON.stringify({
-              data: {
-                url: originalUrl
-              }
-            }),
-          });
-
-          // レスポンスのJSONを解析
-          const result = await response.json();
-          
-          // response.ok でHTTPステータスが200番台かチェック
-          if (!response.ok) {
-            // エラーの場合は、result.error にメッセージが入っている
-            throw new Error(result.error || '不明なエラーが発生しました。');
-          }
-
-          // 成功した場合、result.data にデータが入っている
-          util.showToast(result.data.message);
-          input.value = "";
-
-        } catch (error) {
-          util.showToast(`エラー: ${error.message}`);
-          console.error(error);
-        } finally {
-          btn.disabled = false;
-          btn.classList.remove('loading');
-        }
-      }
         
         async function handleVote(workId, btn) {
             const score = Number(btn.dataset.score);

@@ -342,26 +342,45 @@
     object-fit: cover;
     flex-shrink: 0;
   }
+  /* タイトルとタグをまとめる親要素 */
   .item-body {
     flex: 1;
+    /* この要素でスクロールを管理 */
     overflow-y: auto;
-    padding: 0 .5rem;
+    padding: 0 .75rem .5rem .75rem;
   }
+
+  /* タイトル */
   .title {
     font-size: .9rem;
-    margin: .5rem 0;
-    max-height: 2.4em;
+    font-weight: bold;
+    /* 高さ制限とスクロールを削除 */
+    max-height: none;
+    overflow-y: visible;
+    /* タグとの間に余白を設定 */
+    margin: .75rem 0;
+    cursor: pointer;
   }
+
+  /* タグ全体のコンテナ */
   .tags {
     display: flex;
     flex-wrap: wrap;
-    gap: 4px;
+    gap: 6px;
+    /* 高さ制限とスクロールを削除 */
+    max-height: none;
+    overflow-y: visible;
   }
+
+  /* タグの見た目 */
   .tag {
-    background: #ddd;
+    background: #e0e0e0;
     border-radius: 4px;
-    padding: 2px 6px;
+    padding: 4px 8px; 
     font-size: .75rem;
+    line-height: 1.4; 
+    display: inline-block; 
+    margin-bottom: 4px;
   }
   .item-footer {
     margin-top: auto;
@@ -939,7 +958,46 @@
     justify-content: center;
     padding: 1rem;
   }
+
+
+
+  /* 詳細情報ポップアップ */
+  #details-popup {
+    display: none; /* 通常は非表示 */
+    position: absolute; /* マウス位置に追従させる */
+    z-index: 5000; /* 他の要素より手前に表示 */
+    background-color: #fff;
+    border: 1px solid #ccc;
+    border-radius: 6px;
+    box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+    padding: 1rem;
+    max-width: 350px;
+    pointer-events: none; /* ポップアップ自体がマウスイベントの邪魔をしないように */
+    transition: opacity 0.1s ease-in-out;
   }
+
+  /* ポップアップ内のタイトル */
+  #details-popup h4 {
+    font-size: 1rem;
+    margin-top: 0;
+    margin-bottom: 0.5rem;
+  }
+
+  /* ポップアップ内のタグ一覧 */
+  #details-popup .popup-tags {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 6px;
+  }
+
+  /* ポップアップ内のタグ */
+  #details-popup .popup-tag {
+    background-color: #e0e0e0;
+    padding: 3px 7px;
+    border-radius: 4px;
+    font-size: 0.8rem;
+  }
+}
 </style>
 </head>
 <body>
@@ -1046,12 +1104,14 @@
     <div id="modalOverlay" class="overlay hidden"><div id="modalContent" class="modal"></div></div>
     <div id="toast" class="toast"></div>
     <div id="imagePreviewPopup" class="image-preview-popup"></div>
+    <div id="details-popup"></div>
 
     <script type="module">
         // --- モジュールのインポート ---
         import { initializeApp } from "https://www.gstatic.com/firebasejs/11.10.0/firebase-app.js";
         import { getDatabase, ref, query, onValue, push, set, remove, serverTimestamp, get, child, update } from "https://www.gstatic.com/firebasejs/11.10.0/firebase-database.js";
         import { getAuth, GoogleAuthProvider, signInWithPopup, signOut, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/11.10.0/firebase-auth.js";
+        import { getFunctions, httpsCallable } from "https://www.gstatic.com/firebasejs/11.10.0/firebase-functions.js";
 
         // --- 定数定義 ---
         const CONSTANTS = {
@@ -1135,6 +1195,7 @@
         const firebaseApp = initializeApp(CONSTANTS.FIREBASE_CONFIG);
         const db = getDatabase(firebaseApp);
         const auth = getAuth(firebaseApp);
+        const functions = getFunctions(firebaseApp, "asia-northeast1"); // リージョンを指定
         let activePopover = null;
 
         // --- UI描画関連 ---
@@ -1655,82 +1716,53 @@
         
         async function addWork(url) {
         const originalUrl = url.trim();
-        if (!originalUrl.includes("dlsite.com")) return util.showToast("有効なDLsiteのURLを入力してください");
-        
-        const workIdMatch = originalUrl.match(/(RJ|VJ|BJ)\d{6,}/i);
-        if (!workIdMatch) {
-            return util.showToast("URLから有効な作品IDが見つかりませんでした。");
+        if (!originalUrl.includes("dlsite.com")) {
+          return util.showToast("有効なDLsiteのURLを入力してください");
         }
-        const workId = workIdMatch[0].toUpperCase();
-        
-        const workRef = ref(db, `${CONSTANTS.DB_PATHS.WORKS}/${workId}`);
-        
-        const workSnapshot = await get(workRef);
-        if (workSnapshot.exists()) {
-            return util.showToast("この作品は既に追加されています");
-        }
+
+        const functionUrl = "https://addworkfromurl-vubh7ebq4a-uc.a.run.app"; // 例: https://us-central1-dlsite-share.cloudfunctions.net/addWorkFromUrl
 
         const btn = document.getElementById('addBtn');
         const input = dom.urlInput;
         btn.disabled = true;
         btn.classList.add('loading');
-        
-        try {
-            const proxyUrl = `https://api.allorigins.win/raw?url=${encodeURIComponent(originalUrl)}`;
-            const response = await fetch(proxyUrl, { signal: AbortSignal.timeout(20000) });
-            if (!response.ok) throw new Error(`作品情報の取得に失敗 (${response.status})`);
-            
-            const html = await response.text();
-            const doc = new DOMParser().parseFromString(html, "text/html");
-            const title = doc.querySelector('meta[property="og:title"]')?.content || "";
-            const coverUrl = doc.querySelector('meta[property="og:image"]')?.content || "";
-            if (!title || !coverUrl) throw new Error("タイトル・画像の取得に失敗");
-            
-            const affiliateUrl = `https://dlaf.jp/maniax/dlaf/=/t/n/link/work/aid/${CONSTANTS.DL_AFFILIATE_ID}/id/${workId}.html`;
-            let workType = 'unknown';
-            let extractedTagNames = [];
-            const jsonLdElement = doc.querySelector('script[type="application/ld+json"]');
-            if (jsonLdElement) {
-                try {
-                    const data = JSON.parse(jsonLdElement.textContent);
-                    workType = data["@type"] || 'unknown';
-                    if (data.keywords) {
-                        extractedTagNames = data.keywords.split(',').map(k => k.trim());
-                    }
-                } catch (e) {
-                    console.error("JSON-LD parse error:", e)
-                }
-            }
-            
-            const matchedTags = {};
-            [...new Set(extractedTagNames)].filter(Boolean).forEach(tagName => {
-                if (state.tagNameToDataMap.has(tagName)) {
-                    const foundTag = state.tagNameToDataMap.get(tagName);
-                    matchedTags[foundTag.id] = foundTag.name;
-                }
-            });
-            
-            const newWorkData = {
-                title: title.replace(/\[DLsite.*\]/, '').trim(),
-                coverUrl,
-                pageUrl: affiliateUrl,
-                workType,
-                timestamp: serverTimestamp(),
-                tags: matchedTags,
-                votes: {}
-            };
 
-            await set(workRef, newWorkData);
-            
-            util.showToast(`作品を追加しました`);
-            input.value = "";
-        } catch (err) {
-            util.showToast(`エラー: ${err.message}`);
+        try {
+          // httpsCallableの代わりに、ブラウザ標準のfetchを使用
+          const response = await fetch(functionUrl, {
+            method: 'POST',
+            headers: {
+              'Content-Type': 'application/json',
+            },
+            // データを { data: { ... } } の形式で送信
+            body: JSON.stringify({
+              data: {
+                url: originalUrl
+              }
+            }),
+          });
+
+          // レスポンスのJSONを解析
+          const result = await response.json();
+          
+          // response.ok でHTTPステータスが200番台かチェック
+          if (!response.ok) {
+            // エラーの場合は、result.error にメッセージが入っている
+            throw new Error(result.error || '不明なエラーが発生しました。');
+          }
+
+          // 成功した場合、result.data にデータが入っている
+          util.showToast(result.data.message);
+          input.value = "";
+
+        } catch (error) {
+          util.showToast(`エラー: ${error.message}`);
+          console.error(error);
         } finally {
-            btn.disabled = false;
-            btn.classList.remove('loading');
+          btn.disabled = false;
+          btn.classList.remove('loading');
         }
-    }
+      }
         
         async function handleVote(workId, btn) {
             const score = Number(btn.dataset.score);
@@ -2066,38 +2098,39 @@
             else { showView('main'); }
         }
         
-        function main() {
-            ['pageSizeAdmin', 'pageSizeUser', 'pageSizeFavorites'].forEach(key => {
-                const savedSize = localStorage.getItem(key);
-                if (savedSize) {
-                    const type = key.replace('pageSize', '').toLowerCase();
-                    state.pageSize[type] = parseInt(savedSize, 10);
-                }
-            });
-            state.sectionsCollapsed.admin = localStorage.getItem('adminSectionCollapsed') === 'true';
-            state.sectionsCollapsed.user = localStorage.getItem('userSectionCollapsed') === 'true';
-            if (localStorage.getItem('mosaicActive') === 'true') {
-                state.mosaicActive = true; document.body.classList.add('mosaic-on');
-                document.getElementById('mosaicToggleBtn').textContent = 'モザイク OFF';
-            }
+      function main() {
+          ['pageSizeAdmin', 'pageSizeUser', 'pageSizeFavorites'].forEach(key => {
+              const savedSize = localStorage.getItem(key);
+              if (savedSize) {
+                  const type = key.replace('pageSize', '').toLowerCase();
+                  state.pageSize[type] = parseInt(savedSize, 10);
+              }
+          });
+          state.sectionsCollapsed.admin = localStorage.getItem('adminSectionCollapsed') === 'true';
+          state.sectionsCollapsed.user = localStorage.getItem('userSectionCollapsed') === 'true';
+          if (localStorage.getItem('mosaicActive') === 'true') {
+              state.mosaicActive = true; document.body.classList.add('mosaic-on');
+              document.getElementById('mosaicToggleBtn').textContent = 'モザイク OFF';
+          }
             
-            initializeListeners();
+          initializeListeners();
 
-            onAuthStateChanged(auth, (user) => {
-                updateUIforAuthState(user);
-                if (user) {
-                    subscribeUserData(user);
-                } else {
-                    unsubscribeUserData();
-                }
-                handleUrlBasedView();
-            });
+          onAuthStateChanged(auth, (user) => {
+              updateUIforAuthState(user);
+              if (user) {
+                  subscribeUserData(user);
+              } else {
+                  unsubscribeUserData();
+              }
+              handleUrlBasedView();
+          });
 
-            state.clientId = util.getClientId();
-            initializePageSizeSelectors();
-            setupCollapsers();
-            setupEventListeners();
-            setupImagePreviewListeners();
+          state.clientId = util.getClientId();
+          initializePageSizeSelectors();
+          setupCollapsers();
+          setupEventListeners();
+          setupImagePreviewListeners();
+          initializeDetailsPopup();
         }
         
         main();

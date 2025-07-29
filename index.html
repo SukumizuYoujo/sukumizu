@@ -1760,6 +1760,7 @@
                 return util.showToast("有効なDLsiteのURLを入力してください");
             }
 
+            // ★★★重要：Firebaseコンソールで確認した、あなたの関数の正しいURLに置き換えてください★★★
             const functionUrl = "https://addworkfromurl-vubh7ebq4a-uc.a.run.app"; // 例: https://us-central1-dlsite-share.cloudfunctions.net/addWorkFromUrl
 
             const btn = document.getElementById('addBtn');
@@ -2073,6 +2074,20 @@
             document.getElementById('toggle-sidebar-btn').addEventListener('click', (e) => {
                 const isCollapsed = dom.mylistsContainer.classList.toggle('sidebar-collapsed');
                 e.currentTarget.textContent = isCollapsed ? '▶' : '◀';
+            });
+            // タブ切り替え時にグリッドの高さを再計算するリスナー
+            document.querySelectorAll('.tabs input[type="radio"]').forEach(radio => {
+                radio.addEventListener('change', () => {
+                    // チェックされたタブのIDから、対応するグリッド要素を探す
+                    const activeTabId = radio.id.replace('tab-', ''); // 例: "admin_manga"
+                    const grid = dom.grids[activeTabId];
+                    if (grid) {
+                        // 対応するpageSizeを取得
+                        const pageSize = activeTabId.startsWith('admin_') ? state.pageSize.admin : state.pageSize.user;
+                        // 高さの再計算を実行
+                        adjustPcGridHeight(grid, pageSize);
+                    }
+                });
             });
         }
         

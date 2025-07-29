@@ -1530,6 +1530,8 @@
                     <hr>
                     <h3 style="margin-top: 1rem; margin-bottom: 0.5rem;">⚠️ 注意事項</h3>
                     <ul style="list-style-position: inside; padding-left: 0.5rem; font-size: 0.9rem; line-height: 1.6;">
+                        <li>作品情報の取得には外部の無料プロキシサービスを経由しています。そのため、アクセスが集中している時間帯にはタイムアウトや応答遅延が発生する場合があります。</li>
+                        <li>タグによる絞り込み機能は、自動タグ付与機能が未実装のため現在まともに機能していません。</li>
                         <li>本サイトは個人が運営しております。予告なくサービスを停止、あるいはデータを変更・削除する場合がございますので、あらかじめご了承ください。</li>
                         <li>掲載コンテンツの著作権は各権利者に帰属します。掲載内容に問題がある場合は「お問い合わせ」よりお知らせください。</li>
                         <li>一部のリンクにはアフィリエイトプログラムを利用しているものが含まれます。</li>
@@ -1757,21 +1759,31 @@
             if (!originalUrl.includes("dlsite.com")) {
                 return util.showToast("有効なDLsiteのURLを入力してください");
             }
-            
+
+            // ★★★重要：Firebaseコンソールで確認した、あなたの関数の正しいURLに置き換えてください★★★
+            const functionUrl = "https://addworkfromurl-vubh7ebq4a-uc.a.run.app"; // 例: https://us-central1-dlsite-share.cloudfunctions.net/addWorkFromUrl
+
             const btn = document.getElementById('addBtn');
             const input = dom.urlInput;
             btn.disabled = true;
             btn.classList.add('loading');
-        
-            // Cloud Functionを呼び出す
-            const addWorkFromUrl = httpsCallable(functions, 'addWorkFromUrl');
-            
+
             try {
-                const result = await addWorkFromUrl({ url: originalUrl });
+                const response = await fetch(functionUrl, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ data: { url: originalUrl } }),
+                });
+
+                const result = await response.json();
+                
+                if (!response.ok) {
+                    throw new Error(result.error || '不明なエラーが発生しました。');
+                }
+
                 util.showToast(result.data.message);
                 input.value = "";
             } catch (error) {
-                // HttpsErrorの場合、error.messageにサーバー側で設定したメッセージが入る
                 util.showToast(`エラー: ${error.message}`);
                 console.error(error);
             } finally {

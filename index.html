@@ -88,6 +88,42 @@
   body.mosaic-on .item img:hover {
     filter: blur(0);
   }
+  /* 詳細情報ポップアップ */
+  #details-popup {
+    display: none; /* 通常は非表示 */
+    position: absolute; /* マウス位置に追従させる */
+    z-index: 5000; /* 他の要素より手前に表示 */
+    background-color: #fff;
+    border: 1px solid #ccc;
+    border-radius: 6px;
+    box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+    padding: 1rem;
+    max-width: 350px;
+    pointer-events: none; /* ポップアップ自体がマウスイベントの邪魔をしないように */
+    transition: opacity 0.1s ease-in-out;
+  }
+
+  /* ポップアップ内のタイトル */
+  #details-popup h4 {
+    font-size: 1rem;
+    margin-top: 0;
+    margin-bottom: 0.5rem;
+  }
+
+  /* ポップアップ内のタグ一覧 */
+  #details-popup .popup-tags {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 6px;
+  }
+
+  /* ポップアップ内のタグ */
+  #details-popup .popup-tag {
+    background-color: #e0e0e0;
+    padding: 3px 7px;
+    border-radius: 4px;
+    font-size: 0.8rem;
+  }
 
   /* ==========================================================================
      3. ヘッダーとナビゲーション
@@ -828,20 +864,23 @@
       gap: 0.75rem;
     }
     .item {
-      height: auto;
-      min-height: 0;
+      display: flex;
+      flex-direction: column;
+      height: 320px; /* ★高さを微調整 */
+      min-height: 320px;
     }
     .item img {
       height: 160px;
     }
     .title {
       font-size: .8rem;
-      margin: .4rem 0;
-      max-height: 3.2em;
+      margin: 0 0 .5rem 0;
+      flex-shrink: 0; 
     }
-    .tag {
-      font-size: .7rem;
-      padding: 2px 5px;
+    .tags {
+      flex: 1;
+      overflow-y: auto; 
+      line-height: 1.5; 
     }
     .item-footer {
       padding: .4rem;
@@ -2076,41 +2115,115 @@
             }
             else { showView('main'); }
         }
-        
-      function main() {
-          ['pageSizeAdmin', 'pageSizeUser', 'pageSizeFavorites'].forEach(key => {
-              const savedSize = localStorage.getItem(key);
-              if (savedSize) {
-                  const type = key.replace('pageSize', '').toLowerCase();
-                  state.pageSize[type] = parseInt(savedSize, 10);
-              }
-          });
-          state.sectionsCollapsed.admin = localStorage.getItem('adminSectionCollapsed') === 'true';
-          state.sectionsCollapsed.user = localStorage.getItem('userSectionCollapsed') === 'true';
-          if (localStorage.getItem('mosaicActive') === 'true') {
-              state.mosaicActive = true; document.body.classList.add('mosaic-on');
-              document.getElementById('mosaicToggleBtn').textContent = 'モザイク OFF';
-          }
+
+        function initializeDetailsPopup() {
+            const popup = document.getElementById('details-popup');
+            if (!popup) return;
+
+            let hideTimeout; // ポップアップを隠す処理を遅延させるためのタイマー
+
+            // イベントリスナーをコンテナに設定
+            document.querySelector('.container').addEventListener('mouseover', (e) => {
+                if (window.innerWidth <= 768) return; // スマホでは無効
+                
+                const titleEl = e.target.closest('.title'); // ★トリガーをタイトル（.title）に変更
+                if (!titleEl) return; // タイトル上でなければ何もしない
+
+                // ポップアップを隠すタイマーが作動中ならキャンセル
+                clearTimeout(hideTimeout);
+
+                const card = titleEl.closest('.item');
+                const workId = card.dataset.id;
+                const work = state.works[workId] || state.adminPicks[workId];
+
+                if (!work || !work.tags || Object.keys(work.tags).length === 0) {
+                    popup.style.display = 'none';
+                    return;
+                }
+
+                // --- ポップアップの内容を生成 ---
+                popup.innerHTML = `
+                    <h4>${util.escapeHTML(work.title)}</h4>
+                    <div class="popup-tags">
+                        ${Object.values(work.tags).map(tag => `<span class="popup-tag">${util.escapeHTML(tag)}</span>`).join('')}
+                    </div>
+                `;
+                
+                // --- ポップアップの位置を計算 ---
+                const cardRect = card.getBoundingClientRect(); // 位置の基準はカードのまま
+                popup.style.display = 'block';
+                const popupRect = popup.getBoundingClientRect();
+
+                let top = window.scrollY + cardRect.bottom + 5; // カードの下に5pxの余白
+                let left = window.scrollX + cardRect.left;
+
+                // 画面の右端からはみ出ないように調整
+                if (left + popupRect.width > window.innerWidth) {
+                    left = window.scrollX + cardRect.right - popupRect.width;
+                }
+                
+                popup.style.left = `${left}px`;
+                popup.style.top = `${top}px`;
+            });
+
+            // タイトルからマウスが離れたらポップアップを隠す
+            document.querySelector('.container').addEventListener('mouseout', (e) => {
+                const titleEl = e.target.closest('.title');
+                // マウスがタイトルの外に出て、かつポップアップに移動していない場合
+                if (titleEl && e.relatedTarget !== popup) {
+                    hideTimeout = setTimeout(() => {
+                        popup.style.display = 'none';
+                    }, 200); // 0.2秒後に隠す（ポップアップへ移動する猶予）
+                }
+            });
+
+            // ポップアップ自体にマウスが乗っている間は消さない
+            popup.addEventListener('mouseover', () => {
+                clearTimeout(hideTimeout);
+            });
             
-          initializeListeners();
-
-          onAuthStateChanged(auth, (user) => {
-              updateUIforAuthState(user);
-              if (user) {
-                  subscribeUserData(user);
-              } else {
-                  unsubscribeUserData();
-              }
-              handleUrlBasedView();
-          });
-
-          state.clientId = util.getClientId();
-          initializePageSizeSelectors();
-          setupCollapsers();
-          setupEventListeners();
-          setupImagePreviewListeners();
-          initializeDetailsPopup();
+            // ポップアップからマウスが離れたら隠す
+            popup.addEventListener('mouseout', () => {
+                hideTimeout = setTimeout(() => {
+                    popup.style.display = 'none';
+                }, 200);
+            });
         }
+        
+        function main() {
+            ['pageSizeAdmin', 'pageSizeUser', 'pageSizeFavorites'].forEach(key => {
+                const savedSize = localStorage.getItem(key);
+                if (savedSize) {
+                    const type = key.replace('pageSize', '').toLowerCase();
+                    state.pageSize[type] = parseInt(savedSize, 10);
+                }
+            });
+            state.sectionsCollapsed.admin = localStorage.getItem('adminSectionCollapsed') === 'true';
+            state.sectionsCollapsed.user = localStorage.getItem('userSectionCollapsed') === 'true';
+            if (localStorage.getItem('mosaicActive') === 'true') {
+                state.mosaicActive = true; document.body.classList.add('mosaic-on');
+                document.getElementById('mosaicToggleBtn').textContent = 'モザイク OFF';
+            }
+              
+            initializeListeners();
+
+            onAuthStateChanged(auth, (user) => {
+                updateUIforAuthState(user);
+                if (user) {
+                    subscribeUserData(user);
+                } else {
+                    unsubscribeUserData();
+                }
+                handleUrlBasedView();
+            });
+
+            state.clientId = util.getClientId();
+            initializePageSizeSelectors();
+            setupCollapsers();
+            setupEventListeners();
+            setupImagePreviewListeners();
+            initializeDetailsPopup();
+          }
         
         main();
     </script>

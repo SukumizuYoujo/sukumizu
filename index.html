@@ -1056,33 +1056,6 @@
     font-size: 0.8rem;
   }
 }
-
-    /* ===== 広告用スタイル ===== */
-  .dlsite-ad-container {
-    display: none; /* PCでは非表示がデフォルト */
-    text-align: center;
-    margin: 1.5rem 0; /* 上下の余白を調整 */
-  }
-
-  /* スマホ表示用のメディアクエリ */
-  @media screen and (max-width: 768px) {
-    .dlsite-ad-container {
-      display: block; /* スマホ（768px以下）で表示 */
-    }
-  }
-
-  /* ===== 広告周りの余白を調整する追加CSS ===== */
-
-  /* 広告のすぐ上にある区切り線(hr)の余白を打ち消す */
-  hr + .dlsite-ad-container {
-    margin-top: -1rem;
-  }
-
-  /* 広告のすぐ下にある見出しの上の余白を縮小 */
-  .dlsite-ad-container + .section-header {
-    margin-top: 1rem;
-  }
-
 </style>
 </head>
 <body>
@@ -1201,16 +1174,6 @@
         // --- 定数定義 ---
         const CONSTANTS = {
             DL_AFFILIATE_ID: "sukumizuyoujo",
-            AD_HTML_RECTANGLE: `
-                <div class="dlsite-ad-container">
-                    <a rel="noopener sponsored" href="https://dlaf.jp/maniax/dlaf/=/aid/sukumizuyoujo/url/https%3A%2F%2Fwww.dlsite.com%2Fmaniax%2F%3Futm_medium%3Daffiliate%26utm_campaign%3Dbnlink%26utm_content%3Dbn_sp_300_250_dojin_01.gif" target="_blank"><img src="https://www.dlsite.com/img/male/dojin/bn_sp_300_250_dojin_01.gif" alt="同人誌、同人ゲーム、同人ソフトのダウンロードショップ - DLsite" width="300" height="250" border="0" /></a>
-                </div>
-            `,
-            AD_HTML_BANNER: `
-                <div class="dlsite-ad-container">
-                    <a rel="noopener sponsored" href="https://dlaf.jp/maniax/dlaf/=/aid/sukumizuyoujo/url/https%3A%2F%2Fwww.dlsite.com%2Fmaniax%2F%3Futm_medium%3Daffiliate%26utm_campaign%3Dbnlink%26utm_content%3Dbn_pc_468_60_dojin_01.gif" target="_blank"><img src="https://www.dlsite.com/img/male/dojin/bn_pc_468_60_dojin_01.gif" alt="同人誌、同人ゲーム、同人ソフトのダウンロードショップ - DLsite" width="468" height="60" border="0" /></a>
-                </div>
-            `,
             FIREBASE_CONFIG: {
                 apiKey: "AIzaSyCjbDIVVnl_lf-vOCKSf3_hWOjCDNxaJts",
                 authDomain: "dlsite-share.firebaseapp.com",
@@ -2037,32 +2000,11 @@
             state.sortedAdminIds.game = adminPicks.filter(w => util.classifyWork(w) === 'game').map(w => w.id);
         }
         
-        function insertDlsiteAds() {
-          // ページ内に既にある広告を一旦すべて削除
-          document.querySelectorAll('.dlsite-ad-container').forEach(ad => ad.remove());
-
-          // --- 1つ目の広告（みんなの投稿の上）---
-          const userSectionHr = document.querySelector('.section-header[data-section="user"]')?.previousElementSibling;
-          if (userSectionHr) {
-              const adHtml = CONSTANTS.AD_HTML_RECTANGLE; // 300x250広告
-              userSectionHr.insertAdjacentHTML('afterend', adHtml);
-          }
-
-          // --- 2つ目の広告（ページ末尾）---
-          const container = document.querySelector('.container');
-          if (container) {
-              const adHtml = CONSTANTS.AD_HTML_BANNER; // 468x60広告
-              container.insertAdjacentHTML('beforeend', adHtml);
-          }
-      }
-
         function refreshAllGrids() {
             renderPage('new'); renderPage('ranking');
             renderPage('admin_manga'); renderPage('admin_game');
             renderPage('favorites');
             if (state.currentView === 'mylists') { renderMyListsPage(); }
-
-            insertDlsiteAds(); 
         }
         
         function initializeListeners() {
@@ -2323,7 +2265,6 @@
             setupEventListeners();
             setupImagePreviewListeners();
             initializeDetailsPopup();
-            insertDlsiteAds(); 
           }
         
         main();

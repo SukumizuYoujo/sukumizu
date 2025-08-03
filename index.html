@@ -24,61 +24,61 @@
     <link rel="apple-touch-icon" sizes="180x180" href="/apple-touch-icon.png" />
     <link rel="manifest" href="/site.webmanifest" />
     <style>
-  /* ==========================================================================
-     1. 基本設定 (リセット、全体レイアウト、タイポグラフィ)
-     ========================================================================== */
+ /* ==========================================================================
+    1. 基本設定 (リセット、全体レイアウト、タイポグラフィ)
+    ========================================================================== */
 
-  /* 全ての要素に適用する基本的なリセット */
-  * {
+ /* 全ての要素に適用する基本的なリセット */
+ * {
     box-sizing: border-box; /* paddingとborderをwidth/heightに含める */
     margin: 0;
     padding: 0;
-  }
+ }
 
-  /* ページ全体の基本的なスタイル */
-  body {
+ /* ページ全体の基本的なスタイル */
+ body {
     font-family: sans-serif;
     background: #f5f5f5;
     color: #333;
-  }
+ }
 
-  /* サイト全体のコンテンツを中央に配置するラッパー */
-  .container {
+ /* サイト全体のコンテンツを中央に配置するラッパー */
+ .container {
     max-width: 960px;
     margin: 2rem auto;
     padding: 0 1rem;
-  }
+ }
 
-  /* h2, hr などの共通要素 */
-  h2 {
+ /* h2, hr などの共通要素 */
+ h2 {
     margin: 0;
     padding: 0;
     border: none;
     display: flex;
     align-items: center;
     gap: 0.5rem;
-  }
+ }
 
-  hr {
+ hr {
     border: none;
     border-top: 1px solid #eee;
     margin: 2rem 0;
-  }
+ }
 
-  /* ==========================================================================
-     2. 汎用・ユーティリティクラス
-     ========================================================================== */
+ /* ==========================================================================
+    2. 汎用・ユーティリティクラス
+    ========================================================================== */
 
-  /* 要素を非表示にするための汎用クラス */
-  .hidden {
+ /* 要素を非表示にするための汎用クラス */
+ .hidden {
     display: none !important;
-  }
+ }
 
-  /* 読み込み中を示すスピナーアニメーション */
-  .loading {
+ /* 読み込み中を示すスピナーアニメーション */
+ .loading {
     position: relative;
-  }
-  .loading::after {
+ }
+ .loading::after {
     content: '';
     position: absolute;
     top: 50%;
@@ -90,25 +90,25 @@
     border-top-color: transparent;
     border-radius: 50%;
     animation: spin .6s linear infinite;
-  }
+ }
 
-  /* スピナーの回転アニメーション定義 */
-  @keyframes spin {
+ /* スピナーの回転アニメーション定義 */
+ @keyframes spin {
     to {
-      transform: rotate(360deg);
+        transform: rotate(360deg);
     }
-  }
-  
-  /* 作品画像のモザイク表示 */
-  body.mosaic-on .item img {
+ }
+ 
+ /* 作品画像のモザイク表示 */
+ body.mosaic-on .item img {
     filter: blur(8px);
     transition: filter 0.2s ease-in-out;
-  }
-  body.mosaic-on .item img:hover {
+ }
+ body.mosaic-on .item img:hover {
     filter: blur(0);
-  }
-  /* 詳細情報ポップアップ */
-  #details-popup {
+ }
+ /* 詳細情報ポップアップ */
+ #details-popup {
     display: none; /* 通常は非表示 */
     position: absolute; /* マウス位置に追従させる */
     z-index: 5000; /* 他の要素より手前に表示 */
@@ -120,215 +120,252 @@
     max-width: 350px;
     pointer-events: none; /* ポップアップ自体がマウスイベントの邪魔をしないように */
     transition: opacity 0.1s ease-in-out;
-  }
+ }
 
-  /* ポップアップ内のタイトル */
-  #details-popup h4 {
+ /* ポップアップ内のタイトル */
+ #details-popup h4 {
     font-size: 1rem;
     margin-top: 0;
     margin-bottom: 0.5rem;
-  }
+ }
 
-  /* ポップアップ内のタグ一覧 */
-  #details-popup .popup-tags {
+ /* ポップアップ内のタグ一覧 */
+ #details-popup .popup-tags {
     display: flex;
     flex-wrap: wrap;
     gap: 6px;
-  }
+ }
 
-  /* ポップアップ内のタグ */
-  #details-popup .popup-tag {
+ /* ポップアップ内のタグ */
+ #details-popup .popup-tag {
     background-color: #e0e0e0;
     padding: 3px 7px;
     border-radius: 4px;
     font-size: 0.8rem;
-  }
+ }
 
-  /* ==========================================================================
-     3. ヘッダーとナビゲーション
-     ========================================================================== */
-  
-  /* サイトヘッダー */
-  .site-header {
+ /* ==========================================================================
+    3. ヘッダーとナビゲーション
+    ========================================================================== */
+ 
+ /* サイトヘッダー */
+ .site-header {
     text-align: center;
     margin-bottom: 2rem;
-  }
-  .site-header h1 {
+ }
+ .site-header h1 {
     font-size: 2.5rem;
     margin-bottom: 0.5rem;
-  }
-  .site-header p {
+ }
+ .site-header p {
     font-size: 0.8rem;
     color: #888;
-  }
-  
-  /* 認証エリア（ログイン/ログアウト） */
-  .auth-area {
+ }
+ 
+ /* 認証エリア（ログイン/ログアウト） */
+ .auth-area {
     text-align: right;
     margin-bottom: 1rem;
     display: flex;
     justify-content: flex-end;
     align-items: center;
     gap: 1rem;
-  }
-  .auth-area #userName {
+ }
+ .auth-area #userName {
     font-weight: bold;
-  }
-  .auth-area button {
+ }
+ .auth-area button {
     padding: .4rem .8rem;
     background-color: #007bff;
     color:white;
     border:none;
     border-radius: 4px;
     cursor: pointer;
-  }
-  .auth-area button#logoutBtn {
+ }
+ .auth-area button#logoutBtn {
     background-color: #6c757d;
-  }
-  .requires-auth:disabled {
+ }
+ .requires-auth:disabled {
     opacity: 0.5;
     cursor: not-allowed;
-  }
-  
-  /* メインナビゲーション */
-  .main-nav {
+ }
+ 
+ /* メインナビゲーション */
+ .main-nav {
     display: flex;
     gap: 0.5rem;
     margin-bottom: 1rem;
     padding-bottom: 1rem;
     border-bottom: 1px solid #eee;
-  }
-  .main-nav button {
+    align-items: center;
+ }
+ .main-nav button {
     padding: .5rem 1rem;
     background: #555;
     color: white;
     border: none;
     border-radius: 4px;
     font-size: 1rem;
-  }
-  .main-nav button.active {
+    cursor: pointer;
+ }
+ .main-nav button.active {
     background: #000;
     font-weight: bold;
-  }
+ }
+ .hamburger-btn {
+    font-size: 1.5rem;
+    padding: 0 .8rem;
+    background-color: #555;
+    display: none; /* PCでは非表示 */
+ }
 
-  /* 各ビューのコンテナ */
-  .view-container {
+ /* モバイル用メニュー */
+ .mobile-menu {
+    background-color: #fff;
+    border: 1px solid #ddd;
+    border-radius: 6px;
+    box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+    margin-bottom: 1rem;
+    overflow: hidden;
+ }
+ .mobile-menu button {
+    display: block;
+    width: 100%;
+    padding: .75rem 1rem;
+    background: none;
+    border: none;
+    border-bottom: 1px solid #eee;
+    text-align: left;
+    font-size: 1rem;
+    color: #333;
+    cursor: pointer;
+ }
+ .mobile-menu button:last-child {
+    border-bottom: none;
+ }
+ .mobile-menu button:hover {
+    background-color: #f5f5f5;
+ }
+
+
+ /* 各ビューのコンテナ */
+ .view-container {
     display: none;
-  }
-  #view-favorites, #view-mylists, #view-public-list {
+ }
+ #view-favorites, #view-mylists, #view-public-list {
     padding-bottom: 2rem;
-  }
-  
-  /* ==========================================================================
-     4. セクションと操作コントロール
-     ========================================================================== */
+ }
+ 
+ /* ==========================================================================
+    4. セクションと操作コントロール
+    ========================================================================== */
 
-  /* 各セクションの見出し */
-  .section-header {
+ /* 各セクションの見出し */
+ .section-header {
     display: flex;
     justify-content: space-between;
     align-items: center;
     border-bottom: 2px solid #ccc;
     padding-bottom: 0.5rem;
     margin-top: 2.5rem;
-  }
+ }
 
-  /* 表示件数などのオプション */
-  .view-options {
+ /* 表示件数などのオプション */
+ .view-options {
     display: flex;
     align-items: center;
     gap: 0.5rem;
-  }
-  .view-options label {
+ }
+ .view-options label {
     font-size: 0.85rem;
     color: #555;
-  }
-  .view-options select {
+ }
+ .view-options select {
     padding: 0.2rem 0.4rem;
     border: 1px solid #ccc;
     border-radius: 4px;
     background-color: #fff;
-  }
+ }
 
-  /* 開閉可能なセクション */
-  .collapser-header {
+ /* 開閉可能なセクション */
+ .collapser-header {
     cursor: pointer;
     user-select: none;
-  }
-  .collapser-header h2::after {
+ }
+ .collapser-header h2::after {
     content: '▲';
     font-size: 0.8em;
     margin-left: 0.5em;
     display: inline-block;
     transition: transform 0.3s;
-  }
-  .collapser-header.collapsed h2::after {
+ }
+ .collapser-header.collapsed h2::after {
     transform: rotate(180deg);
-  }
-  .collapsible-content {
+ }
+ .collapsible-content {
     overflow: hidden;
     transition: max-height 0.4s ease-out, padding 0.4s ease-out, margin 0.4s ease-out;
     max-height: 5000px; /* 十分に大きい高さを指定 */
-  }
-  .collapsible-content.collapsed {
+ }
+ .collapsible-content.collapsed {
     max-height: 0;
     padding-top: 0 !important;
     padding-bottom: 0 !important;
     margin-top: 0 !important;
     margin-bottom: 0 !important;
-  }
-  
-  /* URL入力欄やフィルターボタンなどの操作エリア */
-  .controls {
+ }
+ 
+ /* URL入力欄やフィルターボタンなどの操作エリア */
+ .controls {
     display: flex;
     flex-wrap: wrap;
     gap: .5rem;
     margin-bottom: 1rem;
     align-items: center;
-  }
-  .controls input {
+ }
+ .controls input {
     flex: 1;
     min-width: 200px;
     padding: .5rem;
     border: 1px solid #ccc;
     border-radius: 4px;
-  }
-  
-  /* フィルター専用の操作エリア */
-  .filter-controls {
+ }
+ 
+ /* フィルター専用の操作エリア */
+ .filter-controls {
     display: flex;
     flex-wrap: wrap;
     gap: 0.5rem;
     margin-bottom: 1rem;
-  }
+ }
 
-  /* 各種ボタンの共通スタイルと個別スタイル */
-  .controls button, .filter-controls button {
+ /* 各種ボタンの共通スタイルと個別スタイル */
+ .controls button, .filter-controls button {
     padding: .5rem 1rem;
     border: none;
     color: #fff;
     border-radius: 4px;
     cursor: pointer;
     transition: background-color 0.2s;
-  }
-  #addBtn { background: #28a745; }
-  #addBtn:disabled { opacity: .6; cursor: default; }
-  #hideBadBtn { background: #6c757d; }
-  #hideBadBtn.active { background: #f44336; font-weight: bold; }
-  #mosaicToggleBtn { background: #8e44ad; }
-  .filterByTagsBtn, .resetFilterBtn { background: #4CAF50; color: white; }
-  .filterByTagsBtn.active { background: #2E7D32; font-weight: bold;}
-  #contactBtn { background-color: #007bff; color: white; }
-  #infoBtn { background-color: #17a2b8; } /* サイト情報ボタン */
-  
-  /* ==========================================================================
-     5. タブ UI
-     ========================================================================== */
+ }
+ #addBtn { background: #28a745; }
+ #addBtn:disabled { opacity: .6; cursor: default; }
+ #hideBadBtn { background: #6c757d; }
+ #hideBadBtn.active { background: #f44336; font-weight: bold; }
+ #mosaicToggleBtn { background: #8e44ad; }
+ .filterByTagsBtn, .resetFilterBtn { background: #4CAF50; color: white; }
+ .filterByTagsBtn.active { background: #2E7D32; font-weight: bold;}
+ #contactBtn { background-color: #007bff; color: white; }
+ #infoBtn { background-color: #17a2b8; } /* サイト情報ボタン */
+ 
+ /* ==========================================================================
+    5. タブ UI
+    ========================================================================== */
 
-  .tabs input[type="radio"] {
+ .tabs input[type="radio"] {
     display: none; /* ラジオボタン自体は非表示 */
-  }
-  .tabs label {
+ }
+ .tabs label {
     display: inline-block;
     padding: .5rem 1.5rem;
     cursor: pointer;
@@ -336,45 +373,59 @@
     margin-right: .5rem;
     border-radius: 4px 4px 0 0;
     font-weight: bold;
-  }
-  /* 選択されているタブのスタイル */
-  #tab-admin_manga:checked ~ .tabs-container label[for="tab-admin_manga"],
-  #tab-admin_game:checked ~ .tabs-container label[for="tab-admin_game"],
-  #tab-new:checked ~ .tabs-container label[for="tab-new"],
-  #tab-ranking:checked ~ .tabs-container label[for="tab-ranking"] {
+ }
+ /* 選択されているタブのスタイル */
+ #tab-admin_manga:checked ~ .tabs-container label[for="tab-admin_manga"],
+ #tab-admin_game:checked ~ .tabs-container label[for="tab-admin_game"],
+ #tab-new:checked ~ .tabs-container label[for="tab-new"],
+ #tab-ranking:checked ~ .tabs-container label[for="tab-ranking"] {
     background: #fff;
-  }
-  .tab-content {
+ }
+ .tab-content {
     display: none; /* タブの中身は通常非表示 */
     padding: 1rem;
     background: #fff;
     border: 1px solid #ddd;
     border-top: none;
     border-radius: 0 4px 4px 4px;
-  }
-  /* 選択されているタブの中身だけ表示 */
-  #tab-admin_manga:checked ~ #admin_manga,
-  #tab-admin_game:checked ~ #admin_game,
-  #tab-new:checked ~ #new,
-  #tab-ranking:checked ~ #ranking {
+ }
+ /* 選択されているタブの中身だけ表示 */
+ #tab-admin_manga:checked ~ #admin_manga,
+ #tab-admin_game:checked ~ #admin_game,
+ #tab-new:checked ~ #new,
+ #tab-ranking:checked ~ #ranking {
     display: block;
-  }
-  
-  /* ==========================================================================
-     6. 作品カード（グリッドとアイテム）
-     ========================================================================== */
-  
-  /* カードを並べるグリッドレイアウト */
-  .grid {
+ }
+ 
+ /* ==========================================================================
+    6. 作品カード（グリッドとアイテム）
+    ========================================================================== */
+ 
+ /* カードを並べるグリッドレイアウト */
+ .grid {
     display: grid;
     grid-template-columns: repeat(auto-fill, minmax(140px, 1fr));
     gap: 1rem;
     transition: min-height 0.3s ease-in-out;
     align-content: start;
-  }
+ }
 
-  /* 作品カードのコンテナ */
-  .item {
+ /* スケルトンローディング */
+ .skeleton-card {
+    background-color: #e0e0e0;
+    border-radius: 6px;
+    height: 320px;
+    animation: pulse 1.5s infinite ease-in-out;
+ }
+ @keyframes pulse {
+    0% { opacity: 1; }
+    50% { opacity: 0.6; }
+    100% { opacity: 1; }
+ }
+
+
+ /* 作品カードのコンテナ */
+ .item {
     position: relative;
     background: #fafafa;
     border: 1px solid #ddd;
@@ -385,28 +436,28 @@
     cursor: pointer;
     height: 320px;
     transition: box-shadow 0.2s;
-  }
-  .item:hover {
+ }
+ .item:hover {
     box-shadow: 0 4px 12px rgba(0,0,0,0.15); /* カーソルを合わせた時の影 */
-  }
+ }
 
-  /* カード内の各パーツ */
-  .item img {
+ /* カード内の各パーツ */
+ .item img {
     width: 100%;
     height: 180px;
     object-fit: cover;
     flex-shrink: 0;
-  }
-  /* タイトルとタグをまとめる親要素 */
-  .item-body {
+ }
+ /* タイトルとタグをまとめる親要素 */
+ .item-body {
     flex: 1;
     /* この要素でスクロールを管理 */
     overflow-y: auto;
     padding: 0 .75rem .5rem .75rem;
-  }
+ }
 
-  /* タイトル */
-  .title {
+ /* タイトル */
+ .title {
     font-size: .9rem;
     font-weight: bold;
     /* 高さ制限とスクロールを削除 */
@@ -415,20 +466,20 @@
     /* タグとの間に余白を設定 */
     margin: .75rem 0;
     cursor: pointer;
-  }
+ }
 
-  /* タグ全体のコンテナ */
-  .tags {
+ /* タグ全体のコンテナ */
+ .tags {
     display: flex;
     flex-wrap: wrap;
     gap: 6px;
     /* 高さ制限とスクロールを削除 */
     max-height: none;
     overflow-y: visible;
-  }
+ }
 
-  /* タグの見た目 */
-  .tag {
+ /* タグの見た目 */
+ .tag {
     background: #e0e0e0;
     border-radius: 4px;
     padding: 4px 8px; 
@@ -436,8 +487,8 @@
     line-height: 1.4; 
     display: inline-block; 
     margin-bottom: 4px;
-  }
-  .item-footer {
+ }
+ .item-footer {
     margin-top: auto;
     display: flex;
     justify-content: space-between;
@@ -447,47 +498,47 @@
     gap: 0.5rem;
     flex-shrink: 0;
     min-height: 38px;
-  }
+ }
 
-  /* Good/Bad 評価ボタン */
-  .rating-buttons {
+ /* Good/Bad 評価ボタン */
+ .rating-buttons {
     display: flex;
     align-items: center;
     gap: 4px;
-  }
-  .rating-btn {
+ }
+ .rating-btn {
     padding: 2px 6px;
     font-size: .8rem;
     border: none;
     border-radius: 4px;
     background: #eee;
     cursor: pointer;
-  }
-  .rating-btn.good.active {
+ }
+ .rating-btn.good.active {
     background: #4caf50;
     color: #fff;
-  }
-  .rating-btn.bad.active {
+ }
+ .rating-btn.bad.active {
     background: #f44336;
     color: #fff;
-  }
-  .score-display {
+ }
+ .score-display {
     visibility: hidden; /* ランキング以外では非表示 */
     font-size: 0.9rem;
     font-weight: bold;
     color: #333;
     margin-left: 0.5rem;
-  }
-  #rankingGrid .score-display {
+ }
+ #rankingGrid .score-display {
     visibility: visible; /* ランキングタブでのみ表示 */
-  }
+ }
 
-  /* カード上のアクションボタン（お気に入り、リスト追加など） */
-  .card-actions {
+ /* カード上のアクションボタン（お気に入り、リスト追加など） */
+ .card-actions {
     display: flex;
     gap: 4px;
-  }
-  .card-actions button {
+ }
+ .card-actions button {
     width: 32px;
     height: 32px;
     border-radius: 50%;
@@ -499,53 +550,59 @@
     align-items: center;
     justify-content: center;
     transition: all 0.2s;
-  }
-  .card-actions button:hover {
+ }
+ .card-actions button:hover {
     background-color: white;
     transform: scale(1.1);
-  }
-  .card-actions .favorite-btn.favorited { color: #e91e63; background-color: white; }
-  .card-actions .add-to-list-btn.in-list { color: #28a745; background-color: white; }
-  .card-actions .remove-from-list-btn { color: #f44336; }
+ }
+ .card-actions .favorite-btn.favorited { color: #e91e63; background-color: white; }
+ .card-actions .add-to-list-btn.in-list { color: #28a745; background-color: white; }
+ .card-actions .remove-from-list-btn { color: #f44336; }
 
-  /* カード上のアクションボタンをホバー時のみ表示 */
-  .item-footer .card-actions {
+ /* カード上のアクションボタンをホバー時のみ表示 */
+ .item .card-actions {
     position: absolute;
     top: 4px;
     right: 4px;
     z-index: 10;
     opacity: 0;
-  }
-  .item:hover .item-footer .card-actions {
+ }
+ .item:hover .card-actions {
     opacity: 1;
-  }
+ }
 
-  /* ページネーション */
-  .pagination {
+ /* ページネーション */
+ .pagination {
     display: flex;
     align-items: center;
     justify-content: center;
     gap: .5rem;
     margin-top: 1rem;
-  }
-  .pagination button {
+ }
+ .pagination button {
     padding: .3rem .6rem;
     font-size: .9rem;
     border: 1px solid #ccc;
     background: #fff;
     cursor: pointer;
-  }
-  .pagination button:disabled {
+ }
+ .pagination button:disabled {
     opacity: .5;
     cursor: default;
-  }
-  
-  /* ==========================================================================
-     7. ポップアップ・モーダル
-     ========================================================================== */
+ }
+ .pagination button.active {
+    background-color: #000;
+    color: white;
+    border-color: #000;
+    font-weight: bold;
+ }
+ 
+ /* ==========================================================================
+    7. ポップアップ・モーダル
+    ========================================================================== */
 
-  /* モーダルの背景 */
-  .overlay {
+ /* モーダルの背景 */
+ .overlay {
     position: fixed;
     top: 0;
     left: 0;
@@ -556,13 +613,13 @@
     display: flex;
     align-items: center;
     justify-content: center;
-  }
-  .overlay.hidden {
+ }
+ .overlay.hidden {
     display: none;
-  }
+ }
 
-  /* モーダルの本体 */
-  .modal {
+ /* モーダルの本体 */
+ .modal {
     width: 90%;
     max-width: 600px;
     background: #fff;
@@ -571,26 +628,26 @@
     display: flex;
     flex-direction: column;
     max-height: 80vh;
-  }
-  .modal-header {
+ }
+ .modal-header {
     font-weight: bold;
     padding: 1rem;
     border-bottom: 1px solid #ddd;
-  }
-  .modal-body {
+ }
+ .modal-body {
     flex: 1;
     overflow-y: auto;
     padding: 1rem;
-  }
-  .modal-footer {
+ }
+ .modal-footer {
     display: flex;
     justify-content: flex-end;
     gap: 0.75rem;
     padding: .75rem;
     background: #f7f7f7;
     border-top: 1px solid #ddd;
-  }
-  .modal-footer button {
+ }
+ .modal-footer button {
     padding: 0.6rem 1.2rem;
     font-size: 0.9rem;
     font-weight: 600;
@@ -598,42 +655,42 @@
     border: none;
     cursor: pointer;
     transition: opacity 0.2s ease;
-  }
-  .modal-footer button:hover {
+ }
+ .modal-footer button:hover {
     opacity: 0.85;
-  }
-  
-  /* 個別のモーダルボタンの色 */
-  #modal-close-btn, #tag-panel-reset {
+ }
+ 
+ /* 個別のモーダルボタンの色 */
+ #modal-close-btn, #tag-panel-reset {
     background-color: #6c757d;
     color: white;
-  }
-  #tag-panel-confirm {
+ }
+ #tag-panel-confirm {
     background-color: #ff9800;
     color: white;
-  }
+ }
 
-  /* タグ絞り込みモーダルの特別スタイル */
-  .tag-panel .modal-body { padding: 0; }
-  .tag-panel .tag-search-input { width: 100%; padding: .75rem; font-size: 1rem; border: none; border-bottom: 1px solid #ddd; }
-  .tag-panel .category-tabs { display: flex; flex-wrap: wrap; gap: .5rem; padding: .75rem; border-bottom: 1px solid #ddd; background: #f7f7f7; }
-  .tag-panel .category-tabs button { padding: .4rem .8rem; font-size: .8rem; border: 1px solid #ccc; border-radius: 1rem; background: #fff; cursor: pointer; }
-  .tag-panel .category-tabs button.active { background: #333; color: #fff; border-color: #333; }
-  .tag-panel .tag-list { padding: .75rem; display: grid; height: 30vh; overflow-y: auto; grid-template-columns: repeat(auto-fill, minmax(150px, 1fr)); gap: .5rem; align-content: start; }
-  .tag-panel .tag-list label { display: flex; align-items: center; gap: .5rem; margin-bottom: 0; font-size: .9rem; cursor: pointer; }
-  .tag-panel .tag-list input { margin: 0; }
-  #filter-mode-select-buttons { display: flex; gap: 0.5rem; margin-right: auto; }
-  #filter-mode-select-buttons button { padding: 0.4rem 0.8rem; font-size: 0.8rem; border-radius: 4px; background-color: #aaa; color: white; }
-  #filter-mode-select-buttons button.active { background-color: #28a745; }
+ /* タグ絞り込みモーダルの特別スタイル */
+ .tag-panel .modal-body { padding: 0; }
+ .tag-panel .tag-search-input { width: 100%; padding: .75rem; font-size: 1rem; border: none; border-bottom: 1px solid #ddd; }
+ .tag-panel .category-tabs { display: flex; flex-wrap: wrap; gap: .5rem; padding: .75rem; border-bottom: 1px solid #ddd; background: #f7f7f7; }
+ .tag-panel .category-tabs button { padding: .4rem .8rem; font-size: .8rem; border: 1px solid #ccc; border-radius: 1rem; background: #fff; cursor: pointer; }
+ .tag-panel .category-tabs button.active { background: #333; color: #fff; border-color: #333; }
+ .tag-panel .tag-list { padding: .75rem; display: grid; height: 30vh; overflow-y: auto; grid-template-columns: repeat(auto-fill, minmax(150px, 1fr)); gap: .5rem; align-content: start; }
+ .tag-panel .tag-list label { display: flex; align-items: center; gap: .5rem; margin-bottom: 0; font-size: .9rem; cursor: pointer; }
+ .tag-panel .tag-list input { margin: 0; }
+ #filter-mode-select-buttons { display: flex; gap: 0.5rem; margin-right: auto; }
+ #filter-mode-select-buttons button { padding: 0.4rem 0.8rem; font-size: 0.8rem; border-radius: 4px; background-color: #aaa; color: white; }
+ #filter-mode-select-buttons button.active { background-color: #28a745; }
 
-  /* お問い合わせフォームのスタイル */
-  .contact-form .form-group { margin-bottom: 1rem; }
-  .contact-form .form-group label { display: block; margin-bottom: 0.25rem; font-weight: bold; font-size: 0.9rem; }
-  .contact-form .form-group input, .contact-form .form-group textarea { width: 100%; padding: 0.6rem; border: 1px solid #ccc; border-radius: 4px; font-size: 1rem; }
-  .contact-form .form-group textarea { min-height: 120px; resize: vertical; }
+ /* お問い合わせフォームのスタイル */
+ .contact-form .form-group { margin-bottom: 1rem; }
+ .contact-form .form-group label { display: block; margin-bottom: 0.25rem; font-weight: bold; font-size: 0.9rem; }
+ .contact-form .form-group input, .contact-form .form-group textarea { width: 100%; padding: 0.6rem; border: 1px solid #ccc; border-radius: 4px; font-size: 1rem; }
+ .contact-form .form-group textarea { min-height: 120px; resize: vertical; }
 
-  /* 右下に表示される通知 */
-  .toast {
+ /* 右下に表示される通知 */
+ .toast {
     position: fixed;
     bottom: 1rem;
     right: 1rem;
@@ -644,13 +701,13 @@
     opacity: 0;
     transition: opacity .3s;
     z-index: 3000;
-  }
-  .toast.show {
+ }
+ .toast.show {
     opacity: 1;
-  }
-  
-  /* 画像プレビューのポップアップ */
-  .image-preview-popup {
+ }
+ 
+ /* 画像プレビューのポップアップ */
+ .image-preview-popup {
     display: none;
     position: fixed;
     z-index: 4000;
@@ -663,15 +720,15 @@
     border-radius: 4px;
     background-color: #fff;
     transition: opacity 0.1s;
-  }
-  .image-preview-popup img {
+ }
+ .image-preview-popup img {
     display: block;
     width: 100%;
     height: auto;
-  }
-  
-  /* リスト追加時のポップオーバー */
-  .add-to-list-popover {
+ }
+ 
+ /* リスト追加時のポップオーバー */
+ .add-to-list-popover {
     position: absolute;
     z-index: 100;
     background-color: white;
@@ -680,41 +737,41 @@
     border-radius: 6px;
     padding: .75rem;
     width: 250px;
-  }
-  .add-to-list-popover ul { list-style: none; max-height: 150px; overflow-y: auto; margin-bottom: .75rem; }
-  .add-to-list-popover li label { display: block; padding: .25rem 0; cursor: pointer; display: flex; align-items: center; gap: .5rem; }
-  .add-to-list-popover .new-list-form { display: flex; gap: .5rem; border-top: 1px solid #eee; padding-top: .75rem; }
-  .add-to-list-popover .new-list-form input { flex-grow: 1; padding: .4rem; border: 1px solid #ccc; border-radius: 4px; }
-  .add-to-list-popover .new-list-form button { padding: 0 .8rem; background-color: #28a745; color: white; border: none; border-radius: 4px; cursor: pointer; }
+ }
+ .add-to-list-popover ul { list-style: none; max-height: 150px; overflow-y: auto; margin-bottom: .75rem; }
+ .add-to-list-popover li label { display: block; padding: .25rem 0; cursor: pointer; display: flex; align-items: center; gap: .5rem; }
+ .add-to-list-popover .new-list-form { display: flex; gap: .5rem; border-top: 1px solid #eee; padding-top: .75rem; }
+ .add-to-list-popover .new-list-form input { flex-grow: 1; padding: .4rem; border: 1px solid #ccc; border-radius: 4px; }
+ .add-to-list-popover .new-list-form button { padding: 0 .8rem; background-color: #28a745; color: white; border: none; border-radius: 4px; cursor: pointer; }
 
-  /* ==========================================================================
-     8. マイリストページ
-     ========================================================================== */
+ /* ==========================================================================
+    8. マイリストページ
+    ========================================================================== */
 
-  #mylists-container {
+ #mylists-container {
     display: flex;
     gap: 1.5rem;
     align-items: flex-start;
     transition: all 0.3s ease;
-  }
-  .mylists-sidebar {
+ }
+ .mylists-sidebar {
     flex: 0 0 300px; /* サイドバーの幅を固定 */
     transition: all 0.3s ease;
-  }
-  .mylists-content {
+ }
+ .mylists-content {
     flex-grow: 1;
     min-width: 0;
-  }
-  /* サイドバーが折りたたまれた時のスタイル */
-  #mylists-container.sidebar-collapsed .mylists-sidebar {
+ }
+ /* サイドバーが折りたたまれた時のスタイル */
+ #mylists-container.sidebar-collapsed .mylists-sidebar {
     flex-basis: 0;
     width: 0;
     overflow: hidden;
     padding: 0;
     margin-left: -1.5rem;
     opacity: 0;
-  }
-  #toggle-sidebar-btn {
+ }
+ #toggle-sidebar-btn {
     background: none;
     border: 1px solid #ccc;
     border-radius: 4px;
@@ -723,13 +780,13 @@
     font-size: 1em;
     line-height: 1;
     color: #555;
-  }
-  #toggle-sidebar-btn:hover { background: #eee; }
-  
-  .mylists-sidebar h3, .mylists-content h3 { margin-bottom: 1rem; }
-  .mylists-sidebar ul { list-style: none; }
-  .mylists-sidebar li { margin-bottom: .5rem; }
-  .mylists-sidebar .list-group-item {
+ }
+ #toggle-sidebar-btn:hover { background: #eee; }
+ 
+ .mylists-sidebar h3, .mylists-content h3 { margin-bottom: 1rem; }
+ .mylists-sidebar ul { list-style: none; }
+ .mylists-sidebar li { margin-bottom: .5rem; }
+ .mylists-sidebar .list-group-item {
     width: 100%;
     text-align: left;
     padding: .6rem;
@@ -740,323 +797,296 @@
     display: flex;
     justify-content: space-between;
     align-items: center;
-  }
-  .mylists-sidebar .list-group-item.active {
+ }
+ .mylists-sidebar .list-group-item.active {
     background-color: #333;
     color: white;
     border-color: #333;
-  }
-  .list-item-controls {
+ }
+ .list-item-controls {
     display: flex;
     gap: 0.5rem;
-  }
-  .list-item-controls button {
+ }
+ .list-item-controls button {
     background: none;
     border: none;
     font-size: 1rem;
     cursor: pointer;
     padding: 0 .2rem;
     opacity: 0.5;
-  }
-  .list-group-item:hover .list-item-controls button { opacity: 1; }
-  
-  /* リスト名編集フォーム */
-  .list-edit-form {
+ }
+ .list-group-item:hover .list-item-controls button { opacity: 1; }
+ 
+ /* リスト名編集フォーム */
+ .list-edit-form {
     display: flex;
     width: 100%;
     gap: 0.5rem;
     padding: 0.6rem;
     border: 1px solid #ccc;
     border-radius: 4px;
-  }
-  .list-edit-form input { flex-grow: 1; border: 1px solid #999; padding: 0.2rem; }
-  .list-edit-form button { background: none; border: none; font-size: 1rem; cursor: pointer; }
-  
-  /* リスト作成・インポートエリア */
-  .list-actions { margin-top: 1rem; margin-bottom: 1rem; }
-  .list-actions .form-group { display: flex; gap: .5rem; margin-bottom: 0.5rem; }
-  .list-actions input { flex-grow: 1; padding: .5rem; }
-  .list-actions button { padding: .5rem; }
-  #share-id-display { user-select: all; background: #eee; padding: 0.5rem; border-radius: 4px; cursor: pointer; }
-  #share-id-display:hover { background: #ddd; }
+ }
+ .list-edit-form input { flex-grow: 1; border: 1px solid #999; padding: 0.2rem; }
+ .list-edit-form button { background: none; border: none; font-size: 1rem; cursor: pointer; }
+ 
+ /* リスト作成・インポートエリア */
+ .list-actions { margin-top: 1rem; margin-bottom: 1rem; }
+ .list-actions .form-group { display: flex; gap: .5rem; margin-bottom: 0.5rem; }
+ .list-actions input { flex-grow: 1; padding: .5rem; }
+ .list-actions button { padding: .5rem; }
+ #share-id-display { user-select: all; background: #eee; padding: 0.5rem; border-radius: 4px; cursor: pointer; }
+ #share-id-display:hover { background: #ddd; }
 
-  /* ==========================================================================
-     9. レスポンシブデザイン（スマホ向けスタイル）
-     ========================================================================== */
+ /* ==========================================================================
+    9. レスポンシブデザイン（スマホ向けスタイル）
+    ========================================================================== */
 
-  /* PC表示では改行を無効にする */
-  br.mobile-only {
+ /* PC表示では改行を無効にする */
+ br.mobile-only {
     display: none;
-  }
+ }
 
-  /* 画面幅が768px以下の場合に適用 */
-  @media screen and (max-width: 768px) {
+ /* 画面幅が768px以下の場合に適用 */
+ @media screen and (max-width: 768px) {
     body {
-      font-size: 14px;
-      -webkit-text-size-adjust: 100%;
+        font-size: 14px;
+        -webkit-text-size-adjust: 100%;
     }
     .container {
-      margin: 1rem auto;
-      padding: 0 0.75rem;
+        margin: 1rem auto;
+        padding: 0 0.75rem;
     }
     .site-header h1 {
-      font-size: 1.8rem;
+        font-size: 1.8rem;
     }
     br.mobile-only {
-      display: inline; /* スマホ表示でのみ改行を有効にする */
+        display: inline; /* スマホ表示でのみ改行を有効にする */
     }
     .section-header {
-      flex-direction: column;
-      align-items: flex-start;
-      gap: 0.5rem;
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 0.5rem;
     }
     h2 {
-      font-size: 1.2rem;
+        font-size: 1.2rem;
     }
     hr {
-      margin: 1.5rem 0;
+        margin: 1.5rem 0;
     }
+
+    /* ★★★ ハンバーガーメニュー関連 ★★★ */
+    .hamburger-btn {
+        display: block; /* スマホで表示 */
+    }
+    #view-main > .controls {
+        display: none; /* スマホではメインのコントロールを非表示 */
+    }
+
     .controls {
-      flex-direction: column;
-      gap: 0.75rem;
-      align-items: stretch;
+        flex-direction: column;
+        gap: 0.75rem;
+        align-items: stretch;
     }
     .controls input {
-      min-width: 0;
-      width: 100%;
-      padding: .75rem;
-      font-size: 1rem;
+        min-width: 0;
+        width: 100%;
+        padding: .75rem;
+        font-size: 1rem;
     }
     .controls button {
-      width: 100%;
+        width: 100%;
     }
     .controls:has(#dlsiteUrl) {
-      flex-direction: row;
-      flex-wrap: nowrap;
+        display: flex; /* URL入力欄は表示を維持 */
+        flex-direction: row;
+        flex-wrap: nowrap;
     }
     .controls:has(#dlsiteUrl) #dlsiteUrl {
-      flex: 1;
+        flex: 1;
     }
     .controls:has(#dlsiteUrl) #addBtn {
-      flex-shrink: 0;
-      width: auto;
-      padding: .75rem;
+        flex-shrink: 0;
+        width: auto;
+        padding: .75rem;
     }
     .filter-controls {
-      flex-direction: column;
-      gap: 0.75rem;
-      align-items: stretch;
+        flex-direction: column;
+        gap: 0.75rem;
+        align-items: stretch;
     }
     .filter-controls button {
-      width: 100%;
+        width: 100%;
     }
     .tabs {
-      position: relative;
+        position: relative;
     }
     .tab-content {
-      padding: 0.75rem;
+        padding: 0.75rem;
     }
     .tabs-container {
-      overflow-x: auto;
-      white-space: nowrap;
-      -webkit-overflow-scrolling: touch;
-      padding-bottom: 8px;
-      border-bottom: 1px solid #ddd;
+        overflow-x: auto;
+        white-space: nowrap;
+        -webkit-overflow-scrolling: touch;
+        padding-bottom: 8px;
+        border-bottom: 1px solid #ddd;
     }
     .tabs label {
-      padding: .6rem 1.1rem;
-      font-size: .9rem;
-      margin-right: 4px;
+        padding: .6rem 1.1rem;
+        font-size: .9rem;
+        margin-right: 4px;
     }
     #tab-admin_manga:checked ~ .tabs-container label[for="tab-admin_manga"],
     #tab-admin_game:checked ~ .tabs-container label[for="tab-admin_game"],
     #tab-new:checked ~ .tabs-container label[for="tab-new"],
     #tab-ranking:checked ~ .tabs-container label[for="tab-ranking"] {
-      background: #fff;
-      border: 1px solid #ddd;
-      border-bottom: 1px solid #fff;
-      position: relative;
-      top: 1px;
+        background: #fff;
+        border: 1px solid #ddd;
+        border-bottom: 1px solid #fff;
+        position: relative;
+        top: 1px;
     }
     .grid {
-      grid-template-columns: repeat(2, 1fr);
-      gap: 0.75rem;
+        grid-template-columns: repeat(2, 1fr);
+        gap: 0.75rem;
     }
     .item {
-      display: flex;
-      flex-direction: column;
-      height: 320px; /* ★高さを微調整 */
-      min-height: 320px;
+        display: flex;
+        flex-direction: column;
+        height: 320px;
+        min-height: 320px;
     }
     .item img {
-      height: 160px;
+        height: 160px;
     }
     .title {
-      font-size: .8rem;
-      margin: 0 0 .5rem 0;
-      flex-shrink: 0; 
+        font-size: .8rem;
+        margin: 0 0 .5rem 0;
+        flex-shrink: 0; 
     }
     .tags {
-      flex: 1;
-      overflow-y: auto; 
-      line-height: 1.5; 
+        flex: 1;
+        overflow-y: auto; 
+        line-height: 1.5; 
     }
     .item-footer {
-      padding: .4rem;
-      min-height: auto;
+        padding: .4rem;
+        min-height: auto;
     }
     .rating-btn {
-      padding: 3px 7px;
+        padding: 3px 7px;
     }
-    .item-footer .card-actions {
-      position: static; /* ホバーではなく常に表示 */
-      opacity: 1;
+    /* スマホではアクションボタンを常に表示 */
+    .item .card-actions {
+        position: static;
+        opacity: 1;
     }
     .item-footer {
-      flex-direction: column;
-      align-items: stretch;
-      gap: 0.25rem;
+        flex-direction: row;
+        align-items: center;
+        gap: 0.25rem;
     }
     .rating-buttons {
-      justify-content: flex-start;
+        justify-content: flex-start;
+        flex-grow: 1; /* ★評価ボタンが左側を埋めるように */
     }
     .card-actions {
-      justify-content: flex-end;
+        justify-content: flex-end;
     }
     .pagination {
-      gap: .25rem;
+        gap: .25rem;
     }
     .pagination button,
     .pagination span {
-      font-size: 0.85rem;
+        font-size: 0.85rem;
     }
     .pagination button {
-      padding: .4rem .6rem;
+        padding: .4rem .6rem;
     }
     .modal {
-      width: 95vw;
-      max-height: 85vh;
+        width: 95vw;
+        max-height: 85vh;
     }
     .modal-body {
-      padding: 0.75rem;
+        padding: 0.75rem;
     }
     .tag-panel .tag-list {
-      grid-template-columns: repeat(auto-fill, minmax(120px, 1fr));
-      height: 40vh;
-      gap: .75rem;
+        grid-template-columns: repeat(auto-fill, minmax(120px, 1fr));
+        height: 40vh;
+        gap: .75rem;
     }
     .tag-panel .category-tabs {
-      padding: 0.5rem;
-      gap: 0.25rem;
+        padding: 0.5rem;
+        gap: 0.25rem;
     }
     .tag-panel .category-tabs button {
-      font-size: 0.75rem;
+        font-size: 0.75rem;
     }
     .modal-footer {
-      flex-direction: column;
-      gap: 0.5rem;
+        flex-direction: column;
+        gap: 0.5rem;
     }
     #filter-mode-select-buttons {
-      order: -1;
-      width: 100%;
-      justify-content: center;
-      margin-right: 0;
+        order: -1;
+        width: 100%;
+        justify-content: center;
+        margin-right: 0;
     }
     .modal-footer button {
-      width: 100%;
+        width: 100%;
     }
     .toast {
-      left: 1rem;
-      right: 1rem;
-      width: auto;
-      text-align: center;
+        left: 1rem;
+        right: 1rem;
+        width: auto;
+        text-align: center;
     }
     .image-preview-popup {
-      display: none !important; /* スマホではプレビューを無効化 */
+        display: none !important; /* スマホではプレビューを無効化 */
     }
     .main-nav {
-      overflow-x: auto;
-      white-space: nowrap;
+        overflow-x: auto;
+        white-space: nowrap;
     }
     #mylists-container {
-      flex-direction: column;
+        flex-direction: column;
     }
     .mylists-sidebar {
-      width: 100%;
-      flex-basis: auto;
-      transition: max-height 0.3s ease-out;
+        width: 100%;
+        flex-basis: auto;
+        transition: max-height 0.3s ease-out;
     }
     #mylists-container.sidebar-collapsed .mylists-sidebar {
-      max-height: 0;
-      overflow: hidden;
-      padding-top: 0;
-      padding-bottom: 0;
-      margin-bottom: 0;
-      border: none;
+        max-height: 0;
+        overflow: hidden;
+        padding-top: 0;
+        padding-bottom: 0;
+        margin-bottom: 0;
+        border: none;
     }
     #toggle-sidebar-btn {
-      display: block;
+        display: block;
     }
     /* 「リストに追加」ポップオーバーを画面中央に固定 */
     .add-to-list-popover {
-      width: 90vw; /* 画面幅の90% */
-      max-width: 300px; /* 最大幅は300pxに */
+        width: 90vw; /* 画面幅の90% */
+        max-width: 300px; /* 最大幅は300pxに */
     }
     /* リスト追加ポップオーバー専用の背景オーバーレイ */
-  .popover-overlay {
-    position: fixed;
-    top: 0;
-    left: 0;
-    width: 100%;
-    height: 100%;
-    background: rgba(0, 0, 0, 0.6);
-    z-index: 2000; /* 他の要素より手前に表示 */
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    padding: 1rem;
-  }
-
-
-
-  /* 詳細情報ポップアップ */
-  #details-popup {
-    display: none; /* 通常は非表示 */
-    position: absolute; /* マウス位置に追従させる */
-    z-index: 5000; /* 他の要素より手前に表示 */
-    background-color: #fff;
-    border: 1px solid #ccc;
-    border-radius: 6px;
-    box-shadow: 0 4px 12px rgba(0,0,0,0.15);
-    padding: 1rem;
-    max-width: 350px;
-    pointer-events: none; /* ポップアップ自体がマウスイベントの邪魔をしないように */
-    transition: opacity 0.1s ease-in-out;
-  }
-
-  /* ポップアップ内のタイトル */
-  #details-popup h4 {
-    font-size: 1rem;
-    margin-top: 0;
-    margin-bottom: 0.5rem;
-  }
-
-  /* ポップアップ内のタグ一覧 */
-  #details-popup .popup-tags {
-    display: flex;
-    flex-wrap: wrap;
-    gap: 6px;
-  }
-
-  /* ポップアップ内のタグ */
-  #details-popup .popup-tag {
-    background-color: #e0e0e0;
-    padding: 3px 7px;
-    border-radius: 4px;
-    font-size: 0.8rem;
-  }
-}
-</style>
+    .popover-overlay {
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        background: rgba(0, 0, 0, 0.6);
+        z-index: 2000; /* 他の要素より手前に表示 */
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        padding: 1rem;
+    }
+ }
+ </style>
 </head>
 <body>
     <div class="container">
@@ -1070,20 +1100,32 @@
             <button id="loginBtn">Googleでログイン</button>
             <button id="logoutBtn" class="hidden">ログアウト</button>
         </div>
+
         <nav class="main-nav">
+            <button id="hamburger-btn" class="hamburger-btn">☰</button>
             <button id="nav-home" class="active">ホーム</button>
             <button id="nav-favorites" class="requires-auth" disabled>お気に入り</button>
             <button id="nav-mylists" class="requires-auth" disabled>マイリスト</button>
         </nav>
+        
+        <div id="mobile-menu" class="mobile-menu hidden">
+            <button data-action="contact">お問い合わせ</button>
+            <button data-action="filter-tags">タグで絞り込み</button>
+            <button data-action="reset-filter" class="hidden">絞り込み解除</button>
+            <button data-action="toggle-bad">Bad評価を非表示</button>
+            <button data-action="toggle-mosaic">モザイク ON</button>
+            <button data-action="info">サイト情報</button>
+        </div>
+
         <div id="view-main">
             <div class="controls">
-            <button id="contactBtn">お問い合わせ</button>
-            <button class="filterByTagsBtn">タグで絞り込み</button>
-            <button class="resetFilterBtn hidden">絞り込み解除</button>
-            <button id="hideBadBtn">Bad評価を非表示</button>
-            <button id="mosaicToggleBtn">モザイク ON</button>
-            <button id="infoBtn" style="background-color: #17a2b8;">サイト情報</button>
-        </div>
+                <button id="contactBtn">お問い合わせ</button>
+                <button class="filterByTagsBtn">タグで絞り込み</button>
+                <button class="resetFilterBtn hidden">絞り込み解除</button>
+                <button id="hideBadBtn">Bad評価を非表示</button>
+                <button id="mosaicToggleBtn">モザイク ON</button>
+                <button id="infoBtn">サイト情報</button>
+            </div>
             <hr>
             <div class="section-header collapser-header" data-section="admin">
                 <h2>管理者のおすすめ</h2>
@@ -1094,13 +1136,13 @@
                     <input type="radio" id="tab-admin_manga" name="admin_tab" checked><input type="radio" id="tab-admin_game" name="admin_tab">
                     <div class="tabs-container"><label for="tab-admin_manga">漫画</label><label for="tab-admin_game">ゲーム</label></div>
                     <section id="admin_manga" class="tab-content">
-                      <div class="grid" id="adminMangaGrid"></div>
-                      <div class="pagination" id="adminMangaPagination"></div>
+                        <div class="grid" id="adminMangaGrid"></div>
+                        <div class="pagination" id="adminMangaPagination"></div>
                     </section>
                     <section id="admin_game" class="tab-content">
-                      <div class="grid" id="adminGameGrid"></div>
-                      <div class="pagination" id="adminGamePagination"></div>
-                  </section>
+                        <div class="grid" id="adminGameGrid"></div>
+                        <div class="pagination" id="adminGamePagination"></div>
+                    </section>
                 </div>
             </div>
             <hr>
@@ -1118,9 +1160,9 @@
                         <div class="pagination" id="newPagination"></div>
                     </section>
                     <section id="ranking" class="tab-content">
-                      <div class="grid" id="rankingGrid"></div>
-                      <div class="pagination" id="rankingPagination"></div>
-                  </section>
+                        <div class="grid" id="rankingGrid"></div>
+                        <div class="pagination" id="rankingPagination"></div>
+                    </section>
                 </div>
             </div>
         </div>
@@ -1136,9 +1178,7 @@
                 <button class="resetFilterBtn hidden">絞り込み解除</button>
             </div>
             <div class="grid" id="favoritesGrid"></div>
-            <div id="view-favorites" class="view-container">
-              <div class="pagination" id="favoritesPagination"></div>
-            </div>
+            <div class="pagination" id="favoritesPagination"></div>
         </div>
         <div id="view-mylists" class="view-container">
             <div class="section-header">
@@ -1167,9 +1207,9 @@
     <script type="module">
         // --- モジュールのインポート ---
         import { initializeApp } from "https://www.gstatic.com/firebasejs/11.10.0/firebase-app.js";
-        import { getDatabase, ref, query, onValue, push, set, remove, serverTimestamp, get, child, update } from "https://www.gstatic.com/firebasejs/11.10.0/firebase-database.js";
+        import { getDatabase, ref, onValue, push, set, remove, serverTimestamp, get, child, update } from "https://www.gstatic.com/firebasejs/11.10.0/firebase-database.js";
         import { getAuth, GoogleAuthProvider, signInWithPopup, signOut, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/11.10.0/firebase-auth.js";
-        import { getFunctions, httpsCallable } from "https://www.gstatic.com/firebasejs/11.10.0/firebase-functions.js";
+        import { getFunctions } from "https://www.gstatic.com/firebasejs/11.10.0/firebase-functions.js";
 
         // --- 定数定義 ---
         const CONSTANTS = {
@@ -1179,7 +1219,7 @@
                 authDomain: "dlsite-share.firebaseapp.com",
                 databaseURL: "https://dlsite-share-default-rtdb.firebaseio.com",
                 projectId: "dlsite-share",
-                storageBucket: "dlsite-share-default-rtdb.appspot.com",
+                storageBucket: "dlsite-share.appspot.com",
                 messagingSenderId: "764936540510",
                 appId: "1:764936540510:web:846938ef579ea0b0cf3fcf",
                 measurementId: "G-LXNH02PV7J"
@@ -1206,6 +1246,7 @@
             clientId: null, hideBadlyRated: false, mosaicActive: false,
             highlightTagIds: new Set(), hideTagIds: new Set(), currentTagEditMode: 'highlight',
             currentUser: null, favorites: new Set(), myLists: {}, myListItems: {}, activeListId: null, currentView: 'main',
+            isInitialDataLoaded: { works: false, adminPicks: false }
         };
 
         // --- DOM要素のキャッシュ ---
@@ -1221,13 +1262,6 @@
                 admin_manga: document.getElementById("adminMangaGrid"), admin_game: document.getElementById("adminGameGrid"),
                 favorites: document.getElementById('favoritesGrid'), publicList: document.getElementById('public-list-grid')
             },
-            paginations: {
-                new: { prev: document.getElementById("newPrev"), next: document.getElementById("newNext"), current: document.getElementById("newCurrent"), total: document.getElementById("newTotal") },
-                ranking: { prev: document.getElementById("rankPrev"), next: document.getElementById("rankNext"), current: document.getElementById("rankCurrent"), total: document.getElementById("rankTotal") },
-                admin_manga: { prev: document.getElementById("adminMangaPrev"), next: document.getElementById("adminMangaNext"), current: document.getElementById("adminMangaCurrent"), total: document.getElementById("adminMangaTotal") },
-                admin_game: { prev: document.getElementById("adminGamePrev"), next: document.getElementById("adminGameNext"), current: document.getElementById("adminGameCurrent"), total: document.getElementById("adminGameTotal") },
-                favorites: { prev: document.getElementById("favPrev"), next: document.getElementById("favNext"), current: document.getElementById("favCurrent"), total: document.getElementById("favTotal") }
-            },
             pageSizeSelectors: {
                 admin: document.getElementById('adminPageSizeSelector'), user: document.getElementById('userPageSizeSelector'),
                 favorites: document.getElementById('favoritesPageSizeSelector')
@@ -1237,6 +1271,8 @@
             importPublicListBtn: document.getElementById('import-public-list-btn'),
             toast: document.getElementById("toast"), modalOverlay: document.getElementById("modalOverlay"), modalContent: document.getElementById("modalContent"),
             imagePreviewPopup: document.getElementById("imagePreviewPopup"),
+            hamburgerBtn: document.getElementById('hamburger-btn'),
+            mobileMenu: document.getElementById('mobile-menu')
         };
 
         // --- ユーティリティ ---
@@ -1253,7 +1289,7 @@
         const firebaseApp = initializeApp(CONSTANTS.FIREBASE_CONFIG);
         const db = getDatabase(firebaseApp);
         const auth = getAuth(firebaseApp);
-        const functions = getFunctions(firebaseApp, "asia-northeast1"); // リージョンを指定
+        const functions = getFunctions(firebaseApp, "asia-northeast1");
         let activePopover = null;
 
         // --- UI描画関連 ---
@@ -1262,28 +1298,29 @@
             if (!data) return document.createElement('div');
             
             const canonicalWorkId = data.pageUrl?.match(/(RJ|VJ|BJ)\d{6,}/i)?.[0].toUpperCase() || workId;
-
             const { title, coverUrl, pageUrl, tags = {}, votes = {}, score = 0 } = data;
             const userVote = votes[state.clientId] || 0;
             const isFavorited = state.favorites.has(canonicalWorkId);
             const isInAnyList = Object.keys(state.myListItems).some(listId => state.myListItems[listId]?.[canonicalWorkId]);
             const authDisabled = state.currentUser ? '' : 'disabled';
+            
             const card = document.createElement("article");
             card.className = `item`;
             card.dataset.id = workId;
-            
+            card.dataset.canonicalId = canonicalWorkId; // データ属性に正規IDを追加
+
             let cardActionsHTML = `
-                <button class="favorite-btn ${isFavorited ? 'favorited' : ''}" title="お気に入り" ${authDisabled}>♥</button>
-                <button class="add-to-list-btn ${isInAnyList ? 'in-list' : ''}" title="リストに追加" ${authDisabled}>+</button>
+                <button class="favorite-btn card-action-btn ${isFavorited ? 'favorited' : ''}" title="お気に入り" ${authDisabled}>♥</button>
+                <button class="add-to-list-btn card-action-btn ${isInAnyList ? 'in-list' : ''}" title="リストに追加" ${authDisabled}>+</button>
             `;
             if (context === 'myList' && state.activeListId) {
-                cardActionsHTML += `<button class="remove-from-list-btn" title="リストから削除" data-list-id="${state.activeListId}">×</button>`;
+                cardActionsHTML += `<button class="remove-from-list-btn card-action-btn" title="リストから削除" data-list-id="${state.activeListId}">×</button>`;
             }
 
             let footerHTML = `
                 <div class="rating-buttons">
-                    <button class="rating-btn good${userVote === 1 ? ' active' : ''}" data-score="1">Good</button>
-                    <button class="rating-btn bad${userVote === -1 ? ' active' : ''}" data-score="-1">Bad</button>
+                    <button class="rating-btn good card-action-btn ${userVote === 1 ? ' active' : ''}" data-score="1">Good</button>
+                    <button class="rating-btn bad card-action-btn ${userVote === -1 ? ' active' : ''}" data-score="-1">Bad</button>
                     <span class="score-display">${score}</span>
                 </div>
                 <div class="card-actions">${cardActionsHTML}</div>`;
@@ -1293,21 +1330,23 @@
             }
 
             card.innerHTML = `<img src="${coverUrl}" alt="${title}" loading="lazy"> <div class="item-body"> <h3 class="title">${util.escapeHTML(title)}</h3> <div class="tags">${Object.values(tags).map(n => `<span class="tag">${util.escapeHTML(n)}</span>`).join("")}</div> </div> <div class="item-footer">${footerHTML}</div>`;
-            
-            card.addEventListener("click", (e) => { if (!e.target.closest('button')) window.open(pageUrl, "_blank"); });
-            card.querySelectorAll(".rating-btn").forEach(btn => btn.addEventListener("click", (e) => { e.stopPropagation(); handleVote(workId, btn); }));
-            card.querySelectorAll('.favorite-btn').forEach(btn => btn.addEventListener('click', (e) => { e.stopPropagation(); toggleFavorite(canonicalWorkId); }));
-            card.querySelectorAll('.add-to-list-btn').forEach(btn => btn.addEventListener('click', (e) => { e.stopPropagation(); openAddToListPopover(canonicalWorkId, e.currentTarget); }));
-            card.querySelectorAll('.remove-from-list-btn').forEach(btn => btn.addEventListener('click', (e) => {
-                e.stopPropagation();
-                const listId = e.currentTarget.dataset.listId;
-                if (confirm(`「${util.escapeHTML(state.myLists[listId]?.name || '')}」からこの作品を削除しますか？`)) {
-                    removeWorkFromList(canonicalWorkId, listId);
-                }
-            }));
             return card;
         }
-        
+
+        function createSkeletonCard() {
+            const card = document.createElement("div");
+            card.className = "skeleton-card";
+            return card;
+        }
+
+        function renderSkeletons(gridElement, count) {
+            if(!gridElement) return;
+            gridElement.innerHTML = "";
+            for (let i = 0; i < count; i++) {
+                gridElement.appendChild(createSkeletonCard());
+            }
+        }
+
         function adjustPcGridHeight(gridElement, pageSize) {
             if (window.innerWidth <= 768 || !gridElement) { if (gridElement) gridElement.style.minHeight = 'auto'; return; }
             requestAnimationFrame(() => {
@@ -1323,159 +1362,156 @@
             });
         }
         
-        function renderPage(type) {
-            const isAdminSection = type.startsWith('admin_');
-            const isFavoritesSection = type === 'favorites';
-            let pageSize, sortedIds, context, source;
+        function getFilteredIdsForView(type) {
+            const isAdmin = type.startsWith('admin_');
+            const isFav = type === 'favorites';
+            
+            let baseIds = [];
+            let sourceData = state.works;
 
-            if (isAdminSection) {
-              pageSize = state.pageSize.admin;
-              source = state.adminPicks;
-              const genre = type.split('_')[1];
-              sortedIds = state.sortedAdminIds[genre] || [];
-              context = 'admin';
-            } else if (isFavoritesSection) {
-              pageSize = state.pageSize.favorites;
-              source = { ...state.works, ...state.adminPicks };
-              sortedIds = state.sortedWorkIds.favorites || [];
-              context = 'favorites';
+            if (isAdmin) {
+                const genre = type.split('_')[1];
+                baseIds = state.sortedAdminIds[genre] || [];
+                sourceData = state.adminPicks;
+            } else if (isFav) {
+                baseIds = state.sortedWorkIds.favorites || [];
+                sourceData = { ...state.works, ...state.adminPicks };
             } else {
-              pageSize = state.pageSize.user;
-              source = state.works;
-              sortedIds = state.sortedWorkIds[type] || [];
-              context = 'user';
+                baseIds = state.sortedWorkIds[type] || [];
+            }
+            
+            let filteredIds = [...baseIds];
+
+            if (state.hideBadlyRated && !isAdmin && !isFav) {
+                filteredIds = filteredIds.filter(id => (sourceData[id]?.votes?.[state.clientId] || 0) !== -1);
             }
 
-            let filteredIds = [...sortedIds];
-            if (state.hideBadlyRated && !isAdminSection && !isFavoritesSection) {
-                filteredIds = filteredIds.filter(id => (source[id]?.votes?.[state.clientId] || 0) !== -1);
-            }
-            if (!isAdminSection && (state.highlightTagIds.size > 0 || state.hideTagIds.size > 0)) {
-                const worksMap = {};
-                for (const id of filteredIds) { worksMap[id] = source[id]; }
-                const hiddenByTags = new Set(), highlightedByTags = new Set(), others = new Set();
-                for (const workId of filteredIds) {
-                    const work = worksMap[workId];
-                    if (!work) continue;
-                    const hasHideTag = util.hasAnyOfTags(work, state.hideTagIds);
-                    const hasHighlightTag = util.hasAnyOfTags(work, state.highlightTagIds);
-                    if (hasHideTag) { hiddenByTags.add(workId); } else if (hasHighlightTag) { highlightedByTags.add(workId); } else { others.add(workId); }
+            if (!isAdmin && (state.highlightTagIds.size > 0 || state.hideTagIds.size > 0)) {
+                const hasHideTag = id => util.hasAnyOfTags(sourceData[id], state.hideTagIds);
+                const hasHighlightTag = id => util.hasAnyOfTags(sourceData[id], state.highlightTagIds);
+
+                const nonHidden = filteredIds.filter(id => !hasHideTag(id));
+                if (state.highlightTagIds.size > 0) {
+                    const highlighted = nonHidden.filter(hasHighlightTag);
+                    const others = nonHidden.filter(id => !hasHighlightTag(id));
+                    return [...highlighted, ...others];
                 }
-                const finalDisplayedIds = [];
-                for (const id of sortedIds) { if (highlightedByTags.has(id)) { finalDisplayedIds.push(id); } }
-                for (const id of sortedIds) { if (others.has(id)) { finalDisplayedIds.push(id); } }
-                filteredIds = finalDisplayedIds;
+                return nonHidden;
             }
+            return filteredIds;
+        }
 
+        function renderPage(type) {
             const grid = dom.grids[type];
             if (!grid) return;
-            const viewContainer = grid.closest('.view-container');
+
+            const isFav = type === 'favorites';
+            const isAdmin = type.startsWith('admin_');
             
-            const pagination = dom.paginations[type];
-            const totalPages = util.calculateTotalPages(filteredIds.length, pageSize);
+            const pageSize = isAdmin ? state.pageSize.admin : (isFav ? state.pageSize.favorites : state.pageSize.user);
+            const context = isAdmin ? 'admin' : (isFav ? 'favorites' : 'user');
+            
+            const allFilteredIds = getFilteredIdsForView(type);
+            
+            const totalPages = util.calculateTotalPages(allFilteredIds.length, pageSize);
             let currentPage = state.currentPage[type];
             if (currentPage > totalPages) {
                 currentPage = state.currentPage[type] = totalPages;
             }
             
-            // 新しいページネーションを描画
-            let paginationContainerId = '';
-            if (isAdminSection) {
-                paginationContainerId = type === 'admin_manga' ? 'adminMangaPagination' : 'adminGamePagination';
-            } else if (isFavoritesSection) {
-                paginationContainerId = 'favoritesPagination';
-            } else {
-                paginationContainerId = type === 'new' ? 'newPagination' : 'rankingPagination';
-            }
-
-            renderPaginationButtons(paginationContainerId, currentPage, totalPages, (newPage) => {
-                state.currentPage[type] = newPage;
-                renderPage(type);
-            });
-            
             const startIndex = (currentPage - 1) * pageSize;
             const endIndex = startIndex + pageSize;
-            const pageIds = filteredIds.slice(startIndex, endIndex);
+            const pageIds = allFilteredIds.slice(startIndex, endIndex);
 
-            grid.innerHTML = "";
+            grid.innerHTML = ""; // Clear previous content (skeletons or old cards)
             pageIds.forEach(id => {
-                if (source[id]) {
-                    grid.appendChild(makeCard(id, context));
-                }
+                grid.appendChild(makeCard(id, context));
             });
             
             adjustPcGridHeight(grid, pageSize);
 
-            if (viewContainer) {
-                const filterBtn = viewContainer.querySelector('.filterByTagsBtn');
-                const resetBtn = viewContainer.querySelector('.resetFilterBtn');
-                if(filterBtn && resetBtn) {
-                    const activeFiltersCount = state.highlightTagIds.size + state.hideTagIds.size;
-                    if (activeFiltersCount > 0) {
-                        filterBtn.classList.add('active');
-                        filterBtn.textContent = `タグ絞り込み (${state.highlightTagIds.size}優先 / ${state.hideTagIds.size}非表示)`;
-                        resetBtn.classList.remove('hidden');
-                    } else {
-                        filterBtn.classList.remove('active');
-                        filterBtn.textContent = 'タグで絞り込み';
-                        resetBtn.classList.add('hidden');
-                    }
+            const paginationContainerId = {
+                admin_manga: 'adminMangaPagination',
+                admin_game: 'adminGamePagination',
+                new: 'newPagination',
+                ranking: 'rankingPagination',
+                favorites: 'favoritesPagination'
+            }[type];
+
+            if (paginationContainerId) {
+                renderPaginationButtons(paginationContainerId, currentPage, totalPages, (newPage) => {
+                    state.currentPage[type] = newPage;
+                    renderPage(type);
+                });
+            }
+            
+            // Update filter button states
+            const viewContainer = grid.closest('.view-container') || dom.views.main;
+            const filterBtn = viewContainer.querySelector('.filterByTagsBtn');
+            const resetBtn = viewContainer.querySelector('.resetFilterBtn');
+            if(filterBtn && resetBtn) {
+                const activeFiltersCount = state.highlightTagIds.size + state.hideTagIds.size;
+                if (activeFiltersCount > 0) {
+                    filterBtn.classList.add('active');
+                    filterBtn.textContent = `タグ絞り込み (${state.highlightTagIds.size}優先 / ${state.hideTagIds.size}非表示)`;
+                    resetBtn.classList.remove('hidden');
+                } else {
+                    filterBtn.classList.remove('active');
+                    filterBtn.textContent = 'タグで絞り込み';
+                    resetBtn.classList.add('hidden');
                 }
             }
-          }
+        }
+
 
         function renderPaginationButtons(containerId, currentPage, totalPages, onPageClick) {
-          const container = document.getElementById(containerId);
-          if (!container) return;
-          container.innerHTML = '';
+            const container = document.getElementById(containerId);
+            if (!container) return;
+            container.innerHTML = '';
+            if (totalPages <= 1) return;
 
-          // ボタンを生成するヘルパー関数
-          const createButton = (text, page, isDisabled = false, isCurrent = false) => {
-            const btn = document.createElement('button');
-            btn.textContent = text;
-            btn.dataset.page = page;
-            if (isDisabled) btn.disabled = true;
-            if (isCurrent) btn.classList.add('active'); // CSSで .pagination button.active { background:#333; color:white; } などを追加すると見やすい
-            return btn;
-          };
-          
-          // 最初へ & 前へ
-          container.appendChild(createButton('<<', 1, currentPage === 1));
-          container.appendChild(createButton('<', currentPage - 1, currentPage === 1));
+            const createButton = (text, page, isDisabled = false, isCurrent = false) => {
+                const btn = document.createElement('button');
+                btn.textContent = text;
+                btn.dataset.page = page;
+                if (isDisabled) btn.disabled = true;
+                if (isCurrent) btn.classList.add('active');
+                return btn;
+            };
+            
+            container.appendChild(createButton('<<', 1, currentPage === 1));
+            container.appendChild(createButton('<', currentPage - 1, currentPage === 1));
 
-          // ページ番号ボタンのロジック
-          let startPage, endPage;
-          if (totalPages <= 5) {
-            startPage = 1;
-            endPage = totalPages;
-          } else if (currentPage <= 3) {
-            startPage = 1;
-            endPage = 5;
-          } else if (currentPage > totalPages - 3) {
-            startPage = totalPages - 4;
-            endPage = totalPages;
-          } else {
-            startPage = currentPage - 2;
-            endPage = currentPage + 2;
-          }
-
-          for (let i = startPage; i <= endPage; i++) {
-            container.appendChild(createButton(i, i, false, i === currentPage));
-          }
-
-          // 次へ & 最後へ
-          container.appendChild(createButton('>', currentPage + 1, currentPage === totalPages));
-          container.appendChild(createButton('>>', totalPages, currentPage === totalPages));
-          
-          // クリックイベント
-          container.addEventListener('click', (e) => {
-            if (e.target.tagName === 'BUTTON' && e.target.dataset.page) {
-              const newPage = parseInt(e.target.dataset.page, 10);
-              if (newPage !== currentPage) {
-                onPageClick(newPage);
-              }
+            let startPage, endPage;
+            if (totalPages <= 5) {
+                startPage = 1;
+                endPage = totalPages;
+            } else if (currentPage <= 3) {
+                startPage = 1;
+                endPage = 5;
+            } else if (currentPage > totalPages - 3) {
+                startPage = totalPages - 4;
+                endPage = totalPages;
+            } else {
+                startPage = currentPage - 2;
+                endPage = currentPage + 2;
             }
-          });
+
+            for (let i = startPage; i <= endPage; i++) {
+                container.appendChild(createButton(i, i, false, i === currentPage));
+            }
+
+            container.appendChild(createButton('>', currentPage + 1, currentPage === totalPages));
+            container.appendChild(createButton('>>', totalPages, currentPage === totalPages));
+            
+            container.addEventListener('click', (e) => {
+                if (e.target.tagName === 'BUTTON' && e.target.dataset.page) {
+                    const newPage = parseInt(e.target.dataset.page, 10);
+                    if (newPage !== currentPage) {
+                        onPageClick(newPage);
+                    }
+                }
+            });
         }
         
         function openTagFilterModal() {
@@ -1563,87 +1599,59 @@
         }
         
         function openAddToListPopover(workId, button) {
-          if (activePopover) activePopover.remove(); // 既存のポップオーバーがあれば削除
-          
-          const isMobile = window.innerWidth <= 768;
-
-          // ポップオーバー本体を作成
-          const popover = document.createElement('div');
-          popover.className = 'add-to-list-popover';
-          
-          let listHtml = '<ul>';
-          if (Object.keys(state.myLists).length > 0) {
-            for (const listId in state.myLists) {
-              const list = state.myLists[listId];
-              const isChecked = state.myListItems[listId]?.[workId] ? 'checked' : '';
-              listHtml += `<li><label><input type="checkbox" data-list-id="${listId}" ${isChecked}> ${util.escapeHTML(list.name)}</label></li>`;
-            }
-          } else {
-            listHtml += '<li>リストがありません</li>';
-          }
-          listHtml += '</ul>';
-          popover.innerHTML = `${listHtml} <form class="new-list-form"><input type="text" placeholder="新規リスト名" required><button type="submit">+</button></form>`;
-
-          // ポップオーバー内部のクリックで閉じないようにする
-          popover.addEventListener('click', e => e.stopPropagation());
-          
-          if (isMobile) {
-            // --- スマホの場合：オーバーレイを生成して中央に表示 ---
-            const overlay = document.createElement('div');
-            overlay.className = 'popover-overlay';
-            overlay.appendChild(popover); // ポップオーバーをオーバーレイの中に入れる
-            document.body.appendChild(overlay);
-            activePopover = overlay; // 閉じる対象はオーバーレイ全体
-
-            // オーバーレイ（背景）のクリックで閉じる
-            overlay.addEventListener('click', () => {
-              if (activePopover) {
-                activePopover.remove();
-                activePopover = null;
-              }
-            }, { once: true });
-
-          } else {
-            // --- PCの場合：これまで通りボタンの近くに表示 ---
-            document.body.appendChild(popover);
-            activePopover = popover; // 閉じる対象はポップオーバー自身
-
-            // 位置を計算して設定
-            const btnRect = button.getBoundingClientRect();
-            const popoverRect = popover.getBoundingClientRect();
-            let top = window.scrollY + btnRect.bottom + 5;
-            let left = window.scrollX + btnRect.right - popoverRect.width;
-            if (left < 0) { left = window.scrollX + btnRect.left; }
-            if (top + popoverRect.height > window.innerHeight + window.scrollY) { top = window.scrollY + btnRect.top - popoverRect.height - 5; }
-            popover.style.left = `${left}px`;
-            popover.style.top = `${top}px`;
-
-            // 画面のどこかをクリックしたら閉じる
-            setTimeout(() => document.addEventListener('click', () => {
-              if (activePopover && !activePopover.classList.contains('popover-overlay')) {
-                activePopover.remove();
-                activePopover = null;
-              }
-            }, { once: true }), 0);
-          }
-          
-          // ポップオーバー内部のイベントリスナーを設定（共通）
-          popover.querySelectorAll('input[type="checkbox"]').forEach(cb => cb.addEventListener('change', () => toggleWorkInList(workId, cb.dataset.listId, cb.checked)));
-          popover.querySelector('form').addEventListener('submit', async (e) => {
-            e.preventDefault();
-            const input = e.target.querySelector('input');
-            const newListId = await createNewList(input.value);
-            if (newListId) await toggleWorkInList(workId, newListId, true);
+            if (activePopover) activePopover.remove();
             
-            // 閉じる処理
-            if (activePopover) {
-              activePopover.remove();
-              activePopover = null;
+            const isMobile = window.innerWidth <= 768;
+            const popover = document.createElement('div');
+            popover.className = 'add-to-list-popover';
+            
+            let listHtml = '<ul>';
+            if (Object.keys(state.myLists).length > 0) {
+                for (const listId in state.myLists) {
+                    const list = state.myLists[listId];
+                    const isChecked = state.myListItems[listId]?.[workId] ? 'checked' : '';
+                    listHtml += `<li><label><input type="checkbox" data-list-id="${listId}" ${isChecked}> ${util.escapeHTML(list.name)}</label></li>`;
+                }
+            } else {
+                listHtml += '<li>リストがありません</li>';
             }
-          });
+            listHtml += '</ul>';
+            popover.innerHTML = `${listHtml} <form class="new-list-form"><input type="text" placeholder="新規リスト名" required><button type="submit">+</button></form>`;
+
+            popover.addEventListener('click', e => e.stopPropagation());
+            
+            if (isMobile) {
+                const overlay = document.createElement('div');
+                overlay.className = 'popover-overlay';
+                overlay.appendChild(popover);
+                document.body.appendChild(overlay);
+                activePopover = overlay;
+                overlay.addEventListener('click', () => { if (activePopover) { activePopover.remove(); activePopover = null; } }, { once: true });
+            } else {
+                document.body.appendChild(popover);
+                activePopover = popover;
+                const btnRect = button.getBoundingClientRect();
+                const popoverRect = popover.getBoundingClientRect();
+                let top = window.scrollY + btnRect.bottom + 5;
+                let left = window.scrollX + btnRect.right - popoverRect.width;
+                if (left < 0) { left = window.scrollX + btnRect.left; }
+                if (top + popoverRect.height > window.innerHeight + window.scrollY) { top = window.scrollY + btnRect.top - popoverRect.height - 5; }
+                popover.style.left = `${left}px`;
+                popover.style.top = `${top}px`;
+                setTimeout(() => document.addEventListener('click', () => { if (activePopover && !activePopover.classList.contains('popover-overlay')) { activePopover.remove(); activePopover = null; } }, { once: true }), 0);
+            }
+            
+            popover.querySelectorAll('input[type="checkbox"]').forEach(cb => cb.addEventListener('change', () => toggleWorkInList(workId, cb.dataset.listId, cb.checked)));
+            popover.querySelector('form').addEventListener('submit', async (e) => {
+                e.preventDefault();
+                const input = e.target.querySelector('input');
+                const newListId = await createNewList(input.value);
+                if (newListId) await toggleWorkInList(workId, newListId, true);
+                if (activePopover) { activePopover.remove(); activePopover = null; }
+            });
         }
         
-        async function renderMyListsPage() { // asyncキーワードを追加
+        async function renderMyListsPage() {
             dom.mylistsContainer.innerHTML = `<div class="mylists-sidebar"><h3>マイリスト一覧 (${Object.keys(state.myLists).length}/${CONSTANTS.LIST_LIMITS.MAX_LISTS})</h3><ul id="mylists-sidebar-list"></ul><div class="list-actions"><div class="form-group"><input type="text" id="new-list-name-main" placeholder="新規リスト名"><button id="create-list-btn-main">作成</button></div></div><hr><h3>リストをインポート</h3><div class="list-actions"><div class="form-group"><input type="text" id="import-list-id" placeholder="共有ID"><button id="import-list-btn">追加</button></div></div></div><div class="mylists-content"><h3 id="current-list-name">リストを選択してください</h3><div class="list-actions" id="current-list-actions" style="display:none;"><p>共有ID: <span id="share-id-display"></span></p></div><div id="current-list-grid" class="grid"></div></div>`;
             const listUl = dom.mylistsContainer.querySelector('#mylists-sidebar-list');
             listUl.innerHTML = '';
@@ -1681,7 +1689,6 @@
             dom.mylistsContainer.querySelector('#create-list-btn-main').onclick = () => { const input = dom.mylistsContainer.querySelector('#new-list-name-main'); if (input.value) createNewList(input.value).then(() => { input.value = ''; }); };
             dom.mylistsContainer.querySelector('#import-list-btn').onclick = () => { const input = dom.mylistsContainer.querySelector('#import-list-id'); if (input.value) importList(input.value.trim()).then(() => { input.value = ''; }); };
             
-            // ▼▼▼ ここからが追加/修正部分 ▼▼▼
             if (state.activeListId && state.myLists[state.activeListId]) {
                 const list = state.myLists[state.activeListId];
                 const listItems = state.myListItems[state.activeListId] || {};
@@ -1689,26 +1696,22 @@
                 
                 dom.mylistsContainer.querySelector('#current-list-name').textContent = util.escapeHTML(list.name);
                 const grid = dom.mylistsContainer.querySelector('#current-list-grid');
-                grid.innerHTML = '読み込み中...'; // ローディング表示
-
-                // 足りない作品情報をDBから取得
+                grid.innerHTML = '読み込み中...';
+                
                 const neededWorkIds = itemIds.filter(id => !state.works[id] && !state.adminPicks[id]);
                 if (neededWorkIds.length > 0) {
                     const workPromises = neededWorkIds.map(workId =>
                         get(child(ref(db), `${CONSTANTS.DB_PATHS.WORKS}/${workId}`)).then(snap => {
                             if (snap.exists()) {
-                                // 取得した情報を一時的にstateにキャッシュ
                                 state.works[snap.key] = { id: snap.key, ...snap.val() };
                             }
                         })
                     );
                     await Promise.all(workPromises);
                 }
-
-                // 再度レンダリング
+                
                 grid.innerHTML = '';
                 itemIds.forEach(workId => {
-                    // state.works と state.adminPicks の両方から作品情報を探す
                     if (state.works[workId] || state.adminPicks[workId]) {
                         grid.appendChild(makeCard(workId, 'myList'));
                     }
@@ -1721,7 +1724,6 @@
                     navigator.clipboard.writeText(list.id).then(() => util.showToast('IDをコピーしました！'), () => util.showToast('コピーに失敗しました'));
                 };
             }
-            // ▲▲▲ ここまでが追加/修正部分 ▲▲▲
         }
         
         function renderPublicListPage({ info, items, works }) {
@@ -1737,7 +1739,7 @@
             
             sortedItems.forEach(([workId]) => {
                 if (allAvailableWorks[workId]) {
-                     grid.appendChild(makeCard(workId, 'publicList'));
+                        grid.appendChild(makeCard(workId, 'publicList'));
                 }
             });
         }
@@ -1753,7 +1755,11 @@
             if (viewName === 'publicList') { /* URL is already set */ }
             else if (viewName !== 'main') { url.searchParams.set('view', viewName); url.searchParams.delete('list'); window.history.pushState({ view: viewName }, '', url); }
             else { url.searchParams.delete('view'); url.searchParams.delete('list'); window.history.pushState({ view: 'main' }, '', url); }
-            if (viewName === 'favorites') renderPage('favorites');
+            
+            if (viewName === 'favorites') {
+                if(!state.isInitialDataLoaded.works) renderSkeletons(dom.grids.favorites, state.pageSize.favorites);
+                renderPage('favorites');
+            }
             if (viewName === 'mylists') renderMyListsPage();
         }
         
@@ -1772,15 +1778,13 @@
             catch (error) { util.showToast(`送信に失敗しました: ${error.message}`); btn.disabled = false; btn.textContent = '送信'; }
         }
         
-        // --- データベース操作 & ロジック ---
         async function addWork(url) {
             const originalUrl = url.trim();
             if (!originalUrl.includes("dlsite.com")) {
                 return util.showToast("有効なDLsiteのURLを入力してください");
             }
 
-            // ★★★重要：Firebaseコンソールで確認した、あなたの関数の正しいURLに置き換えてください★★★
-            const functionUrl = "https://addworkfromurl-vubh7ebq4a-uc.a.run.app"; // 例: https://us-central1-dlsite-share.cloudfunctions.net/addWorkFromUrl
+            const functionUrl = "https://addworkfromurl-vubh7ebq4a-uc.a.run.app"; 
 
             const btn = document.getElementById('addBtn');
             const input = dom.urlInput;
@@ -1893,7 +1897,7 @@
                     }
                 }
                 if (needsRender || removedListIds.length > 0) {
-                     if (state.currentView === 'mylists') { renderMyListsPage(); }
+                    if (state.currentView === 'mylists') { renderMyListsPage(); }
                 }
             });
             userListeners.push(listMetaListener);
@@ -1944,9 +1948,7 @@
             const items = itemsSnap.exists() ? itemsSnap.val() : {};
             const workIds = Object.keys(items);
 
-            const workPromises = workIds.map(workId =>
-                get(child(ref(db), `${CONSTANTS.DB_PATHS.WORKS}/${workId}`))
-            );
+            const workPromises = workIds.map(workId => get(child(ref(db), `${CONSTANTS.DB_PATHS.WORKS}/${workId}`)));
             const workSnapshots = await Promise.all(workPromises);
 
             const worksForList = {};
@@ -1956,11 +1958,7 @@
                 }
             });
             
-            return { 
-                info: { id: listSnap.key, ...listSnap.val() }, 
-                items: items,
-                works: worksForList
-            };
+            return { info: { id: listSnap.key, ...listSnap.val() }, items: items, works: worksForList };
         }
         
         async function importList(listId) {
@@ -1993,8 +1991,8 @@
             state.sortedWorkIds.favorites = [...state.favorites].map(favId => {
                 return allWorks[favId] || Object.values(allWorks).find(p => p.pageUrl?.includes(favId));
             }).filter(Boolean) 
-              .sort((a, b) => (b?.timestamp || 0) - (a?.timestamp || 0))
-              .map(w => w.id);
+                .sort((a, b) => (b?.timestamp || 0) - (a?.timestamp || 0))
+                .map(w => w.id);
             
             const adminPicks = Object.values(state.adminPicks).sort((a, b) => (a.order ?? a.timestamp) - (b.order ?? b.timestamp));
             state.sortedAdminIds.manga = adminPicks.filter(w => util.classifyWork(w) === 'manga').map(w => w.id);
@@ -2002,10 +2000,16 @@
         }
         
         function refreshAllGrids() {
-            renderPage('new'); renderPage('ranking');
-            renderPage('admin_manga'); renderPage('admin_game');
-            renderPage('favorites');
-            if (state.currentView === 'mylists') { renderMyListsPage(); }
+            if (state.currentView === 'main' || state.currentView === 'publicList') {
+                renderPage('new');
+                renderPage('ranking');
+                renderPage('admin_manga');
+                renderPage('admin_game');
+            } else if (state.currentView === 'favorites') {
+                renderPage('favorites');
+            } else if (state.currentView === 'mylists') {
+                renderMyListsPage();
+            }
         }
         
         function initializeListeners() {
@@ -2014,24 +2018,24 @@
                 state.tags = snap.val() || {}; state.tagNameToDataMap.clear();
                 Object.entries(state.tags).forEach(([id, data]) => { state.tagNameToDataMap.set(data.name, { id, ...data }); });
             });
-            const worksRef = ref(db, CONSTANTS.DB_PATHS.WORKS);
-            onValue(worksRef, (snapshot) => {
+            onValue(ref(db, CONSTANTS.DB_PATHS.WORKS), (snapshot) => {
                 const newWorks = {};
                 snapshot.forEach(childSnap => {
                     const data = childSnap.val();
                     newWorks[childSnap.key] = { id: childSnap.key, ...data, score: Object.values(data?.votes || {}).reduce((s, v) => s + v, 0) };
                 });
                 state.works = newWorks;
+                state.isInitialDataLoaded.works = true;
                 updateSortedArrays();
                 refreshAllGrids();
             });
-            const adminPicksRef = ref(db, CONSTANTS.DB_PATHS.ADMIN_PICKS);
-            onValue(adminPicksRef, (snapshot) => {
+            onValue(ref(db, CONSTANTS.DB_PATHS.ADMIN_PICKS), (snapshot) => {
                 const newAdminPicks = {};
                 snapshot.forEach(childSnap => {
                     newAdminPicks[childSnap.key] = { id: childSnap.key, ...childSnap.val() };
                 });
                 state.adminPicks = newAdminPicks;
+                state.isInitialDataLoaded.adminPicks = true;
                 updateSortedArrays();
                 refreshAllGrids();
             });
@@ -2085,28 +2089,101 @@
             dom.pageSizeSelectors.favorites.addEventListener('change', (e) => { state.pageSize.favorites = parseInt(e.target.value, 10); localStorage.setItem('pageSizeFavorites', state.pageSize.favorites); renderPage('favorites'); });
             dom.modalOverlay.addEventListener("click", (e) => { if (e.target === dom.modalOverlay) dom.modalOverlay.classList.add("hidden"); });
             document.getElementById('infoBtn').addEventListener('click', openInfoModal);
-            document.getElementById('hideBadBtn').addEventListener("click", () => { state.hideBadlyRated = !state.hideBadlyRated; const btn = document.getElementById('hideBadBtn'); btn.classList.toggle('active', state.hideBadlyRated); btn.textContent = state.hideBadlyRated ? 'Bad評価を再表示' : 'Bad評価を非表示'; renderPage('new'); renderPage('ranking'); });
-            document.getElementById('mosaicToggleBtn').addEventListener("click", () => { state.mosaicActive = !state.mosaicActive; localStorage.setItem('mosaicActive', state.mosaicActive); document.body.classList.toggle('mosaic-on', state.mosaicActive); document.getElementById('mosaicToggleBtn').textContent = state.mosaicActive ? 'モザイク OFF' : 'モザイク ON'; });
+            
+            const hideBadBtn = document.getElementById('hideBadBtn');
+            hideBadBtn.addEventListener("click", () => { 
+                state.hideBadlyRated = !state.hideBadlyRated; 
+                hideBadBtn.classList.toggle('active', state.hideBadlyRated); 
+                const mobileBtn = dom.mobileMenu.querySelector('[data-action="toggle-bad"]');
+                if(state.hideBadlyRated) {
+                    hideBadBtn.textContent = 'Bad評価を再表示';
+                    if (mobileBtn) mobileBtn.textContent = 'Bad評価を再表示';
+                } else {
+                    hideBadBtn.textContent = 'Bad評価を非表示';
+                    if (mobileBtn) mobileBtn.textContent = 'Bad評価を非表示';
+                }
+                renderPage('new'); renderPage('ranking');
+            });
+            
+            const mosaicToggleBtn = document.getElementById('mosaicToggleBtn');
+            mosaicToggleBtn.addEventListener("click", () => {
+                state.mosaicActive = !state.mosaicActive;
+                localStorage.setItem('mosaicActive', state.mosaicActive);
+                document.body.classList.toggle('mosaic-on', state.mosaicActive);
+                const text = state.mosaicActive ? 'モザイク OFF' : 'モザイク ON';
+                mosaicToggleBtn.textContent = text;
+                const mobileBtn = dom.mobileMenu.querySelector('[data-action="toggle-mosaic"]');
+                if (mobileBtn) mobileBtn.textContent = text;
+            });
+            
             document.querySelectorAll('.filterByTagsBtn').forEach(btn => btn.addEventListener('click', openTagFilterModal));
-            document.querySelectorAll('.resetFilterBtn').forEach(btn => btn.addEventListener('click', () => { state.highlightTagIds.clear(); state.hideTagIds.clear(); refreshAllGrids(); }));
+            document.querySelectorAll('.resetFilterBtn').forEach(btn => btn.addEventListener('click', () => { 
+                state.highlightTagIds.clear(); 
+                state.hideTagIds.clear(); 
+                refreshAllGrids();
+                dom.mobileMenu.querySelector('[data-action="reset-filter"]').classList.add('hidden');
+            }));
             document.getElementById('contactBtn').addEventListener('click', openContactModal);
             document.getElementById('toggle-sidebar-btn').addEventListener('click', (e) => {
                 const isCollapsed = dom.mylistsContainer.classList.toggle('sidebar-collapsed');
                 e.currentTarget.textContent = isCollapsed ? '▶' : '◀';
             });
-            // タブ切り替え時にグリッドの高さを再計算するリスナー
-            document.querySelectorAll('.tabs input[type="radio"]').forEach(radio => {
-                radio.addEventListener('change', () => {
-                    // チェックされたタブのIDから、対応するグリッド要素を探す
-                    const activeTabId = radio.id.replace('tab-', ''); // 例: "admin_manga"
-                    const grid = dom.grids[activeTabId];
-                    if (grid) {
-                        // 対応するpageSizeを取得
-                        const pageSize = activeTabId.startsWith('admin_') ? state.pageSize.admin : state.pageSize.user;
-                        // 高さの再計算を実行
-                        adjustPcGridHeight(grid, pageSize);
+            
+            dom.hamburgerBtn.addEventListener('click', () => {
+                dom.mobileMenu.classList.toggle('hidden');
+            });
+
+            dom.mobileMenu.addEventListener('click', (e) => {
+                if (e.target.tagName !== 'BUTTON') return;
+                const action = e.target.dataset.action;
+                switch(action) {
+                    case 'contact': openContactModal(); break;
+                    case 'filter-tags': openTagFilterModal(); break;
+                    case 'reset-filter': 
+                        state.highlightTagIds.clear(); 
+                        state.hideTagIds.clear(); 
+                        refreshAllGrids();
+                        document.querySelectorAll('.resetFilterBtn').forEach(b => b.classList.add('hidden'));
+                        break;
+                    case 'toggle-bad': hideBadBtn.click(); break;
+                    case 'toggle-mosaic': mosaicToggleBtn.click(); break;
+                    case 'info': openInfoModal(); break;
+                }
+                dom.mobileMenu.classList.add('hidden');
+            });
+
+            window.addEventListener('popstate', handleUrlBasedView);
+        }
+
+        function setupGridEventListeners() {
+            dom.container.addEventListener('click', (e) => {
+                const target = e.target;
+                const card = target.closest('.item');
+                if (!card) return;
+
+                const workId = card.dataset.id;
+                const canonicalId = card.dataset.canonicalId;
+
+                if (target.closest('.card-action-btn')) {
+                    e.stopPropagation();
+                    if (target.matches('.rating-btn')) {
+                        handleVote(workId, target);
+                    } else if (target.matches('.favorite-btn')) {
+                        toggleFavorite(canonicalId);
+                    } else if (target.matches('.add-to-list-btn')) {
+                        openAddToListPopover(canonicalId, target);
+                    } else if (target.matches('.remove-from-list-btn')) {
+                        const listId = target.dataset.listId;
+                        if (confirm(`「${util.escapeHTML(state.myLists[listId]?.name || '')}」からこの作品を削除しますか？`)) {
+                            removeWorkFromList(canonicalId, listId);
+                        }
                     }
-                });
+                } else {
+                    const workData = state.works[workId] || state.adminPicks[workId];
+                    if(workData && workData.pageUrl) {
+                        window.open(workData.pageUrl, "_blank");
+                    }
+                }
             });
         }
         
@@ -2162,75 +2239,34 @@
         function initializeDetailsPopup() {
             const popup = document.getElementById('details-popup');
             if (!popup) return;
-
-            let hideTimeout; // ポップアップを隠す処理を遅延させるためのタイマー
-
-            // イベントリスナーをコンテナに設定
+            let hideTimeout;
             document.querySelector('.container').addEventListener('mouseover', (e) => {
-                if (window.innerWidth <= 768) return; // スマホでは無効
-                
-                const titleEl = e.target.closest('.title'); // ★トリガーをタイトル（.title）に変更
-                if (!titleEl) return; // タイトル上でなければ何もしない
-
-                // ポップアップを隠すタイマーが作動中ならキャンセル
+                if (window.innerWidth <= 768) return;
+                const titleEl = e.target.closest('.title');
+                if (!titleEl) return;
                 clearTimeout(hideTimeout);
-
                 const card = titleEl.closest('.item');
                 const workId = card.dataset.id;
                 const work = state.works[workId] || state.adminPicks[workId];
-
-                if (!work || !work.tags || Object.keys(work.tags).length === 0) {
-                    popup.style.display = 'none';
-                    return;
-                }
-
-                // --- ポップアップの内容を生成 ---
-                popup.innerHTML = `
-                    <h4>${util.escapeHTML(work.title)}</h4>
-                    <div class="popup-tags">
-                        ${Object.values(work.tags).map(tag => `<span class="popup-tag">${util.escapeHTML(tag)}</span>`).join('')}
-                    </div>
-                `;
-                
-                // --- ポップアップの位置を計算 ---
-                const cardRect = card.getBoundingClientRect(); // 位置の基準はカードのまま
+                if (!work || !work.tags || Object.keys(work.tags).length === 0) { popup.style.display = 'none'; return; }
+                popup.innerHTML = `<h4>${util.escapeHTML(work.title)}</h4><div class="popup-tags">${Object.values(work.tags).map(tag => `<span class="popup-tag">${util.escapeHTML(tag)}</span>`).join('')}</div>`;
+                const cardRect = card.getBoundingClientRect();
                 popup.style.display = 'block';
                 const popupRect = popup.getBoundingClientRect();
-
-                let top = window.scrollY + cardRect.bottom + 5; // カードの下に5pxの余白
+                let top = window.scrollY + cardRect.bottom + 5;
                 let left = window.scrollX + cardRect.left;
-
-                // 画面の右端からはみ出ないように調整
-                if (left + popupRect.width > window.innerWidth) {
-                    left = window.scrollX + cardRect.right - popupRect.width;
-                }
-                
+                if (left + popupRect.width > window.innerWidth) { left = window.scrollX + cardRect.right - popupRect.width; }
                 popup.style.left = `${left}px`;
                 popup.style.top = `${top}px`;
             });
-
-            // タイトルからマウスが離れたらポップアップを隠す
             document.querySelector('.container').addEventListener('mouseout', (e) => {
                 const titleEl = e.target.closest('.title');
-                // マウスがタイトルの外に出て、かつポップアップに移動していない場合
                 if (titleEl && e.relatedTarget !== popup) {
-                    hideTimeout = setTimeout(() => {
-                        popup.style.display = 'none';
-                    }, 200); // 0.2秒後に隠す（ポップアップへ移動する猶予）
+                    hideTimeout = setTimeout(() => { popup.style.display = 'none'; }, 200);
                 }
             });
-
-            // ポップアップ自体にマウスが乗っている間は消さない
-            popup.addEventListener('mouseover', () => {
-                clearTimeout(hideTimeout);
-            });
-            
-            // ポップアップからマウスが離れたら隠す
-            popup.addEventListener('mouseout', () => {
-                hideTimeout = setTimeout(() => {
-                    popup.style.display = 'none';
-                }, 200);
-            });
+            popup.addEventListener('mouseover', () => { clearTimeout(hideTimeout); });
+            popup.addEventListener('mouseout', () => { hideTimeout = setTimeout(() => { popup.style.display = 'none'; }, 200); });
         }
         
         function main() {
@@ -2246,9 +2282,17 @@
             if (localStorage.getItem('mosaicActive') === 'true') {
                 state.mosaicActive = true; document.body.classList.add('mosaic-on');
                 document.getElementById('mosaicToggleBtn').textContent = 'モザイク OFF';
+                dom.mobileMenu.querySelector('[data-action="toggle-mosaic"]').textContent = 'モザイク OFF';
             }
-              
+            
             initializeListeners();
+            // Render skeletons on initial load
+            Object.values(dom.grids).forEach(grid => {
+                const type = Object.keys(dom.grids).find(key => dom.grids[key] === grid);
+                const pageSize = state.pageSize[type] || state.pageSize.user;
+                renderSkeletons(grid, pageSize);
+            });
+
 
             onAuthStateChanged(auth, (user) => {
                 updateUIforAuthState(user);
@@ -2264,12 +2308,12 @@
             initializePageSizeSelectors();
             setupCollapsers();
             setupEventListeners();
+            setupGridEventListeners(); // ★ Event delegation setup
             setupImagePreviewListeners();
             initializeDetailsPopup();
-          }
+        }
         
         main();
     </script>
 </body>
 </html>
-

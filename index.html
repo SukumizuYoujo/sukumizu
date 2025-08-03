@@ -109,16 +109,16 @@
  }
  /* 詳細情報ポップアップ */
  #details-popup {
-    display: none; /* 通常は非表示 */
-    position: absolute; /* マウス位置に追従させる */
-    z-index: 5000; /* 他の要素より手前に表示 */
+    display: none;
+    position: absolute;
+    z-index: 5000; 
     background-color: #fff;
     border: 1px solid #ccc;
     border-radius: 6px;
     box-shadow: 0 4px 12px rgba(0,0,0,0.15);
     padding: 1rem;
     max-width: 350px;
-    pointer-events: none; /* ポップアップ自体がマウスイベントの邪魔をしないように */
+    pointer-events: none; 
     transition: opacity 0.1s ease-in-out;
  }
 
@@ -207,6 +207,7 @@
     border-radius: 4px;
     font-size: 1rem;
     cursor: pointer;
+    white-space: nowrap;
  }
  .main-nav button.active {
     background: #000;
@@ -433,7 +434,6 @@
     display: flex;
     flex-direction: column;
     overflow: hidden;
-    cursor: pointer;
     height: 320px;
     transition: box-shadow 0.2s;
  }
@@ -451,7 +451,6 @@
  /* タイトルとタグをまとめる親要素 */
  .item-body {
     flex: 1;
-    /* この要素でスクロールを管理 */
     overflow-y: auto;
     padding: 0 .75rem .5rem .75rem;
  }
@@ -460,10 +459,8 @@
  .title {
     font-size: .9rem;
     font-weight: bold;
-    /* 高さ制限とスクロールを削除 */
     max-height: none;
     overflow-y: visible;
-    /* タグとの間に余白を設定 */
     margin: .75rem 0;
     cursor: pointer;
  }
@@ -473,7 +470,6 @@
     display: flex;
     flex-wrap: wrap;
     gap: 6px;
-    /* 高さ制限とスクロールを削除 */
     max-height: none;
     overflow-y: visible;
  }
@@ -860,7 +856,7 @@
         font-size: 1.8rem;
     }
     br.mobile-only {
-        display: inline; /* スマホ表示でのみ改行を有効にする */
+        display: inline; 
     }
     .section-header {
         flex-direction: column;
@@ -874,13 +870,34 @@
         margin: 1.5rem 0;
     }
 
-    /* ★★★ ハンバーガーメニュー関連 ★★★ */
+    /* ハンバーガーメニュー関連 */
     .hamburger-btn {
         display: block; /* スマホで表示 */
     }
     #view-main > .controls {
         display: none; /* スマホではメインのコントロールを非表示 */
     }
+
+    /* お気に入り画面のフィルターコントロールを非表示 */
+    #view-favorites .filter-controls {
+        display: none;
+    }
+
+    .main-nav button {
+        height: 36px;
+        padding-top: 0;
+        padding-bottom: 0;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 0.9rem;
+        padding-left: 0.8rem;
+        padding-right: 0.8rem;
+    }
+    .main-nav .hamburger-btn {
+        font-size: 1.2rem;
+    }
+
 
     .controls {
         flex-direction: column;
@@ -987,7 +1004,7 @@
     }
     .rating-buttons {
         justify-content: flex-start;
-        flex-grow: 1; /* ★評価ボタンが左側を埋めるように */
+        flex-grow: 1;
     }
     .card-actions {
         justify-content: flex-end;
@@ -1045,7 +1062,11 @@
     }
     .main-nav {
         overflow-x: auto;
-        white-space: nowrap;
+        -ms-overflow-style: none;  /* IE, Edge */
+        scrollbar-width: none;  /* Firefox */
+    }
+    .main-nav::-webkit-scrollbar { /* Chrome, Safari */
+        display: none;
     }
     #mylists-container {
         flex-direction: column;
@@ -1298,7 +1319,7 @@
             if (!data) return document.createElement('div');
             
             const canonicalWorkId = data.pageUrl?.match(/(RJ|VJ|BJ)\d{6,}/i)?.[0].toUpperCase() || workId;
-            const { title, coverUrl, pageUrl, tags = {}, votes = {}, score = 0 } = data;
+            const { title, coverUrl, tags = {}, votes = {}, score = 0 } = data;
             const userVote = votes[state.clientId] || 0;
             const isFavorited = state.favorites.has(canonicalWorkId);
             const isInAnyList = Object.keys(state.myListItems).some(listId => state.myListItems[listId]?.[canonicalWorkId]);
@@ -1307,7 +1328,7 @@
             const card = document.createElement("article");
             card.className = `item`;
             card.dataset.id = workId;
-            card.dataset.canonicalId = canonicalWorkId; // データ属性に正規IDを追加
+            card.dataset.canonicalId = canonicalWorkId;
 
             let cardActionsHTML = `
                 <button class="favorite-btn card-action-btn ${isFavorited ? 'favorited' : ''}" title="お気に入り" ${authDisabled}>♥</button>
@@ -1319,8 +1340,8 @@
 
             let footerHTML = `
                 <div class="rating-buttons">
-                    <button class="rating-btn good card-action-btn ${userVote === 1 ? ' active' : ''}" data-score="1">Good</button>
-                    <button class="rating-btn bad card-action-btn ${userVote === -1 ? ' active' : ''}" data-score="-1">Bad</button>
+                    <button class="rating-btn good" data-score="1">Good</button>
+                    <button class="rating-btn bad" data-score="-1">Bad</button>
                     <span class="score-display">${score}</span>
                 </div>
                 <div class="card-actions">${cardActionsHTML}</div>`;
@@ -1328,8 +1349,15 @@
             if (['favorites', 'admin', 'myList', 'publicList'].includes(context)) {
                 footerHTML = `<div class="card-actions">${cardActionsHTML}</div>`;
             }
-
+            
             card.innerHTML = `<img src="${coverUrl}" alt="${title}" loading="lazy"> <div class="item-body"> <h3 class="title">${util.escapeHTML(title)}</h3> <div class="tags">${Object.values(tags).map(n => `<span class="tag">${util.escapeHTML(n)}</span>`).join("")}</div> </div> <div class="item-footer">${footerHTML}</div>`;
+            
+            // 状態に応じてactiveクラスを付与
+            const goodBtn = card.querySelector('.rating-btn.good');
+            const badBtn = card.querySelector('.rating-btn.bad');
+            if (userVote === 1 && goodBtn) goodBtn.classList.add('active');
+            if (userVote === -1 && badBtn) badBtn.classList.add('active');
+
             return card;
         }
 
@@ -1423,7 +1451,7 @@
             const endIndex = startIndex + pageSize;
             const pageIds = allFilteredIds.slice(startIndex, endIndex);
 
-            grid.innerHTML = ""; // Clear previous content (skeletons or old cards)
+            grid.innerHTML = "";
             pageIds.forEach(id => {
                 grid.appendChild(makeCard(id, context));
             });
@@ -1439,36 +1467,37 @@
             }[type];
 
             if (paginationContainerId) {
-                renderPaginationButtons(paginationContainerId, currentPage, totalPages, (newPage) => {
-                    state.currentPage[type] = newPage;
-                    renderPage(type);
-                });
+                renderPaginationButtons(paginationContainerId, currentPage, totalPages, type);
             }
             
-            // Update filter button states
             const viewContainer = grid.closest('.view-container') || dom.views.main;
             const filterBtn = viewContainer.querySelector('.filterByTagsBtn');
             const resetBtn = viewContainer.querySelector('.resetFilterBtn');
+            const mobileResetBtn = dom.mobileMenu.querySelector('[data-action="reset-filter"]');
             if(filterBtn && resetBtn) {
                 const activeFiltersCount = state.highlightTagIds.size + state.hideTagIds.size;
                 if (activeFiltersCount > 0) {
                     filterBtn.classList.add('active');
                     filterBtn.textContent = `タグ絞り込み (${state.highlightTagIds.size}優先 / ${state.hideTagIds.size}非表示)`;
                     resetBtn.classList.remove('hidden');
+                    mobileResetBtn.classList.remove('hidden');
                 } else {
                     filterBtn.classList.remove('active');
                     filterBtn.textContent = 'タグで絞り込み';
                     resetBtn.classList.add('hidden');
+                    mobileResetBtn.classList.add('hidden');
                 }
             }
         }
 
 
-        function renderPaginationButtons(containerId, currentPage, totalPages, onPageClick) {
+        function renderPaginationButtons(containerId, currentPage, totalPages, viewType) {
             const container = document.getElementById(containerId);
             if (!container) return;
             container.innerHTML = '';
             if (totalPages <= 1) return;
+            
+            container.dataset.viewType = viewType;
 
             const createButton = (text, page, isDisabled = false, isCurrent = false) => {
                 const btn = document.createElement('button');
@@ -1503,15 +1532,6 @@
 
             container.appendChild(createButton('>', currentPage + 1, currentPage === totalPages));
             container.appendChild(createButton('>>', totalPages, currentPage === totalPages));
-            
-            container.addEventListener('click', (e) => {
-                if (e.target.tagName === 'BUTTON' && e.target.dataset.page) {
-                    const newPage = parseInt(e.target.dataset.page, 10);
-                    if (newPage !== currentPage) {
-                        onPageClick(newPage);
-                    }
-                }
-            });
         }
         
         function openTagFilterModal() {
@@ -1696,7 +1716,7 @@
                 
                 dom.mylistsContainer.querySelector('#current-list-name').textContent = util.escapeHTML(list.name);
                 const grid = dom.mylistsContainer.querySelector('#current-list-grid');
-                grid.innerHTML = '読み込み中...';
+                renderSkeletons(grid, itemIds.length || 10);
                 
                 const neededWorkIds = itemIds.filter(id => !state.works[id] && !state.adminPicks[id]);
                 if (neededWorkIds.length > 0) {
@@ -1753,8 +1773,8 @@
             });
             const url = new URL(window.location);
             if (viewName === 'publicList') { /* URL is already set */ }
-            else if (viewName !== 'main') { url.searchParams.set('view', viewName); url.searchParams.delete('list'); window.history.pushState({ view: viewName }, '', url); }
-            else { url.searchParams.delete('view'); url.searchParams.delete('list'); window.history.pushState({ view: 'main' }, '', url); }
+            else if (viewName !== 'main') { url.searchParams.set('view', viewName); url.searchParams.delete('list'); history.pushState({ view: viewName }, '', url); }
+            else { url.searchParams.delete('view'); url.searchParams.delete('list'); history.pushState({ view: 'main' }, '', url); }
             
             if (viewName === 'favorites') {
                 if(!state.isInitialDataLoaded.works) renderSkeletons(dom.grids.favorites, state.pageSize.favorites);
@@ -1815,16 +1835,33 @@
             }
         }
         
-        async function handleVote(workId, btn) {
-            const score = Number(btn.dataset.score);
+        async function handleVote(workId) {
             const data = state.works[workId] || state.adminPicks[workId];
             if(!data) return;
+            
+            const card = document.querySelector(`.item[data-id="${workId}"]`);
+            if(!card) return;
+
+            const goodBtn = card.querySelector('.rating-btn.good');
+            const badBtn = card.querySelector('.rating-btn.bad');
+            
+            const score = Number(event.target.dataset.score);
             const currentVote = data.votes?.[state.clientId] || 0;
             const newVote = currentVote === score ? 0 : score;
+
+            // Optimistic UI update
+            goodBtn.classList.toggle('active', newVote === 1);
+            badBtn.classList.toggle('active', newVote === -1);
+            
             const workPath = state.works[workId] ? CONSTANTS.DB_PATHS.WORKS : CONSTANTS.DB_PATHS.ADMIN_PICKS;
             const voteRef = ref(db, `${workPath}/${workId}/votes/${state.clientId}`);
             try { await (newVote === 0 ? remove(voteRef) : set(voteRef, newVote)); }
-            catch (error) { util.showToast(`投票エラー: ${error.message}`); }
+            catch (error) { 
+                util.showToast(`投票エラー: ${error.message}`);
+                // Revert UI on error
+                goodBtn.classList.toggle('active', currentVote === 1);
+                badBtn.classList.toggle('active', currentVote === -1);
+            }
         }
         
         async function deleteList(listId) {
@@ -1913,7 +1950,18 @@
         async function toggleFavorite(workId) {
             if (!state.currentUser) return util.showToast('ログインが必要です。');
             const favRef = ref(db, `${CONSTANTS.DB_PATHS.FAVORITES}/${state.currentUser.uid}/${workId}`);
-            await (state.favorites.has(workId) ? remove(favRef) : set(favRef, serverTimestamp()));
+            
+            // Optimistic UI update
+            const card = document.querySelector(`.item[data-canonical-id="${workId}"]`);
+            if (card) card.querySelector('.favorite-btn')?.classList.toggle('favorited');
+
+            try {
+                await (state.favorites.has(workId) ? remove(favRef) : set(favRef, serverTimestamp()));
+            } catch (error) {
+                // Revert on error
+                if (card) card.querySelector('.favorite-btn')?.classList.toggle('favorited');
+                util.showToast(`お気に入り操作に失敗しました: ${error.message}`);
+            }
         }
         
         async function createNewList(name) {
@@ -2000,14 +2048,12 @@
         }
         
         function refreshAllGrids() {
-            if (state.currentView === 'main' || state.currentView === 'publicList') {
-                renderPage('new');
-                renderPage('ranking');
-                renderPage('admin_manga');
-                renderPage('admin_game');
-            } else if (state.currentView === 'favorites') {
+            const currentView = state.currentView;
+            if (currentView === 'main' || currentView === 'publicList') {
+                ['new', 'ranking', 'admin_manga', 'admin_game'].forEach(renderPage);
+            } else if (currentView === 'favorites') {
                 renderPage('favorites');
-            } else if (state.currentView === 'mylists') {
+            } else if (currentView === 'mylists') {
                 renderMyListsPage();
             }
         }
@@ -2082,30 +2128,27 @@
             dom.nav.home.addEventListener('click', () => showView('main'));
             dom.nav.favorites.addEventListener('click', () => showView('favorites'));
             dom.nav.mylists.addEventListener('click', () => showView('mylists'));
+            
             dom.importPublicListBtn.addEventListener('click', (e) => importList(e.currentTarget.dataset.listId));
             document.getElementById('addBtn').addEventListener("click", () => addWork(dom.urlInput.value.trim()));
             dom.pageSizeSelectors.admin.addEventListener('change', (e) => { state.pageSize.admin = parseInt(e.target.value, 10); localStorage.setItem('pageSizeAdmin', state.pageSize.admin); renderPage('admin_manga'); renderPage('admin_game'); });
             dom.pageSizeSelectors.user.addEventListener('change', (e) => { state.pageSize.user = parseInt(e.target.value, 10); localStorage.setItem('pageSizeUser', state.pageSize.user); renderPage('new'); renderPage('ranking'); });
             dom.pageSizeSelectors.favorites.addEventListener('change', (e) => { state.pageSize.favorites = parseInt(e.target.value, 10); localStorage.setItem('pageSizeFavorites', state.pageSize.favorites); renderPage('favorites'); });
             dom.modalOverlay.addEventListener("click", (e) => { if (e.target === dom.modalOverlay) dom.modalOverlay.classList.add("hidden"); });
-            document.getElementById('infoBtn').addEventListener('click', openInfoModal);
             
+            const mosaicToggleBtn = document.getElementById('mosaicToggleBtn');
             const hideBadBtn = document.getElementById('hideBadBtn');
+
+            // PC Controls
+            document.getElementById('infoBtn').addEventListener('click', openInfoModal);
             hideBadBtn.addEventListener("click", () => { 
                 state.hideBadlyRated = !state.hideBadlyRated; 
                 hideBadBtn.classList.toggle('active', state.hideBadlyRated); 
                 const mobileBtn = dom.mobileMenu.querySelector('[data-action="toggle-bad"]');
-                if(state.hideBadlyRated) {
-                    hideBadBtn.textContent = 'Bad評価を再表示';
-                    if (mobileBtn) mobileBtn.textContent = 'Bad評価を再表示';
-                } else {
-                    hideBadBtn.textContent = 'Bad評価を非表示';
-                    if (mobileBtn) mobileBtn.textContent = 'Bad評価を非表示';
-                }
+                hideBadBtn.textContent = state.hideBadlyRated ? 'Bad評価を再表示' : 'Bad評価を非表示';
+                if (mobileBtn) mobileBtn.textContent = hideBadBtn.textContent;
                 renderPage('new'); renderPage('ranking');
             });
-            
-            const mosaicToggleBtn = document.getElementById('mosaicToggleBtn');
             mosaicToggleBtn.addEventListener("click", () => {
                 state.mosaicActive = !state.mosaicActive;
                 localStorage.setItem('mosaicActive', state.mosaicActive);
@@ -2115,24 +2158,18 @@
                 const mobileBtn = dom.mobileMenu.querySelector('[data-action="toggle-mosaic"]');
                 if (mobileBtn) mobileBtn.textContent = text;
             });
-            
             document.querySelectorAll('.filterByTagsBtn').forEach(btn => btn.addEventListener('click', openTagFilterModal));
             document.querySelectorAll('.resetFilterBtn').forEach(btn => btn.addEventListener('click', () => { 
                 state.highlightTagIds.clear(); 
                 state.hideTagIds.clear(); 
                 refreshAllGrids();
-                dom.mobileMenu.querySelector('[data-action="reset-filter"]').classList.add('hidden');
             }));
             document.getElementById('contactBtn').addEventListener('click', openContactModal);
-            document.getElementById('toggle-sidebar-btn').addEventListener('click', (e) => {
-                const isCollapsed = dom.mylistsContainer.classList.toggle('sidebar-collapsed');
-                e.currentTarget.textContent = isCollapsed ? '▶' : '◀';
-            });
             
+            // Mobile Controls
             dom.hamburgerBtn.addEventListener('click', () => {
                 dom.mobileMenu.classList.toggle('hidden');
             });
-
             dom.mobileMenu.addEventListener('click', (e) => {
                 if (e.target.tagName !== 'BUTTON') return;
                 const action = e.target.dataset.action;
@@ -2140,10 +2177,7 @@
                     case 'contact': openContactModal(); break;
                     case 'filter-tags': openTagFilterModal(); break;
                     case 'reset-filter': 
-                        state.highlightTagIds.clear(); 
-                        state.hideTagIds.clear(); 
-                        refreshAllGrids();
-                        document.querySelectorAll('.resetFilterBtn').forEach(b => b.classList.add('hidden'));
+                        document.querySelectorAll('.resetFilterBtn').forEach(b => b.click());
                         break;
                     case 'toggle-bad': hideBadBtn.click(); break;
                     case 'toggle-mosaic': mosaicToggleBtn.click(); break;
@@ -2151,37 +2185,55 @@
                 }
                 dom.mobileMenu.classList.add('hidden');
             });
-
-            window.addEventListener('popstate', handleUrlBasedView);
+            
+            // Other Listeners
+            document.getElementById('toggle-sidebar-btn').addEventListener('click', (e) => {
+                const isCollapsed = dom.mylistsContainer.classList.toggle('sidebar-collapsed');
+                e.currentTarget.textContent = isCollapsed ? '▶' : '◀';
+            });
         }
 
-        function setupGridEventListeners() {
+        function setupDelegatedEventListeners() {
             dom.container.addEventListener('click', (e) => {
                 const target = e.target;
+                
+                // --- Item Card Actions ---
                 const card = target.closest('.item');
-                if (!card) return;
+                if (card) {
+                    const workId = card.dataset.id;
+                    const canonicalId = card.dataset.canonicalId;
 
-                const workId = card.dataset.id;
-                const canonicalId = card.dataset.canonicalId;
-
-                if (target.closest('.card-action-btn')) {
-                    e.stopPropagation();
-                    if (target.matches('.rating-btn')) {
-                        handleVote(workId, target);
-                    } else if (target.matches('.favorite-btn')) {
+                    if (target.closest('.rating-btn')) {
+                        handleVote(workId);
+                    } else if (target.closest('.favorite-btn')) {
+                        e.stopPropagation();
                         toggleFavorite(canonicalId);
-                    } else if (target.matches('.add-to-list-btn')) {
+                    } else if (target.closest('.add-to-list-btn')) {
+                        e.stopPropagation();
                         openAddToListPopover(canonicalId, target);
-                    } else if (target.matches('.remove-from-list-btn')) {
+                    } else if (target.closest('.remove-from-list-btn')) {
+                        e.stopPropagation();
                         const listId = target.dataset.listId;
                         if (confirm(`「${util.escapeHTML(state.myLists[listId]?.name || '')}」からこの作品を削除しますか？`)) {
                             removeWorkFromList(canonicalId, listId);
                         }
+                    } else {
+                        const workData = state.works[workId] || state.adminPicks[workId];
+                        if(workData && workData.pageUrl) {
+                            window.open(workData.pageUrl, "_blank");
+                        }
                     }
-                } else {
-                    const workData = state.works[workId] || state.adminPicks[workId];
-                    if(workData && workData.pageUrl) {
-                        window.open(workData.pageUrl, "_blank");
+                    return; // Card action handled, no need to check others
+                }
+
+                const paginationButton = target.closest('.pagination button');
+                if (paginationButton && !paginationButton.disabled) {
+                    const paginationContainer = target.closest('.pagination');
+                    const viewType = paginationContainer.dataset.viewType;
+                    const newPage = parseInt(paginationButton.dataset.page, 10);
+                    if (viewType && newPage) {
+                        state.currentPage[viewType] = newPage;
+                        renderPage(viewType);
                     }
                 }
             });
@@ -2240,7 +2292,7 @@
             const popup = document.getElementById('details-popup');
             if (!popup) return;
             let hideTimeout;
-            document.querySelector('.container').addEventListener('mouseover', (e) => {
+            dom.container.addEventListener('mouseover', (e) => {
                 if (window.innerWidth <= 768) return;
                 const titleEl = e.target.closest('.title');
                 if (!titleEl) return;
@@ -2259,7 +2311,7 @@
                 popup.style.left = `${left}px`;
                 popup.style.top = `${top}px`;
             });
-            document.querySelector('.container').addEventListener('mouseout', (e) => {
+            dom.container.addEventListener('mouseout', (e) => {
                 const titleEl = e.target.closest('.title');
                 if (titleEl && e.relatedTarget !== popup) {
                     hideTimeout = setTimeout(() => { popup.style.display = 'none'; }, 200);
@@ -2286,10 +2338,11 @@
             }
             
             initializeListeners();
-            // Render skeletons on initial load
             Object.values(dom.grids).forEach(grid => {
                 const type = Object.keys(dom.grids).find(key => dom.grids[key] === grid);
-                const pageSize = state.pageSize[type] || state.pageSize.user;
+                const isFav = type === 'favorites';
+                const isAdmin = type.startsWith('admin_');
+                const pageSize = isAdmin ? state.pageSize.admin : (isFav ? state.pageSize.favorites : state.pageSize.user);
                 renderSkeletons(grid, pageSize);
             });
 
@@ -2303,12 +2356,14 @@
                 }
                 handleUrlBasedView();
             });
+            
+            window.addEventListener('popstate', handleUrlBasedView);
 
             state.clientId = util.getClientId();
             initializePageSizeSelectors();
             setupCollapsers();
             setupEventListeners();
-            setupGridEventListeners(); // ★ Event delegation setup
+            setupDelegatedEventListeners();
             setupImagePreviewListeners();
             initializeDetailsPopup();
         }

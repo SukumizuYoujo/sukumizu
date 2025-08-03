@@ -109,16 +109,16 @@
  }
  /* 詳細情報ポップアップ */
  #details-popup {
-    display: none;
-    position: absolute;
-    z-index: 5000; 
+    display: none; /* 通常は非表示 */
+    position: absolute; /* マウス位置に追従させる */
+    z-index: 5000; /* 他の要素より手前に表示 */
     background-color: #fff;
     border: 1px solid #ccc;
     border-radius: 6px;
     box-shadow: 0 4px 12px rgba(0,0,0,0.15);
     padding: 1rem;
     max-width: 350px;
-    pointer-events: none; 
+    pointer-events: none; /* ポップアップ自体がマウスイベントの邪魔をしないように */
     transition: opacity 0.1s ease-in-out;
  }
 
@@ -555,17 +555,20 @@
  .card-actions .add-to-list-btn.in-list { color: #28a745; background-color: white; }
  .card-actions .remove-from-list-btn { color: #f44336; }
 
- /* カード上のアクションボタンをホバー時のみ表示 */
+ /* ★ 変更: PC表示ではホバー時のみボタン表示 */
  .item .card-actions {
     position: absolute;
     top: 4px;
     right: 4px;
     z-index: 10;
     opacity: 0;
+    pointer-events: none;
  }
  .item:hover .card-actions {
     opacity: 1;
+    pointer-events: auto;
  }
+
 
  /* ページネーション */
  .pagination {
@@ -856,7 +859,7 @@
         font-size: 1.8rem;
     }
     br.mobile-only {
-        display: inline; 
+        display: inline;
     }
     .section-header {
         flex-direction: column;
@@ -872,17 +875,16 @@
 
     /* ハンバーガーメニュー関連 */
     .hamburger-btn {
-        display: block; /* スマホで表示 */
+        display: block;
     }
     #view-main > .controls {
-        display: none; /* スマホではメインのコントロールを非表示 */
+        display: none;
     }
-
-    /* お気に入り画面のフィルターコントロールを非表示 */
     #view-favorites .filter-controls {
         display: none;
     }
-
+    
+    /* navボタンの高さ統一とハンバーガーアイコンのサイズ調整 */
     .main-nav button {
         height: 36px;
         padding-top: 0;
@@ -897,7 +899,6 @@
     .main-nav .hamburger-btn {
         font-size: 1.2rem;
     }
-
 
     .controls {
         flex-direction: column;
@@ -914,7 +915,7 @@
         width: 100%;
     }
     .controls:has(#dlsiteUrl) {
-        display: flex; /* URL入力欄は表示を維持 */
+        display: flex;
         flex-direction: row;
         flex-wrap: nowrap;
     }
@@ -992,23 +993,24 @@
     .rating-btn {
         padding: 3px 7px;
     }
-    /* スマホではアクションボタンを常に表示 */
+
     .item .card-actions {
-        position: static;
+        position: static; /* ホバーではなく常に表示 */
         opacity: 1;
+        pointer-events: auto;
     }
     .item-footer {
-        flex-direction: row;
-        align-items: center;
+        flex-direction: column;
+        align-items: stretch;
         gap: 0.25rem;
     }
     .rating-buttons {
         justify-content: flex-start;
-        flex-grow: 1;
     }
     .card-actions {
         justify-content: flex-end;
     }
+    
     .pagination {
         gap: .25rem;
     }

@@ -1377,17 +1377,33 @@
             }
         }
 
-        function adjustPcGridHeight(gridElement, pageSize) {
-            if (window.innerWidth <= 768 || !gridElement) { if (gridElement) gridElement.style.minHeight = 'auto'; return; }
+        /**
+         * @param {HTMLElement} gridElement - 対象のグリッド要素
+         * @param {number} pageSize - ページあたりの表示件数
+         */
+        function adjustGridMinHeight(gridElement, pageSize) {
+            if (!gridElement) return;
+
             requestAnimationFrame(() => {
+                const isMobile = window.innerWidth <= 768;
                 const gridComputedStyle = window.getComputedStyle(gridElement);
-                const columnCount = gridComputedStyle.gridTemplateColumns.split(' ').length;
+                // モバイルでのgapは0.75rem (12px), PCでは1rem (16px) がデフォルト
+                const rowGap = parseInt(gridComputedStyle.gap, 10) || (isMobile ? 12 : 16);
+                const cardHeight = 320; // .itemの高さ
+
+                let columnCount;
+                if (isMobile) {
+                    columnCount = 2; // モバイルでは2列固定
+                } else {
+                    columnCount = gridComputedStyle.gridTemplateColumns.split(' ').length;
+                }
+
                 if (columnCount > 0) {
-                    const cardHeight = 320;
-                    const rowGap = parseInt(gridComputedStyle.gap, 10) || 16;
                     const rowCount = Math.ceil(pageSize / columnCount);
                     const minHeight = rowCount * cardHeight + (rowCount > 0 ? (rowCount - 1) * rowGap : 0);
                     gridElement.style.minHeight = `${minHeight}px`;
+                } else {
+                    gridElement.style.minHeight = 'auto';
                 }
             });
         }
@@ -1458,7 +1474,7 @@
                 grid.appendChild(makeCard(id, context));
             });
             
-            adjustPcGridHeight(grid, pageSize);
+            adjustGridMinHeight(grid, pageSize);
 
             const paginationContainerId = {
                 admin_manga: 'adminMangaPagination',

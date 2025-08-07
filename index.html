@@ -555,7 +555,7 @@
  .card-actions .add-to-list-btn.in-list { color: #28a745; background-color: white; }
  .card-actions .remove-from-list-btn { color: #f44336; }
 
- /* ★ 変更: PC表示ではホバー時のみボタン表示 */
+ /* PC表示ではホバー時のみボタン表示 */
  .item .card-actions {
     position: absolute;
     top: 4px;
@@ -1136,7 +1136,9 @@
             <button data-action="filter-tags">タグで絞り込み</button>
             <button data-action="reset-filter" class="hidden">絞り込み解除</button>
             <button data-action="toggle-bad">Bad評価を非表示</button>
-            <button data-action="toggle-mosaic">モザイク ON</button>
+            <button data-action="toggle-mosaic">モザイク: OFF</button>
+            <button data-action="toggle-grid-height">グリッド高さ固定: ON</button>
+            <button data-action="toggle-auto-scroll">ページ移動スクロール: ON</button>
             <button data-action="info">サイト情報</button>
         </div>
 
@@ -1146,7 +1148,7 @@
                 <button class="filterByTagsBtn">タグで絞り込み</button>
                 <button class="resetFilterBtn hidden">絞り込み解除</button>
                 <button id="hideBadBtn">Bad評価を非表示</button>
-                <button id="mosaicToggleBtn">モザイク ON</button>
+                <button id="mosaicToggleBtn">モザイク: OFF</button>
                 <button id="infoBtn">サイト情報</button>
             </div>
             <hr>
@@ -1252,7 +1254,8 @@
                 FAVORITES: "userFavorites", USER_LISTS: "userLists", LISTS: "lists", LIST_ITEMS: "listItems"
             },
             PAGE_SIZE_OPTIONS: {
-                mobile: { admin: [8, 10, 12], user: [10, 20, 30], favorites: [10, 20, 30] },
+                // ★変更: スマホでの表示件数を変更
+                mobile: { admin: [8, 10, 12], user: [10, 16, 20], favorites: [10, 20, 30] },
                 pc: { admin: [5, 10, 15], user: [10, 20, 40], favorites: [10, 20, 40] }
             },
             LIST_LIMITS: { MAX_LISTS: 10, MAX_ITEMS_PER_LIST: 100 }
@@ -1269,7 +1272,9 @@
             clientId: null, hideBadlyRated: false, mosaicActive: false,
             highlightTagIds: new Set(), hideTagIds: new Set(), currentTagEditMode: 'highlight',
             currentUser: null, favorites: new Set(), myLists: {}, myListItems: {}, activeListId: null, currentView: 'main',
-            isInitialDataLoaded: { works: false, adminPicks: false }
+            isInitialDataLoaded: { works: false, adminPicks: false },
+            isGridHeightFixedForMobile: true,
+            autoScrollOnPageChange: true,
         };
 
         // --- DOM要素のキャッシュ ---
@@ -1354,7 +1359,6 @@
             
             card.innerHTML = `<img src="${coverUrl}" alt="${title}" loading="lazy"> <div class="item-body"> <h3 class="title">${util.escapeHTML(title)}</h3> <div class="tags">${Object.values(tags).map(n => `<span class="tag">${util.escapeHTML(n)}</span>`).join("")}</div> </div> <div class="item-footer">${footerHTML}</div>`;
             
-            // 状態に応じてactiveクラスを付与
             const goodBtn = card.querySelector('.rating-btn.good');
             const badBtn = card.querySelector('.rating-btn.bad');
             if (userVote === 1 && goodBtn) goodBtn.classList.add('active');
@@ -1377,23 +1381,24 @@
             }
         }
 
-        /**
-         * @param {HTMLElement} gridElement - 対象のグリッド要素
-         * @param {number} pageSize - ページあたりの表示件数
-         */
         function adjustGridMinHeight(gridElement, pageSize) {
             if (!gridElement) return;
 
+            const isMobile = window.innerWidth <= 768;
+            
+            if (isMobile && !state.isGridHeightFixedForMobile) {
+                gridElement.style.minHeight = 'auto';
+                return;
+            }
+
             requestAnimationFrame(() => {
-                const isMobile = window.innerWidth <= 768;
                 const gridComputedStyle = window.getComputedStyle(gridElement);
-                // モバイルでのgapは0.75rem (12px), PCでは1rem (16px) がデフォルト
                 const rowGap = parseInt(gridComputedStyle.gap, 10) || (isMobile ? 12 : 16);
-                const cardHeight = 320; // .itemの高さ
+                const cardHeight = 320; 
 
                 let columnCount;
                 if (isMobile) {
-                    columnCount = 2; // モバイルでは2列固定
+                    columnCount = 2;
                 } else {
                     columnCount = gridComputedStyle.gridTemplateColumns.split(' ').length;
                 }
@@ -1867,7 +1872,6 @@
             const currentVote = data.votes?.[state.clientId] || 0;
             const newVote = currentVote === score ? 0 : score;
 
-            // Optimistic UI update
             goodBtn.classList.toggle('active', newVote === 1);
             badBtn.classList.toggle('active', newVote === -1);
             
@@ -1876,7 +1880,6 @@
             try { await (newVote === 0 ? remove(voteRef) : set(voteRef, newVote)); }
             catch (error) { 
                 util.showToast(`投票エラー: ${error.message}`);
-                // Revert UI on error
                 goodBtn.classList.toggle('active', currentVote === 1);
                 badBtn.classList.toggle('active', currentVote === -1);
             }
@@ -1969,14 +1972,12 @@
             if (!state.currentUser) return util.showToast('ログインが必要です。');
             const favRef = ref(db, `${CONSTANTS.DB_PATHS.FAVORITES}/${state.currentUser.uid}/${workId}`);
             
-            // Optimistic UI update
             const card = document.querySelector(`.item[data-canonical-id="${workId}"]`);
             if (card) card.querySelector('.favorite-btn')?.classList.toggle('favorited');
 
             try {
                 await (state.favorites.has(workId) ? remove(favRef) : set(favRef, serverTimestamp()));
             } catch (error) {
-                // Revert on error
                 if (card) card.querySelector('.favorite-btn')?.classList.toggle('favorited');
                 util.showToast(`お気に入り操作に失敗しました: ${error.message}`);
             }
@@ -2076,6 +2077,26 @@
             }
         }
         
+        function getScrollTargetForView(viewType) {
+            const grid = dom.grids[viewType];
+            if (!grid) return null;
+
+            const collapsibleParent = grid.closest('.collapsible-content');
+            if (collapsibleParent) {
+                const sectionHeader = collapsibleParent.previousElementSibling;
+                if (sectionHeader && sectionHeader.matches('.section-header')) {
+                    return sectionHeader;
+                }
+            }
+
+            const viewContainer = grid.closest('.view-container');
+            if (viewContainer) {
+                return viewContainer.querySelector('.section-header');
+            }
+
+            return null;
+        }
+        
         function initializeListeners() {
             onValue(ref(db, CONSTANTS.DB_PATHS.CATEGORIES), (snap) => { state.categories = snap.val() || {}; });
             onValue(ref(db, CONSTANTS.DB_PATHS.TAGS), (snap) => {
@@ -2157,7 +2178,6 @@
             const mosaicToggleBtn = document.getElementById('mosaicToggleBtn');
             const hideBadBtn = document.getElementById('hideBadBtn');
 
-            // PC Controls
             document.getElementById('infoBtn').addEventListener('click', openInfoModal);
             hideBadBtn.addEventListener("click", () => { 
                 state.hideBadlyRated = !state.hideBadlyRated; 
@@ -2167,11 +2187,12 @@
                 if (mobileBtn) mobileBtn.textContent = hideBadBtn.textContent;
                 renderPage('new'); renderPage('ranking');
             });
+            // ★変更: モザイクボタンのテキスト表示ロジックを修正
             mosaicToggleBtn.addEventListener("click", () => {
                 state.mosaicActive = !state.mosaicActive;
                 localStorage.setItem('mosaicActive', state.mosaicActive);
                 document.body.classList.toggle('mosaic-on', state.mosaicActive);
-                const text = state.mosaicActive ? 'モザイク OFF' : 'モザイク ON';
+                const text = `モザイク: ${state.mosaicActive ? 'ON' : 'OFF'}`;
                 mosaicToggleBtn.textContent = text;
                 const mobileBtn = dom.mobileMenu.querySelector('[data-action="toggle-mosaic"]');
                 if (mobileBtn) mobileBtn.textContent = text;
@@ -2184,27 +2205,43 @@
             }));
             document.getElementById('contactBtn').addEventListener('click', openContactModal);
             
-            // Mobile Controls
             dom.hamburgerBtn.addEventListener('click', () => {
                 dom.mobileMenu.classList.toggle('hidden');
             });
             dom.mobileMenu.addEventListener('click', (e) => {
                 if (e.target.tagName !== 'BUTTON') return;
                 const action = e.target.dataset.action;
+                const button = e.target;
+                let shouldCloseMenu = true;
+
                 switch(action) {
                     case 'contact': openContactModal(); break;
                     case 'filter-tags': openTagFilterModal(); break;
                     case 'reset-filter': 
                         document.querySelectorAll('.resetFilterBtn').forEach(b => b.click());
                         break;
-                    case 'toggle-bad': hideBadBtn.click(); break;
-                    case 'toggle-mosaic': mosaicToggleBtn.click(); break;
+                    case 'toggle-bad': hideBadBtn.click(); shouldCloseMenu = false; break;
+                    case 'toggle-mosaic': mosaicToggleBtn.click(); shouldCloseMenu = false; break;
+                    case 'toggle-grid-height':
+                        state.isGridHeightFixedForMobile = !state.isGridHeightFixedForMobile;
+                        localStorage.setItem('isGridHeightFixedForMobile', state.isGridHeightFixedForMobile);
+                        button.textContent = `グリッド高さ固定: ${state.isGridHeightFixedForMobile ? 'ON' : 'OFF'}`;
+                        refreshAllGrids();
+                        shouldCloseMenu = false;
+                        break;
+                    case 'toggle-auto-scroll':
+                        state.autoScrollOnPageChange = !state.autoScrollOnPageChange;
+                        localStorage.setItem('autoScrollOnPageChange', state.autoScrollOnPageChange);
+                        button.textContent = `ページ移動スクロール: ${state.autoScrollOnPageChange ? 'ON' : 'OFF'}`;
+                        shouldCloseMenu = false;
+                        break;
                     case 'info': openInfoModal(); break;
                 }
-                dom.mobileMenu.classList.add('hidden');
+                if (shouldCloseMenu) {
+                    dom.mobileMenu.classList.add('hidden');
+                }
             });
             
-            // Other Listeners
             document.getElementById('toggle-sidebar-btn').addEventListener('click', (e) => {
                 const isCollapsed = dom.mylistsContainer.classList.toggle('sidebar-collapsed');
                 e.currentTarget.textContent = isCollapsed ? '▶' : '◀';
@@ -2215,7 +2252,6 @@
             dom.container.addEventListener('click', (e) => {
                 const target = e.target;
                 
-                // --- Item Card Actions ---
                 const card = target.closest('.item');
                 if (card) {
                     const workId = card.dataset.id;
@@ -2241,7 +2277,7 @@
                             window.open(workData.pageUrl, "_blank");
                         }
                     }
-                    return; // Card action handled, no need to check others
+                    return;
                 }
 
                 const paginationButton = target.closest('.pagination button');
@@ -2252,6 +2288,15 @@
                     if (viewType && newPage) {
                         state.currentPage[viewType] = newPage;
                         renderPage(viewType);
+
+                        if (window.innerWidth <= 768 && state.autoScrollOnPageChange) {
+                            requestAnimationFrame(() => {
+                                const targetElement = getScrollTargetForView(viewType);
+                                if (targetElement) {
+                                    targetElement.scrollIntoView({ behavior: 'smooth', block: 'start' });
+                                }
+                            });
+                        }
                     }
                 }
             });
@@ -2340,6 +2385,28 @@
         }
         
         function main() {
+            const savedGridHeightSetting = localStorage.getItem('isGridHeightFixedForMobile');
+            state.isGridHeightFixedForMobile = savedGridHeightSetting === null ? true : (savedGridHeightSetting === 'true');
+
+            const savedAutoScrollSetting = localStorage.getItem('autoScrollOnPageChange');
+            state.autoScrollOnPageChange = savedAutoScrollSetting === null ? true : (savedAutoScrollSetting === 'true');
+
+            const gridHeightBtn = dom.mobileMenu.querySelector('[data-action="toggle-grid-height"]');
+            if (gridHeightBtn) gridHeightBtn.textContent = `グリッド高さ固定: ${state.isGridHeightFixedForMobile ? 'ON' : 'OFF'}`;
+
+            const autoScrollBtn = dom.mobileMenu.querySelector('[data-action="toggle-auto-scroll"]');
+            if (autoScrollBtn) autoScrollBtn.textContent = `ページ移動スクロール: ${state.autoScrollOnPageChange ? 'ON' : 'OFF'}`;
+
+            if (localStorage.getItem('mosaicActive') === 'true') {
+                state.mosaicActive = true; 
+                document.body.classList.add('mosaic-on');
+            }
+             // ★変更: モザイクボタンのテキストを初期化
+            const mosaicText = `モザイク: ${state.mosaicActive ? 'ON' : 'OFF'}`;
+            document.getElementById('mosaicToggleBtn').textContent = mosaicText;
+            const mobileMosaicBtn = dom.mobileMenu.querySelector('[data-action="toggle-mosaic"]');
+            if(mobileMosaicBtn) mobileMosaicBtn.textContent = mosaicText;
+
             ['pageSizeAdmin', 'pageSizeUser', 'pageSizeFavorites'].forEach(key => {
                 const savedSize = localStorage.getItem(key);
                 if (savedSize) {
@@ -2349,11 +2416,6 @@
             });
             state.sectionsCollapsed.admin = localStorage.getItem('adminSectionCollapsed') === 'true';
             state.sectionsCollapsed.user = localStorage.getItem('userSectionCollapsed') === 'true';
-            if (localStorage.getItem('mosaicActive') === 'true') {
-                state.mosaicActive = true; document.body.classList.add('mosaic-on');
-                document.getElementById('mosaicToggleBtn').textContent = 'モザイク OFF';
-                dom.mobileMenu.querySelector('[data-action="toggle-mosaic"]').textContent = 'モザイク OFF';
-            }
             
             initializeListeners();
             Object.values(dom.grids).forEach(grid => {

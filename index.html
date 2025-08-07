@@ -2187,7 +2187,7 @@
                 if (mobileBtn) mobileBtn.textContent = hideBadBtn.textContent;
                 renderPage('new'); renderPage('ranking');
             });
-            // ★変更: モザイクボタンのテキスト表示ロジックを修正
+            // モザイクボタンのテキスト表示ロジックを修正
             mosaicToggleBtn.addEventListener("click", () => {
                 state.mosaicActive = !state.mosaicActive;
                 localStorage.setItem('mosaicActive', state.mosaicActive);
@@ -2401,7 +2401,7 @@
                 state.mosaicActive = true; 
                 document.body.classList.add('mosaic-on');
             }
-             // ★変更: モザイクボタンのテキストを初期化
+             // モザイクボタンのテキストを初期化
             const mosaicText = `モザイク: ${state.mosaicActive ? 'ON' : 'OFF'}`;
             document.getElementById('mosaicToggleBtn').textContent = mosaicText;
             const mobileMosaicBtn = dom.mobileMenu.querySelector('[data-action="toggle-mosaic"]');
@@ -2452,3 +2452,4 @@
     </script>
 </body>
 </html>
+

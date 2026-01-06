@@ -7,7 +7,7 @@ import { CONSTANTS } from "../config/constants.js";
 import { db } from "../config/firebase.js";
 import { ref, get, child, push, set, remove, update, serverTimestamp } from "https://www.gstatic.com/firebasejs/11.10.0/firebase-database.js";
 import { makeCard, renderSkeletons } from "../components/card.js";
-import { showView } from "./core.js"; // 後ほど作成するcore.jsからインポート
+import { showView } from "./router.js"; // 後ほど作成するcore.jsからインポート
 
 let activePopover = null;
 
@@ -271,4 +271,5 @@ export function openAddToListPopover(workId, button) {
         if (newListId) await toggleWorkInList(workId, newListId, true);
         if (activePopover) { activePopover.remove(); activePopover = null; }
     });
+
 }

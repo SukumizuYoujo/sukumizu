@@ -3,7 +3,8 @@
 import { dom } from "../utils/dom.js";
 import { state } from "../store/state.js";
 import { util } from "../utils/common.js";
-import { renderPage, renderSkeletons } from "./works.js";
+import { renderPage } from "./works.js"; // renderPageはworks.jsから
+import { renderSkeletons } from "../components/card.js"; // ★修正: renderSkeletonsはcard.jsから読み込む
 import { renderMyListsPage, renderPublicListPage, getPublicListData } from "./lists.js";
 
 // --- ビュー切り替え ---

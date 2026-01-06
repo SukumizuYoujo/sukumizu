@@ -14,7 +14,7 @@ import { util } from "./utils/common.js";
 import { renderSkeletons } from "./components/card.js";
 import { 
     renderPage, handleVote, addWork, 
-    adjustGridMinHeight, renderPaginationButtons, getScrollTargetForView 
+    renderPaginationButtons 
 } from "./features/works.js";
 import { 
     toggleFavorite, openAddToListPopover, removeWorkFromList, 
@@ -25,9 +25,11 @@ import {
     setupImagePreviewListeners, initializeDetailsPopup 
 } from "./features/modals.js";
 import { 
-    updateSortedArrays, refreshAllGrids, showView, 
-    handleUrlBasedView 
+    updateSortedArrays, refreshAllGrids 
 } from "./features/core.js";
+import { 
+    showView, handleUrlBasedView, getScrollTargetForView 
+} from "./features/router.js"; // ★ここが重要：router.jsからインポート
 import { 
     updateUIforAuthState, subscribeUserData, unsubscribeUserData 
 } from "./features/auth.js";
@@ -245,7 +247,7 @@ function setupDelegatedEventListeners() {
             const canonicalId = card.dataset.canonicalId;
 
             if (target.closest('.rating-btn')) {
-                const score = Number(target.closest('.rating-btn').dataset.score);
+                const score = Number(target.closest('.rating-btn.good, .rating-btn.bad').dataset.score);
                 handleVote(workId, score);
             } else if (target.closest('.favorite-btn')) {
                 e.stopPropagation();

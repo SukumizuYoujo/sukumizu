@@ -3,7 +3,10 @@
 import { state } from "../store/state.js";
 import { dom } from "../utils/dom.js";
 import { util } from "../utils/common.js";
-import { renderPage, renderSkeletons, getFilteredIdsForView } from "./works.js";
+// ▼ 修正: renderSkeletons を削除
+import { renderPage, getFilteredIdsForView } from "./works.js";
+// ▼ 追加: renderSkeletons を正しい場所からインポート
+import { renderSkeletons } from "../components/card.js";
 import { renderMyListsPage, renderPublicListPage, getPublicListData } from "./lists.js";
 
 // --- ソート処理 ---

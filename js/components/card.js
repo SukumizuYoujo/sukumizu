@@ -2,34 +2,17 @@
 
 import { state } from "../store/state.js";
 import { util } from "../utils/common.js";
-import { CONSTANTS } from "../config/constants.js"; // 追加
 
 export function makeCard(workId, context = '') {
-    // データの取得と保存場所の特定
-    let data = state.works[workId];
-    let dbPath = CONSTANTS.DB_PATHS.WORKS;
-
-    if (!data) {
-        if (state.adminPicks[workId]) {
-            data = state.adminPicks[workId];
-            dbPath = CONSTANTS.DB_PATHS.ADMIN_PICKS;
-        } else {
-            // AdminPicksの中からpageUrlで検索（レガシー互換）
-            const found = Object.values(state.adminPicks).find(p => p.pageUrl && p.pageUrl.includes(workId));
-            if (found) {
-                data = found;
-                dbPath = CONSTANTS.DB_PATHS.ADMIN_PICKS;
-            }
-        }
-    }
-
+    const data = state.works[workId] || state.adminPicks[workId] || Object.values(state.adminPicks).find(p => p.pageUrl && p.pageUrl.includes(workId));
     if (!data) return document.createElement('div');
     
-    // IDの正規化
+    // IDの正規化（RJ/VJ番号などを抽出）
     const canonicalWorkId = data.pageUrl?.match(/(RJ|VJ|BJ)\d{6,}/i)?.[0].toUpperCase() || workId;
     const { title, coverUrl, tags = {}, votes = {}, score = 0 } = data;
     const userVote = votes[state.clientId] || 0;
     
+    // 状態判定
     const isFavorited = state.favorites.has(canonicalWorkId);
     const isInAnyList = Object.keys(state.myListItems).some(listId => state.myListItems[listId]?.[canonicalWorkId]);
     const authDisabled = state.currentUser ? '' : 'disabled';
@@ -38,8 +21,6 @@ export function makeCard(workId, context = '') {
     card.className = `item`;
     card.dataset.id = workId;
     card.dataset.canonicalId = canonicalWorkId;
-    // ★重要: データベースのパスを要素に埋め込む
-    card.dataset.dbPath = dbPath;
 
     let cardActionsHTML = `
         <button class="favorite-btn card-action-btn ${isFavorited ? 'favorited' : ''}" title="お気に入り" ${authDisabled}>♥</button>
@@ -57,6 +38,7 @@ export function makeCard(workId, context = '') {
         </div>
         <div class="card-actions">${cardActionsHTML}</div>`;
     
+    // 特定のビューでは評価ボタンを表示しない
     if (['favorites', 'admin', 'myList', 'publicList'].includes(context)) {
         footerHTML = `<div class="card-actions">${cardActionsHTML}</div>`;
     }

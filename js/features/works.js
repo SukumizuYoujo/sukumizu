@@ -5,305 +5,42 @@ import { dom } from "../utils/dom.js";
 import { util } from "../utils/common.js";
 import { CONSTANTS } from "../config/constants.js";
 import { db } from "../config/firebase.js";
-import { 
-    ref, get, child, set, remove, 
-    query, orderByChild, runTransaction // ★追加
-} from "https://www.gstatic.com/firebasejs/11.10.0/firebase-database.js";
-import { makeCard, renderSkeletons } from "../components/card.js";
-import { updateSortedArrays } from "./core.js";
+import { ref, set, remove } from "https://www.gstatic.com/firebasejs/11.10.0/firebase-database.js";
+import { makeCard } from "../components/card.js";
 
-// ==========================================================================
-// 1. ページ読み込みルーティング
-// ==========================================================================
-
-export function renderPage(type) {
-    // ランキングも「新着」と同じ高機能な読み込みロジック(loadPageWithIndex)を使用する
-    if (type === 'new' || type === 'ranking') {
-        loadPageWithIndex(type, state.currentPage[type]);
-    } else if (type === 'favorites') {
-        loadFavoritesPage();
-    } else {
-        renderLegacyPage(type);
-    }
-}
-
-// ==========================================================================
-// 2. お気に入り専用読み込みロジック
-// ==========================================================================
-
-async function loadFavoritesPage() {
-    const grid = dom.grids.favorites;
-    const pageSize = state.pageSize.favorites;
+// --- グリッドの高さ調整 ---
+export function adjustGridMinHeight(gridElement, pageSize) {
+    if (!gridElement) return;
+    const isMobile = window.innerWidth <= 768;
     
-    renderSkeletons(grid, pageSize);
-
-    const favIds = Array.from(state.favorites);
-
-    if (favIds.length === 0) {
-        grid.innerHTML = '<div style="grid-column: 1/-1; text-align: center; padding: 2rem;">お気に入りはまだありません。</div>';
+    if (isMobile && !state.isGridHeightFixedForMobile) {
+        gridElement.style.minHeight = 'auto';
         return;
     }
 
-    const missingIds = favIds.filter(id => {
-        const isCached = state.works[id] || Object.values(state.works).some(w => w.id === id || (w.pageUrl && w.pageUrl.includes(id)));
-        return !isCached;
-    });
+    requestAnimationFrame(() => {
+        const gridComputedStyle = window.getComputedStyle(gridElement);
+        const rowGap = parseInt(gridComputedStyle.gap, 10) || (isMobile ? 12 : 16);
+        const cardHeight = 320; 
 
-    if (missingIds.length > 0) {
-        try {
-            const fetchPromises = missingIds.map(async (id) => {
-                const snapshot = await get(child(ref(db), `${CONSTANTS.DB_PATHS.WORKS}/${id}`));
-                if (snapshot.exists()) {
-                    const data = { id: snapshot.key, ...snapshot.val() };
-                    state.works[snapshot.key] = data;
-                }
-            });
-            await Promise.all(fetchPromises);
-            updateSortedArrays();
-        } catch (e) {
-            console.error("Favorites fetch error:", e);
-            util.showToast("お気に入りデータの取得に失敗しました");
-        }
-    }
-
-    renderLegacyPage('favorites');
-}
-
-
-// ==========================================================================
-// 3. 共通・データ取得ロジック（新着・ランキング用）
-// ==========================================================================
-
-async function loadPageWithIndex(viewType, pageNumber) {
-    const grid = dom.grids[viewType];
-    const pageSize = state.pageSize.user;
-
-    // インデックスの初期化チェック
-    if (!state.workIndices) state.workIndices = {};
-
-    // インデックス（ID一覧）がまだ無ければ取得しに行く
-    if (!state.workIndices[viewType] || state.workIndices[viewType].length === 0) {
-        renderSkeletons(grid, pageSize);
-        await fetchAndCacheIndices(viewType);
-    }
-
-    const allIds = state.workIndices[viewType] || [];
-    const totalItems = allIds.length;
-    const totalPages = util.calculateTotalPages(totalItems, pageSize);
-
-    if (pageNumber < 1) pageNumber = 1;
-    if (pageNumber > totalPages && totalPages > 0) pageNumber = totalPages;
-    state.currentPage[viewType] = pageNumber;
-
-    const startIndex = (pageNumber - 1) * pageSize;
-    const endIndex = startIndex + pageSize;
-    const targetIds = allIds.slice(startIndex, endIndex);
-
-    const fetchPromises = targetIds.map(async (id) => {
-        if (state.works[id]) return state.works[id];
-        try {
-            const snapshot = await get(child(ref(db), `${CONSTANTS.DB_PATHS.WORKS}/${id}`));
-            if (snapshot.exists()) {
-                const data = { id: snapshot.key, ...snapshot.val() };
-                state.works[id] = data;
-                return data;
-            }
-        } catch (e) {
-            console.error(`Failed to fetch work ${id}`, e);
-        }
-        return null;
-    });
-
-    let works = (await Promise.all(fetchPromises)).filter(Boolean);
-
-    if (state.hideBadlyRated) {
-        works = works.filter(w => (w.votes?.[state.clientId] || 0) !== -1);
-    }
-
-    grid.innerHTML = "";
-    if (works.length === 0 && totalItems === 0) {
-         grid.innerHTML = '<div style="grid-column: 1/-1; text-align: center; padding: 2rem;">データがありません。</div>';
-    } else {
-        works.forEach(work => {
-            grid.appendChild(makeCard(work.id, 'user'));
-        });
-    }
-
-    adjustGridMinHeight(grid, pageSize);
-    renderNumberedPagination(viewType, pageNumber, totalPages);
-}
-
-async function fetchAndCacheIndices(viewType) {
-    try {
-        if (viewType === 'ranking') {
-            const worksRef = ref(db, CONSTANTS.DB_PATHS.WORKS);
-            const q = query(worksRef, orderByChild('score'));
-            const snapshot = await get(q);
-            
-            const ids = [];
-            if (snapshot.exists()) {
-                snapshot.forEach(childSnap => {
-                    const work = { id: childSnap.key, ...childSnap.val() };
-                    ids.push(work.id);
-                    state.works[work.id] = work;
-                });
-            }
-            // スコアが高い順（降順）にするため反転
-            state.workIndices[viewType] = ids.reverse();
-
+        let columnCount;
+        if (isMobile) {
+            columnCount = 2;
         } else {
-            const path = `work_orders/${viewType}`; 
-            const snapshot = await get(ref(db, path));
-            if (!snapshot.exists()) {
-                state.workIndices[viewType] = [];
-                return;
-            }
-            const rawData = snapshot.val();
-            let sortedIds = [];
-            if (Array.isArray(rawData)) {
-                sortedIds = rawData;
-            } else if (typeof rawData === 'object' && rawData !== null) {
-                sortedIds = Object.keys(rawData).sort((a, b) => {
-                    return rawData[b] - rawData[a];
-                });
-            }
-            state.workIndices[viewType] = sortedIds;
+            columnCount = gridComputedStyle.gridTemplateColumns.split(' ').length;
         }
-    } catch (error) {
-        console.error("Index fetch error:", error);
-        util.showToast("リストの取得に失敗しました");
-        state.workIndices[viewType] = [];
-    }
-}
 
-function renderNumberedPagination(viewType, currentPage, totalPages) {
-    const containerId = `${viewType}Pagination`;
-    const container = document.getElementById(containerId);
-    if (!container) return;
-    
-    container.innerHTML = '';
-    container.dataset.viewType = viewType;
-
-    if (totalPages <= 1) return;
-
-    const createBtn = (text, page, isActive = false, isDisabled = false) => {
-        const btn = document.createElement('button');
-        btn.textContent = text;
-        if (isDisabled) btn.disabled = true;
-        if (isActive) btn.classList.add('active');
-        btn.onclick = () => loadPageWithIndex(viewType, page);
-        return btn;
-    };
-
-    container.appendChild(createBtn('<<', 1, false, currentPage === 1));
-    container.appendChild(createBtn('<', currentPage - 1, false, currentPage === 1));
-
-    let start = Math.max(1, currentPage - 2);
-    let end = Math.min(totalPages, currentPage + 2);
-    
-    if (end - start < 4 && totalPages >= 5) {
-        if (start === 1) end = 5;
-        else if (end === totalPages) start = totalPages - 4;
-    }
-
-    for (let i = start; i <= end; i++) {
-        container.appendChild(createBtn(i, i, i === currentPage));
-    }
-
-    container.appendChild(createBtn('>', currentPage + 1, false, currentPage === totalPages));
-    container.appendChild(createBtn('>>', totalPages, false, currentPage === totalPages));
-}
-
-
-// ==========================================================================
-// 4. 既存ロジック（レガシーモード: 管理者おすすめ用）
-// ==========================================================================
-
-function renderLegacyPage(type) {
-    const grid = dom.grids[type];
-    if (!grid) return;
-
-    const isFav = type === 'favorites';
-    const isAdmin = type.startsWith('admin_');
-    const pageSize = isAdmin ? state.pageSize.admin : (isFav ? state.pageSize.favorites : state.pageSize.user);
-    const context = isAdmin ? 'admin' : (isFav ? 'favorites' : 'user');
-    
-    const allFilteredIds = getFilteredIdsForView(type);
-    
-    const totalPages = util.calculateTotalPages(allFilteredIds.length, pageSize);
-    let currentPage = state.currentPage[type];
-    if (currentPage > totalPages) {
-        currentPage = state.currentPage[type] = Math.max(1, totalPages);
-    }
-    
-    const startIndex = (currentPage - 1) * pageSize;
-    const endIndex = startIndex + pageSize;
-    const pageIds = allFilteredIds.slice(startIndex, endIndex);
-
-    grid.innerHTML = "";
-    pageIds.forEach(id => {
-        grid.appendChild(makeCard(id, context));
+        if (columnCount > 0) {
+            const rowCount = Math.ceil(pageSize / columnCount);
+            const minHeight = rowCount * cardHeight + (rowCount > 0 ? (rowCount - 1) * rowGap : 0);
+            gridElement.style.minHeight = `${minHeight}px`;
+        } else {
+            gridElement.style.minHeight = 'auto';
+        }
     });
-    
-    adjustGridMinHeight(grid, pageSize);
-
-    const paginationContainerId = {
-        admin_manga: 'adminMangaPagination',
-        admin_game: 'adminGamePagination',
-        ranking: 'rankingPagination',
-        favorites: 'favoritesPagination'
-    }[type];
-
-    if (paginationContainerId) {
-        renderLegacyPaginationButtons(paginationContainerId, currentPage, totalPages, type);
-    }
-    
-    updateFilterButtonState(grid);
 }
 
-export function renderPaginationButtons(containerId, currentPage, totalPages, viewType) {
-    renderLegacyPaginationButtons(containerId, currentPage, totalPages, viewType);
-}
-
-export function renderLegacyPaginationButtons(containerId, currentPage, totalPages, viewType) {
-    const container = document.getElementById(containerId);
-    if (!container) return;
-    container.innerHTML = '';
-    if (totalPages <= 1) return;
-    
-    container.dataset.viewType = viewType;
-
-    const createButton = (text, page, isDisabled = false, isCurrent = false) => {
-        const btn = document.createElement('button');
-        btn.textContent = text;
-        btn.dataset.page = page;
-        if (isDisabled) btn.disabled = true;
-        if (isCurrent) btn.classList.add('active');
-        return btn;
-    };
-    
-    container.appendChild(createButton('<<', 1, currentPage === 1));
-    container.appendChild(createButton('<', currentPage - 1, currentPage === 1));
-
-    let startPage, endPage;
-    if (totalPages <= 5) {
-        startPage = 1; endPage = totalPages;
-    } else if (currentPage <= 3) {
-        startPage = 1; endPage = 5;
-    } else if (currentPage > totalPages - 3) {
-        startPage = totalPages - 4; endPage = totalPages;
-    } else {
-        startPage = currentPage - 2; endPage = currentPage + 2;
-    }
-
-    for (let i = startPage; i <= endPage; i++) {
-        container.appendChild(createButton(i, i, false, i === currentPage));
-    }
-
-    container.appendChild(createButton('>', currentPage + 1, currentPage === totalPages));
-    container.appendChild(createButton('>>', totalPages, currentPage === totalPages));
-}
-
+// --- フィルタリングロジック ---
 export function getFilteredIdsForView(type) {
     const isAdmin = type.startsWith('admin_');
     const isFav = type === 'favorites';
@@ -343,36 +80,49 @@ export function getFilteredIdsForView(type) {
     return filteredIds;
 }
 
-// ==========================================================================
-// 5. 共通・ユーティリティ機能
-// ==========================================================================
+// --- ページ描画 ---
+export function renderPage(type) {
+    const grid = dom.grids[type];
+    if (!grid) return;
 
-export function adjustGridMinHeight(gridElement, pageSize) {
-    if (!gridElement) return;
-    const isMobile = window.innerWidth <= 768;
-    if (isMobile && !state.isGridHeightFixedForMobile) {
-        gridElement.style.minHeight = 'auto';
-        return;
+    const isFav = type === 'favorites';
+    const isAdmin = type.startsWith('admin_');
+    
+    const pageSize = isAdmin ? state.pageSize.admin : (isFav ? state.pageSize.favorites : state.pageSize.user);
+    const context = isAdmin ? 'admin' : (isFav ? 'favorites' : 'user');
+    
+    const allFilteredIds = getFilteredIdsForView(type);
+    
+    const totalPages = util.calculateTotalPages(allFilteredIds.length, pageSize);
+    let currentPage = state.currentPage[type];
+    if (currentPage > totalPages) {
+        currentPage = state.currentPage[type] = totalPages;
     }
-    requestAnimationFrame(() => {
-        const gridComputedStyle = window.getComputedStyle(gridElement);
-        const rowGap = parseInt(gridComputedStyle.gap, 10) || (isMobile ? 12 : 16);
-        const cardHeight = 320; 
-        let columnCount;
-        if (isMobile) { columnCount = 2; } 
-        else { columnCount = gridComputedStyle.gridTemplateColumns.split(' ').length; }
+    
+    const startIndex = (currentPage - 1) * pageSize;
+    const endIndex = startIndex + pageSize;
+    const pageIds = allFilteredIds.slice(startIndex, endIndex);
 
-        if (columnCount > 0) {
-            const rowCount = Math.ceil(pageSize / columnCount);
-            const minHeight = rowCount * cardHeight + (rowCount > 0 ? (rowCount - 1) * rowGap : 0);
-            gridElement.style.minHeight = `${minHeight}px`;
-        } else {
-            gridElement.style.minHeight = 'auto';
-        }
+    grid.innerHTML = "";
+    pageIds.forEach(id => {
+        grid.appendChild(makeCard(id, context));
     });
-}
+    
+    adjustGridMinHeight(grid, pageSize);
 
-function updateFilterButtonState(grid) {
+    const paginationContainerId = {
+        admin_manga: 'adminMangaPagination',
+        admin_game: 'adminGamePagination',
+        new: 'newPagination',
+        ranking: 'rankingPagination',
+        favorites: 'favoritesPagination'
+    }[type];
+
+    if (paginationContainerId) {
+        renderPaginationButtons(paginationContainerId, currentPage, totalPages, type);
+    }
+    
+    // 絞り込みボタンの状態更新
     const viewContainer = grid.closest('.view-container') || dom.views.main;
     const filterBtn = viewContainer.querySelector('.filterByTagsBtn');
     const resetBtn = viewContainer.querySelector('.resetFilterBtn');
@@ -383,104 +133,88 @@ function updateFilterButtonState(grid) {
             filterBtn.classList.add('active');
             filterBtn.textContent = `タグ絞り込み (${state.highlightTagIds.size}優先 / ${state.hideTagIds.size}非表示)`;
             resetBtn.classList.remove('hidden');
-            if(mobileResetBtn) mobileResetBtn.classList.remove('hidden');
+            mobileResetBtn.classList.remove('hidden');
         } else {
             filterBtn.classList.remove('active');
             filterBtn.textContent = 'タグで絞り込み';
             resetBtn.classList.add('hidden');
-            if(mobileResetBtn) mobileResetBtn.classList.add('hidden');
+            mobileResetBtn.classList.add('hidden');
         }
     }
 }
 
-// トランザクション処理を使った安全な投票ロジック
-export async function handleVote(workId, score, dbPath) {
-    // 1. パスの特定
-    if (!dbPath) {
-        if (state.works[workId]) dbPath = CONSTANTS.DB_PATHS.WORKS;
-        else if (state.adminPicks[workId]) dbPath = CONSTANTS.DB_PATHS.ADMIN_PICKS;
-        else {
-            console.error("handleVote: dbPath could not be determined for", workId);
-            return;
-        }
+// --- ページネーション ---
+export function renderPaginationButtons(containerId, currentPage, totalPages, viewType) {
+    const container = document.getElementById(containerId);
+    if (!container) return;
+    container.innerHTML = '';
+    if (totalPages <= 1) return;
+    
+    container.dataset.viewType = viewType;
+
+    const createButton = (text, page, isDisabled = false, isCurrent = false) => {
+        const btn = document.createElement('button');
+        btn.textContent = text;
+        btn.dataset.page = page;
+        if (isDisabled) btn.disabled = true;
+        if (isCurrent) btn.classList.add('active');
+        return btn;
+    };
+    
+    container.appendChild(createButton('<<', 1, currentPage === 1));
+    container.appendChild(createButton('<', currentPage - 1, currentPage === 1));
+
+    let startPage, endPage;
+    if (totalPages <= 5) {
+        startPage = 1;
+        endPage = totalPages;
+    } else if (currentPage <= 3) {
+        startPage = 1;
+        endPage = 5;
+    } else if (currentPage > totalPages - 3) {
+        startPage = totalPages - 4;
+        endPage = totalPages;
+    } else {
+        startPage = currentPage - 2;
+        endPage = currentPage + 2;
     }
 
-    const workRef = ref(db, `${dbPath}/${workId}`);
+    for (let i = startPage; i <= endPage; i++) {
+        container.appendChild(createButton(i, i, false, i === currentPage));
+    }
 
-    try {
-        const result = await runTransaction(workRef, (work) => {
-            // 【重要】ローカルキャッシュが無い場合、workは null になります。
-            // ここで undefined を返すとトランザクションが中止されてしまうため、
-            // サーバーからデータを取得させるために、意図的に work (null) を返して再試行させます。
-            // ※ただし、本当にデータがない場合は削除扱いになりますが、
-            //   カードが表示されている＝データはあるはずなので、これで整合性が取れます。
-            if (!work) {
-                return work; 
-            }
+    container.appendChild(createButton('>', currentPage + 1, currentPage === totalPages));
+    container.appendChild(createButton('>>', totalPages, currentPage === totalPages));
+}
 
-            // 初期化
-            if (!work.votes) work.votes = {};
-            if (typeof work.score !== 'number') work.score = 0;
+// --- 投票処理 ---
+export async function handleVote(workId, score) {
+    const data = state.works[workId] || state.adminPicks[workId];
+    if(!data) return;
+    
+    const card = document.querySelector(`.item[data-id="${workId}"]`);
+    if(!card) return;
 
-            const currentVote = work.votes[state.clientId] || 0;
+    const goodBtn = card.querySelector('.rating-btn.good');
+    const badBtn = card.querySelector('.rating-btn.bad');
+    
+    const currentVote = data.votes?.[state.clientId] || 0;
+    const newVote = currentVote === score ? 0 : score;
 
-            if (currentVote === score) {
-                // 取り消し (同じボタンをもう一度押した)
-                work.score -= score;
-                delete work.votes[state.clientId];
-            } else {
-                // 新規 または 変更
-                // 例: 0 -> 1 (+1), 1 -> -1 (-2), -1 -> 1 (+2)
-                work.score = (work.score - currentVote) + score;
-                work.votes[state.clientId] = score;
-            }
-
-            return work;
-        });
-
-        // 成功時のUI更新
-        if (result.committed) {
-            const updatedWork = result.snapshot.val();
-            
-            // ステート更新
-            if (dbPath === CONSTANTS.DB_PATHS.WORKS) {
-                state.works[workId] = { id: workId, ...updatedWork };
-            } else if (dbPath === CONSTANTS.DB_PATHS.ADMIN_PICKS) {
-                state.adminPicks[workId] = { id: workId, ...updatedWork };
-            }
-
-            // カード表示の更新
-            const card = document.querySelector(`.item[data-id="${workId}"]`);
-            if (card) {
-                const goodBtn = card.querySelector('.rating-btn.good');
-                const badBtn = card.querySelector('.rating-btn.bad');
-                const scoreDisplay = card.querySelector('.score-display');
-                
-                const newVote = updatedWork.votes?.[state.clientId] || 0;
-                
-                // ボタンの見た目更新
-                if (goodBtn) {
-                    goodBtn.classList.toggle('active', newVote === 1);
-                }
-                if (badBtn) {
-                    badBtn.classList.toggle('active', newVote === -1);
-                }
-                // スコア表示更新
-                if (scoreDisplay) {
-                    scoreDisplay.textContent = updatedWork.score;
-                }
-            }
-            console.log("Vote transaction success:", updatedWork);
-        } else {
-            console.warn("Vote transaction not committed.");
-        }
-
-    } catch (error) {
-        console.error("Vote transaction error:", error);
+    goodBtn.classList.toggle('active', newVote === 1);
+    badBtn.classList.toggle('active', newVote === -1);
+    
+    const workPath = state.works[workId] ? CONSTANTS.DB_PATHS.WORKS : CONSTANTS.DB_PATHS.ADMIN_PICKS;
+    const voteRef = ref(db, `${workPath}/${workId}/votes/${state.clientId}`);
+    try { await (newVote === 0 ? remove(voteRef) : set(voteRef, newVote)); }
+    catch (error) { 
         util.showToast(`投票エラー: ${error.message}`);
+        goodBtn.classList.toggle('active', currentVote === 1);
+        badBtn.classList.toggle('active', currentVote === -1);
     }
 }
 
+// --- 作品追加 ---
 export async function addWork(url) {
     const originalUrl = url.trim();
     if (!originalUrl.includes("dlsite.com")) {
@@ -488,6 +222,7 @@ export async function addWork(url) {
     }
 
     const functionUrl = "https://addworkfromurl-vubh7ebq4a-uc.a.run.app"; 
+
     const btn = document.getElementById('addBtn');
     const input = dom.urlInput;
     btn.disabled = true;
@@ -501,14 +236,13 @@ export async function addWork(url) {
         });
 
         const result = await response.json();
-        if (!response.ok) throw new Error(result.error || '不明なエラーが発生しました。');
+        
+        if (!response.ok) {
+            throw new Error(result.error || '不明なエラーが発生しました。');
+        }
 
         util.showToast(result.data.message);
         input.value = "";
-        
-        state.workIndices['new'] = []; 
-        renderPage('new');
-
     } catch (error) {
         util.showToast(`エラー: ${error.message}`);
         console.error(error);
@@ -517,5 +251,3 @@ export async function addWork(url) {
         btn.classList.remove('loading');
     }
 }
-
-

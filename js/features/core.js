@@ -1,7 +1,10 @@
 // js/features/core.js
 
 import { state } from "../store/state.js";
+import { dom } from "../utils/dom.js";
 import { util } from "../utils/common.js";
+import { renderPage } from "./works.js";
+import { renderMyListsPage } from "./lists.js"; // ここでのimportはOKになります
 
 // --- ソート処理 ---
 export function updateSortedArrays() {
@@ -29,3 +32,17 @@ export function updateSortedArrays() {
     state.sortedAdminIds.manga = adminPicks.filter(w => util.classifyWork(w) === 'manga').map(w => w.id);
     state.sortedAdminIds.game = adminPicks.filter(w => util.classifyWork(w) === 'game').map(w => w.id);
 }
+
+// --- グリッド一括更新 ---
+export function refreshAllGrids() {
+    const currentView = state.currentView;
+    if (currentView === 'main' || currentView === 'publicList') {
+        ['new', 'ranking', 'admin_manga', 'admin_game'].forEach(renderPage);
+    } else if (currentView === 'favorites') {
+        renderPage('favorites');
+    } else if (currentView === 'mylists') {
+        renderMyListsPage();
+    }
+}
+
+// showView, handleUrlBasedView, getScrollTargetForView は router.js に移動したので削除

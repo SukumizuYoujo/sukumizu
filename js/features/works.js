@@ -7,30 +7,86 @@ import { CONSTANTS } from "../config/constants.js";
 import { db } from "../config/firebase.js";
 import { ref, get, child, set, remove, update, serverTimestamp } from "https://www.gstatic.com/firebasejs/11.10.0/firebase-database.js";
 import { makeCard, renderSkeletons } from "../components/card.js";
+import { updateSortedArrays } from "./core.js"; // データの整合性を保つため追加
 
 // ==========================================================================
-// 1. 新・データ取得ロジック（インデックス分離方式）
+// 1. ページ読み込みルーティング
 // ==========================================================================
 
-// ページ読み込みのメイン関数（ルーター）
 export function renderPage(type) {
-    // 'new'（新着）タブだけ新しい軽量化ロジックを使う
     if (type === 'new') {
+        // 新着: インデックス分離方式（高速）
         loadPageWithIndex(type, state.currentPage[type]);
+    } else if (type === 'favorites') {
+        // お気に入り: 不足データ取得ロジック付き
+        loadFavoritesPage();
     } else {
-        // それ以外（ランキング、管理者、お気に入り）は既存ロジック
+        // その他（ランキング、管理者、検索結果など）: レガシーモード
         renderLegacyPage(type);
     }
 }
 
-// インデックス方式でのページ読み込み
+// ==========================================================================
+// 2. お気に入り専用読み込みロジック (今回追加)
+// ==========================================================================
+
+async function loadFavoritesPage() {
+    const grid = dom.grids.favorites;
+    const pageSize = state.pageSize.favorites;
+    
+    // とりあえずスケルトン表示
+    renderSkeletons(grid, pageSize);
+
+    // 1. お気に入りIDリストを取得
+    const favIds = Array.from(state.favorites);
+
+    if (favIds.length === 0) {
+        grid.innerHTML = '<div style="grid-column: 1/-1; text-align: center; padding: 2rem;">お気に入りはまだありません。</div>';
+        return;
+    }
+
+    // 2. 手持ちのデータ(state.works)にないIDを特定
+    const missingIds = favIds.filter(id => {
+        // 正規化IDへの対応も含めてチェック
+        const isCached = state.works[id] || Object.values(state.works).some(w => w.id === id || (w.pageUrl && w.pageUrl.includes(id)));
+        return !isCached;
+    });
+
+    // 3. 不足しているデータをDBから取得
+    if (missingIds.length > 0) {
+        try {
+            const fetchPromises = missingIds.map(async (id) => {
+                // works/{id} を直接取得
+                const snapshot = await get(child(ref(db), `${CONSTANTS.DB_PATHS.WORKS}/${id}`));
+                if (snapshot.exists()) {
+                    const data = { id: snapshot.key, ...snapshot.val() };
+                    state.works[snapshot.key] = data; // キャッシュに保存
+                }
+            });
+            await Promise.all(fetchPromises);
+            
+            // データが増えたのでソート順などを再計算
+            updateSortedArrays();
+        } catch (e) {
+            console.error("Favorites fetch error:", e);
+            util.showToast("お気に入りデータの取得に失敗しました");
+        }
+    }
+
+    // 4. データが揃ったので描画（レガシーロジックを再利用）
+    renderLegacyPage('favorites');
+}
+
+
+// ==========================================================================
+// 3. 新・データ取得ロジック（新着・インデックス方式）
+// ==========================================================================
+
 async function loadPageWithIndex(viewType, pageNumber) {
     const grid = dom.grids[viewType];
     const pageSize = state.pageSize.user;
 
-    // 初回ロード時などでインデックスが空なら取得・キャッシュ
     if (!state.workIndices[viewType] || state.workIndices[viewType].length === 0) {
-        // スケルトンを表示して待機
         renderSkeletons(grid, pageSize);
         await fetchAndCacheIndices(viewType);
     }
@@ -39,25 +95,21 @@ async function loadPageWithIndex(viewType, pageNumber) {
     const totalItems = allIds.length;
     const totalPages = util.calculateTotalPages(totalItems, pageSize);
 
-    // ページ番号の範囲チェック
     if (pageNumber < 1) pageNumber = 1;
     if (pageNumber > totalPages && totalPages > 0) pageNumber = totalPages;
     state.currentPage[viewType] = pageNumber;
 
-    // 表示すべきIDの範囲を切り出す
     const startIndex = (pageNumber - 1) * pageSize;
     const endIndex = startIndex + pageSize;
     const targetIds = allIds.slice(startIndex, endIndex);
 
-    // 未取得のデータのみDBから取得（キャッシュ活用）
     const fetchPromises = targetIds.map(async (id) => {
-        if (state.works[id]) return state.works[id]; // キャッシュヒット
-        
+        if (state.works[id]) return state.works[id];
         try {
             const snapshot = await get(child(ref(db), `${CONSTANTS.DB_PATHS.WORKS}/${id}`));
             if (snapshot.exists()) {
                 const data = { id: snapshot.key, ...snapshot.val() };
-                state.works[id] = data; // キャッシュに保存
+                state.works[id] = data;
                 return data;
             }
         } catch (e) {
@@ -66,22 +118,12 @@ async function loadPageWithIndex(viewType, pageNumber) {
         return null;
     });
 
-    // 並列取得完了を待つ
     let works = (await Promise.all(fetchPromises)).filter(Boolean);
 
-    // --- フィルタリング（Bad非表示など） ---
-    // ※ インデックス方式での厳密なフィルタリングは、IDを取り出した後に適用するため
-    //   ページごとの表示数が減る可能性がありますが、軽量化優先のため現状はこれで良しとします。
     if (state.hideBadlyRated) {
         works = works.filter(w => (w.votes?.[state.clientId] || 0) !== -1);
     }
-    // ※ タグ絞り込み機能は、インデックス方式だと全件スキャンが必要になるため、
-    //   本格対応するには「タグごとのインデックス」をDBに作る必要があります。
-    //   今回は簡易的に「取得したページ内での絞り込み」または
-    //   「タグ絞り込み時はレガシーモードに切り替える」等の対応が理想ですが、
-    //   一旦は表示だけ行います。
 
-    // 描画
     grid.innerHTML = "";
     works.forEach(work => {
         grid.appendChild(makeCard(work.id, 'user'));
@@ -91,9 +133,7 @@ async function loadPageWithIndex(viewType, pageNumber) {
     renderNumberedPagination(viewType, pageNumber, totalPages);
 }
 
-// 目次データ（IDとソートキー）を取得してキャッシュ
 async function fetchAndCacheIndices(viewType) {
-    // DBパス: work_orders/new
     const path = `work_orders/${viewType}`; 
     try {
         const snapshot = await get(ref(db, path));
@@ -101,16 +141,11 @@ async function fetchAndCacheIndices(viewType) {
             state.workIndices[viewType] = [];
             return;
         }
-        
-        const rawData = snapshot.val(); // { workId: timestamp, ... }
-        
-        // タイムスタンプ降順（新しい順）にソートしてID配列にする
+        const rawData = snapshot.val();
         const sortedIds = Object.keys(rawData).sort((a, b) => {
             return rawData[b] - rawData[a];
         });
-        
         state.workIndices[viewType] = sortedIds;
-        
     } catch (error) {
         console.error("Index fetch error:", error);
         util.showToast("リストの取得に失敗しました");
@@ -118,9 +153,8 @@ async function fetchAndCacheIndices(viewType) {
     }
 }
 
-// 番号付きページネーション描画
 function renderNumberedPagination(viewType, currentPage, totalPages) {
-    const containerId = `${viewType}Pagination`; // newPagination
+    const containerId = `${viewType}Pagination`;
     const container = document.getElementById(containerId);
     if (!container) return;
     
@@ -134,15 +168,13 @@ function renderNumberedPagination(viewType, currentPage, totalPages) {
         btn.textContent = text;
         if (isDisabled) btn.disabled = true;
         if (isActive) btn.classList.add('active');
-        btn.onclick = () => loadPageWithIndex(viewType, page); // ここで再読み込み呼び出し
+        btn.onclick = () => loadPageWithIndex(viewType, page);
         return btn;
     };
 
-    // << <
     container.appendChild(createBtn('<<', 1, false, currentPage === 1));
     container.appendChild(createBtn('<', currentPage - 1, false, currentPage === 1));
 
-    // 数字ボタン（スマホ考慮して最大5つ）
     let start = Math.max(1, currentPage - 2);
     let end = Math.min(totalPages, currentPage + 2);
     
@@ -155,15 +187,13 @@ function renderNumberedPagination(viewType, currentPage, totalPages) {
         container.appendChild(createBtn(i, i, i === currentPage));
     }
 
-    // > >>
     container.appendChild(createBtn('>', currentPage + 1, false, currentPage === totalPages));
     container.appendChild(createBtn('>>', totalPages, false, currentPage === totalPages));
 }
 
 
 // ==========================================================================
-// 2. 既存ロジック（レガシーモード）
-//    ※ ランキング、管理者、お気に入り等はこれまで通りの処理を行う
+// 4. 既存ロジック（レガシーモード）
 // ==========================================================================
 
 function renderLegacyPage(type) {
@@ -175,7 +205,8 @@ function renderLegacyPage(type) {
     const pageSize = isAdmin ? state.pageSize.admin : (isFav ? state.pageSize.favorites : state.pageSize.user);
     const context = isAdmin ? 'admin' : (isFav ? 'favorites' : 'user');
     
-    const allFilteredIds = getFilteredIdsForView(type); // core.js / works.js内の既存ロジック依存
+    // updateSortedArrays経由でフィルタリング済みのIDを取得
+    const allFilteredIds = getFilteredIdsForView(type);
     
     const totalPages = util.calculateTotalPages(allFilteredIds.length, pageSize);
     let currentPage = state.currentPage[type];
@@ -208,7 +239,6 @@ function renderLegacyPage(type) {
     updateFilterButtonState(grid);
 }
 
-// 既存のページネーションボタン描画（名前を変更して保持）
 export function renderLegacyPaginationButtons(containerId, currentPage, totalPages, viewType) {
     const container = document.getElementById(containerId);
     if (!container) return;
@@ -220,7 +250,7 @@ export function renderLegacyPaginationButtons(containerId, currentPage, totalPag
     const createButton = (text, page, isDisabled = false, isCurrent = false) => {
         const btn = document.createElement('button');
         btn.textContent = text;
-        btn.dataset.page = page; // Delegated Event Listener用
+        btn.dataset.page = page;
         if (isDisabled) btn.disabled = true;
         if (isCurrent) btn.classList.add('active');
         return btn;
@@ -248,7 +278,6 @@ export function renderLegacyPaginationButtons(containerId, currentPage, totalPag
     container.appendChild(createButton('>>', totalPages, currentPage === totalPages));
 }
 
-// フィルタリングID取得（レガシー用）
 export function getFilteredIdsForView(type) {
     const isAdmin = type.startsWith('admin_');
     const isFav = type === 'favorites';
@@ -289,10 +318,9 @@ export function getFilteredIdsForView(type) {
 }
 
 // ==========================================================================
-// 3. 共通・ユーティリティ機能
+// 5. 共通・ユーティリティ機能
 // ==========================================================================
 
-// グリッドの高さ調整
 export function adjustGridMinHeight(gridElement, pageSize) {
     if (!gridElement) return;
     const isMobile = window.innerWidth <= 768;
@@ -318,7 +346,6 @@ export function adjustGridMinHeight(gridElement, pageSize) {
     });
 }
 
-// フィルタボタンの状態更新
 function updateFilterButtonState(grid) {
     const viewContainer = grid.closest('.view-container') || dom.views.main;
     const filterBtn = viewContainer.querySelector('.filterByTagsBtn');
@@ -340,14 +367,11 @@ function updateFilterButtonState(grid) {
     }
 }
 
-// 投票処理（変更なし）
 export async function handleVote(workId, score) {
     const data = state.works[workId] || state.adminPicks[workId];
     if(!data) return;
     
     const card = document.querySelector(`.item[data-id="${workId}"]`);
-    
-    // UIの楽観的更新
     if(card) {
         const goodBtn = card.querySelector('.rating-btn.good');
         const badBtn = card.querySelector('.rating-btn.bad');
@@ -360,17 +384,13 @@ export async function handleVote(workId, score) {
     const workPath = state.works[workId] ? CONSTANTS.DB_PATHS.WORKS : CONSTANTS.DB_PATHS.ADMIN_PICKS;
     const voteRef = ref(db, `${workPath}/${workId}/votes/${state.clientId}`);
     try { 
-        // 実際の投票データ更新
-        // TODO: ランキング対応時にここで score トランザクション更新が必要
         await (data.votes?.[state.clientId] === score ? remove(voteRef) : set(voteRef, score)); 
     }
     catch (error) { 
         util.showToast(`投票エラー: ${error.message}`);
-        // エラー時のロールバック処理は省略
     }
 }
 
-// 作品追加（修正あり：目次データの更新を追加）
 export async function addWork(url) {
     const originalUrl = url.trim();
     if (!originalUrl.includes("dlsite.com")) {
@@ -396,8 +416,7 @@ export async function addWork(url) {
         util.showToast(result.data.message);
         input.value = "";
         
-        // ★重要: Cloud Functions側で work_orders/new が更新されない場合、
-        // クライアント側で強制的にインデックスをリセットして再取得させる
+        // インデックスリセット
         state.workIndices['new'] = []; 
         renderPage('new');
 
@@ -410,5 +429,4 @@ export async function addWork(url) {
     }
 }
 
-// 互換性のためエクスポート
 export { renderLegacyPaginationButtons as renderPaginationButtons };

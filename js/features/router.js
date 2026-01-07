@@ -3,8 +3,8 @@
 import { dom } from "../utils/dom.js";
 import { state } from "../store/state.js";
 import { util } from "../utils/common.js";
-import { renderPage } from "./works.js";
-import { renderSkeletons } from "../components/card.js";
+import { renderPage } from "./works.js"; 
+import { renderSkeletons } from "../components/card.js"; 
 import { renderMyListsPage, renderPublicListPage, getPublicListData } from "./lists.js";
 
 // --- ビュー切り替え ---
@@ -55,7 +55,7 @@ export function handleUrlBasedView() {
     if (listId) {
         getPublicListData(listId)
             .then(data => {
-                showView('publicList'); // ★ここで明示的に切り替え
+                showView('publicList'); // ★lists.jsで消した分、ここで明示的にビューを切り替え
                 renderPublicListPage(data);
             })
             .catch(err => { 

@@ -32,14 +32,24 @@ export function showView(viewName) {
         url.searchParams.delete('view'); url.searchParams.delete('list'); history.pushState({ view: 'main' }, '', url); 
     }
     
-    // ホームに戻った時
+    // ★★★ ホームに戻った時の処理（ここを修正） ★★★
     if (viewName === 'main') {
-        // ★追加: タブの状態を強制的に「新着(tab-new)」に合わせる
-        // これがないと、裏でランキングタブが選択されたままになり、新着が表示されても隠れてしまう
+        // 1. 下部タブ（みんなの投稿）を「新着」にリセット
         const newTabBtn = document.getElementById('tab-new');
         if (newTabBtn) newTabBtn.checked = true;
 
+        // 2. 上部タブ（管理者のおすすめ）を「漫画」にリセット
+        const adminMangaTabBtn = document.getElementById('tab-admin_manga');
+        if (adminMangaTabBtn) adminMangaTabBtn.checked = true;
+
+        // 3. すべてのメイングリッドを再描画する
+        // これがないと、他のページから戻ってきた時に空っぽになります
+        renderPage('admin_manga');
+        renderPage('admin_game');
         renderPage('new');
+        // ランキングは重いのでタブ切り替え時まで描画を遅らせても良いが、
+        // 念のため描画しておくなら以下を追加（必須ではありません）
+        // renderPage('ranking'); 
     }
     // お気に入り表示時
     else if (viewName === 'favorites') {

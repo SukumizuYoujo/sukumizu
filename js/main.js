@@ -368,3 +368,54 @@ function main() {
 
 // アプリケーション起動
 main();
+
+// ==========================================
+// データ移行用コード
+// ==========================================
+import { ref, get, update } from "https://www.gstatic.com/firebasejs/11.10.0/firebase-database.js";
+import { db } from "./config/firebase.js"; // 既存の設定を読み込みます
+
+async function migrateData() {
+    console.log("🚀 データ移行を開始します...");
+    
+    // 1. 全作品データを取得
+    const worksRef = ref(db, "works");
+    const worksSnapshot = await get(worksRef);
+    
+    if (!worksSnapshot.exists()) {
+        console.log("作品データが見つかりませんでした。移行をスキップします。");
+        return;
+    }
+
+    const updates = {};
+    let count = 0;
+
+    // 2. 目次(インデックス)データを作成
+    worksSnapshot.forEach(childSnap => {
+        const workId = childSnap.key;
+        const workData = childSnap.val();
+        
+        // タイムスタンプを取得 (なければ現在時刻)
+        const timestamp = workData.timestamp || Date.now();
+
+        // work_orders/new/{workId} = timestamp という形式で保存
+        updates[`work_orders/new/${workId}`] = timestamp;
+        count++;
+    });
+
+    // 3. 一括書き込み
+    if (count > 0) {
+        await update(ref(db), updates);
+        console.log(`✅ 完了! ${count} 件のインデックスを作成しました。`);
+        alert(`データ移行が完了しました！\n${count}件のインデックスを作成しました。\nmain.jsに追加したコードを削除してください。`);
+    } else {
+        console.log("移行するデータがありませんでした。");
+    }
+}
+
+// 実行
+migrateData();
+// ==========================================
+// ▲▲▲ データ移行用コード (ここまで) ▲▲▲
+// ==========================================
+

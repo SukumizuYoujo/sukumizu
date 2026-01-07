@@ -6,8 +6,7 @@ import { CONSTANTS } from "../config/constants.js";
 import { db } from "../config/firebase.js";
 import { ref, onValue, get, child } from "https://www.gstatic.com/firebasejs/11.10.0/firebase-database.js";
 import { updateSortedArrays } from "./core.js";
-// import refreshAllGrids は削除しました
-import { renderMyListsPage } from "./lists.js";
+// routerのインポートは削除
 
 let userListeners = [];
 
@@ -23,7 +22,7 @@ export function subscribeUserData(user) {
             Object.keys(snapshot.val()).forEach(workId => state.favorites.add(workId)); 
         }
         updateSortedArrays();
-        // ★変更: 直接関数を呼ばず、イベントを発信する
+        // ★ イベント発火でリフレッシュを要求
         window.dispatchEvent(new CustomEvent('dlsite-share:refresh'));
     });
     userListeners.push(favListener);
@@ -51,7 +50,7 @@ export function subscribeUserData(user) {
                 needsRender = true;
                 const itemsListener = onValue(ref(db, `${CONSTANTS.DB_PATHS.LIST_ITEMS}/${l.id}`), itemSnap => {
                     state.myListItems[l.id] = itemSnap.val() || {};
-                    // イベント発信
+                    // ★ イベント発火
                     window.dispatchEvent(new CustomEvent('dlsite-share:refresh'));
                 });
                 userListeners.push(itemsListener);
@@ -59,7 +58,7 @@ export function subscribeUserData(user) {
         }
         if (needsRender || removedListIds.length > 0) {
             if (state.currentView === 'mylists') { 
-                // ★変更: イベント発信
+                // ★ イベント発火
                 window.dispatchEvent(new CustomEvent('dlsite-share:refresh'));
             }
         }
@@ -73,7 +72,7 @@ export function unsubscribeUserData() {
     state.favorites.clear(); state.myLists = {}; state.myListItems = {};
     if (state.currentUser === null) { 
         updateSortedArrays(); 
-        // ★変更: イベント発信
+        // ★ イベント発火
         window.dispatchEvent(new CustomEvent('dlsite-share:refresh'));
     }
 }

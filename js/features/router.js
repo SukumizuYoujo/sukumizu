@@ -55,7 +55,7 @@ export function handleUrlBasedView() {
     if (listId) {
         getPublicListData(listId)
             .then(data => {
-                showView('publicList'); // ★lists.jsで消した分、ここで明示的にビューを切り替え
+                showView('publicList'); // ★明示的に切り替え
                 renderPublicListPage(data);
             })
             .catch(err => { 

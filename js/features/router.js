@@ -5,7 +5,6 @@ import { state } from "../store/state.js";
 import { util } from "../utils/common.js";
 import { renderPage } from "./works.js"; 
 import { renderSkeletons } from "../components/card.js"; 
-// 下位モジュールをインポートして使用するのはOK（循環さえしなければ）
 import { renderMyListsPage, renderPublicListPage, getPublicListData } from "./lists.js";
 
 // --- ビュー切り替え ---
@@ -35,6 +34,11 @@ export function showView(viewName) {
     
     // ホームに戻った時
     if (viewName === 'main') {
+        // ★追加: タブの状態を強制的に「新着(tab-new)」に合わせる
+        // これがないと、裏でランキングタブが選択されたままになり、新着が表示されても隠れてしまう
+        const newTabBtn = document.getElementById('tab-new');
+        if (newTabBtn) newTabBtn.checked = true;
+
         renderPage('new');
     }
     // お気に入り表示時

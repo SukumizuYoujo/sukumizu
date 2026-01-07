@@ -6,7 +6,8 @@ import { CONSTANTS } from "../config/constants.js";
 import { db } from "../config/firebase.js";
 import { ref, onValue, get, child } from "https://www.gstatic.com/firebasejs/11.10.0/firebase-database.js";
 import { updateSortedArrays } from "./core.js";
-import { refreshAllGrids } from "./router.js"; // ★変更: core.js -> router.js
+// ▼▼▼ 修正: core.js ではなく router.js から読み込む ▼▼▼
+import { refreshAllGrids } from "./router.js";
 import { renderMyListsPage } from "./lists.js";
 
 let userListeners = [];

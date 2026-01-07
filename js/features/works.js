@@ -7,7 +7,7 @@ import { CONSTANTS } from "../config/constants.js";
 import { db } from "../config/firebase.js";
 import { 
     ref, get, child, set, remove, 
-    query, orderByChild, limitToLast 
+    query, orderByChild 
 } from "https://www.gstatic.com/firebasejs/11.10.0/firebase-database.js";
 import { makeCard, renderSkeletons } from "../components/card.js";
 import { updateSortedArrays } from "./core.js";
@@ -17,12 +17,9 @@ import { updateSortedArrays } from "./core.js";
 // ==========================================================================
 
 export function renderPage(type) {
-    if (type === 'new') {
-        // 新着はインデックスリスト方式
+    // ★修正: ランキングも「新着」と同じ高機能な読み込みロジック(loadPageWithIndex)を使用する
+    if (type === 'new' || type === 'ranking') {
         loadPageWithIndex(type, state.currentPage[type]);
-    } else if (type === 'ranking') {
-        //  ランキングはスコア順に直接取得
-        loadRankingPage();
     } else if (type === 'favorites') {
         loadFavoritesPage();
     } else {
@@ -31,58 +28,7 @@ export function renderPage(type) {
 }
 
 // ==========================================================================
-// 2. ランキング専用読み込みロジック (自動ソート機能)
-// ==========================================================================
-
-async function loadRankingPage() {
-    const grid = dom.grids.ranking;
-    // ランキングは上位20件固定表示とする（ページネーションなし）
-    const limit = 20; 
-    
-    renderSkeletons(grid, limit);
-
-    try {
-        // Firebaseの機能で score の高い順（昇順）に取得し、後で逆転させる
-        const worksRef = ref(db, CONSTANTS.DB_PATHS.WORKS);
-        const rankingQuery = query(worksRef, orderByChild('score'), limitToLast(limit));
-        
-        const snapshot = await get(rankingQuery);
-        
-        if (!snapshot.exists()) {
-            grid.innerHTML = '<div style="grid-column: 1/-1; text-align: center; padding: 2rem;">データがありません。</div>';
-            return;
-        }
-
-        const rankingData = [];
-        snapshot.forEach(childSnap => {
-            const work = { id: childSnap.key, ...childSnap.val() };
-            rankingData.push(work);
-            // キャッシュにも保存しておく
-            state.works[work.id] = work;
-        });
-
-        // 昇順（低い順）で来るので、逆転させて高い順にする
-        rankingData.reverse();
-
-        grid.innerHTML = "";
-        rankingData.forEach(work => {
-            grid.appendChild(makeCard(work.id, 'user'));
-        });
-
-        // ページネーションは非表示にする
-        const container = document.getElementById('rankingPagination');
-        if (container) container.innerHTML = '';
-
-        adjustGridMinHeight(grid, limit);
-
-    } catch (error) {
-        console.error("Ranking fetch error:", error);
-        grid.innerHTML = '<div style="grid-column: 1/-1; text-align: center; padding: 2rem;">読み込みに失敗しました。</div>';
-    }
-}
-
-// ==========================================================================
-// 3. お気に入り専用読み込みロジック
+// 2. お気に入り専用読み込みロジック
 // ==========================================================================
 
 async function loadFavoritesPage() {
@@ -125,15 +71,17 @@ async function loadFavoritesPage() {
 
 
 // ==========================================================================
-// 4. 新着データ取得ロジック（インデックス方式）
+// 3. 共通・データ取得ロジック（新着・ランキング用）
 // ==========================================================================
 
 async function loadPageWithIndex(viewType, pageNumber) {
     const grid = dom.grids[viewType];
-    const pageSize = state.pageSize.user;
+    const pageSize = state.pageSize.user; // ユーザーが選択した件数を使用
 
+    // インデックスの初期化チェック
     if (!state.workIndices) state.workIndices = {};
 
+    // インデックス（ID一覧）がまだ無ければ取得しに行く
     if (!state.workIndices[viewType] || state.workIndices[viewType].length === 0) {
         renderSkeletons(grid, pageSize);
         await fetchAndCacheIndices(viewType);
@@ -143,14 +91,17 @@ async function loadPageWithIndex(viewType, pageNumber) {
     const totalItems = allIds.length;
     const totalPages = util.calculateTotalPages(totalItems, pageSize);
 
+    // ページ番号の補正
     if (pageNumber < 1) pageNumber = 1;
     if (pageNumber > totalPages && totalPages > 0) pageNumber = totalPages;
     state.currentPage[viewType] = pageNumber;
 
+    // 現在のページに必要なIDを切り出す
     const startIndex = (pageNumber - 1) * pageSize;
     const endIndex = startIndex + pageSize;
     const targetIds = allIds.slice(startIndex, endIndex);
 
+    // データがキャッシュに無ければ取得
     const fetchPromises = targetIds.map(async (id) => {
         if (state.works[id]) return state.works[id];
         try {
@@ -185,27 +136,50 @@ async function loadPageWithIndex(viewType, pageNumber) {
     renderNumberedPagination(viewType, pageNumber, totalPages);
 }
 
+// ★修正: ランキングと新着で取得方法を分岐させる関数
 async function fetchAndCacheIndices(viewType) {
-    const path = `work_orders/${viewType}`; 
     try {
-        const snapshot = await get(ref(db, path));
-        if (!snapshot.exists()) {
-            state.workIndices[viewType] = [];
-            return;
+        if (viewType === 'ranking') {
+            // --- ランキングの場合: 全件をスコア順で取得してIDリストを作る ---
+            const worksRef = ref(db, CONSTANTS.DB_PATHS.WORKS);
+            // スコア順に並べ替え（昇順）
+            const q = query(worksRef, orderByChild('score'));
+            const snapshot = await get(q);
+            
+            const ids = [];
+            if (snapshot.exists()) {
+                snapshot.forEach(childSnap => {
+                    const work = { id: childSnap.key, ...childSnap.val() };
+                    ids.push(work.id);
+                    // ついでにデータもキャッシュしておく（個別取得の手間を省く）
+                    state.works[work.id] = work;
+                });
+            }
+            // 昇順(低い順)で来るので逆転させて、高い順のIDリストにする
+            state.workIndices[viewType] = ids.reverse();
+
+        } else {
+            // --- 新着の場合: 既存のwork_orders（目次）を取得 ---
+            const path = `work_orders/${viewType}`; 
+            const snapshot = await get(ref(db, path));
+            if (!snapshot.exists()) {
+                state.workIndices[viewType] = [];
+                return;
+            }
+            const rawData = snapshot.val();
+            let sortedIds = [];
+            if (Array.isArray(rawData)) {
+                sortedIds = rawData;
+            } else if (typeof rawData === 'object' && rawData !== null) {
+                sortedIds = Object.keys(rawData).sort((a, b) => {
+                    return rawData[b] - rawData[a];
+                });
+            }
+            state.workIndices[viewType] = sortedIds;
         }
-        const rawData = snapshot.val();
-        
-        let sortedIds = [];
-        if (Array.isArray(rawData)) {
-            sortedIds = rawData;
-        } else if (typeof rawData === 'object' && rawData !== null) {
-            sortedIds = Object.keys(rawData).sort((a, b) => {
-                return rawData[b] - rawData[a];
-            });
-        }
-        state.workIndices[viewType] = sortedIds;
     } catch (error) {
         console.error("Index fetch error:", error);
+        util.showToast("リストの取得に失敗しました");
         state.workIndices[viewType] = [];
     }
 }
@@ -250,7 +224,7 @@ function renderNumberedPagination(viewType, currentPage, totalPages) {
 
 
 // ==========================================================================
-// 5. 既存ロジック（レガシーモード）
+// 4. 既存ロジック（レガシーモード: 管理者おすすめ用）
 // ==========================================================================
 
 function renderLegacyPage(type) {
@@ -284,7 +258,7 @@ function renderLegacyPage(type) {
     const paginationContainerId = {
         admin_manga: 'adminMangaPagination',
         admin_game: 'adminGamePagination',
-        ranking: 'rankingPagination',
+        ranking: 'rankingPagination', // レガシーモードのフォールバック用
         favorites: 'favoritesPagination'
     }[type];
 
@@ -295,7 +269,7 @@ function renderLegacyPage(type) {
     updateFilterButtonState(grid);
 }
 
-// 修正: export の競合を解消
+// exportの重複エラー修正済み
 export function renderPaginationButtons(containerId, currentPage, totalPages, viewType) {
     renderLegacyPaginationButtons(containerId, currentPage, totalPages, viewType);
 }
@@ -379,7 +353,7 @@ export function getFilteredIdsForView(type) {
 }
 
 // ==========================================================================
-// 6. 共通・ユーティリティ機能
+// 5. 共通・ユーティリティ機能
 // ==========================================================================
 
 export function adjustGridMinHeight(gridElement, pageSize) {

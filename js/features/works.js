@@ -14,7 +14,7 @@ import { updateSortedArrays } from "./core.js";
 // ==========================================================================
 
 export function renderPage(type) {
-    // ★修正: ランキングもインデックス読み込み方式に対応させる
+    // 新着(new) または ランキング(ranking) はインデックス読み込み方式
     if (type === 'new' || type === 'ranking') {
         loadPageWithIndex(type, state.currentPage[type]);
     } else if (type === 'favorites') {
@@ -83,7 +83,7 @@ async function loadPageWithIndex(viewType, pageNumber) {
         await fetchAndCacheIndices(viewType);
     }
 
-    const allIds = state.workIndices[viewType];
+    const allIds = state.workIndices[viewType] || [];
     const totalItems = allIds.length;
     const totalPages = util.calculateTotalPages(totalItems, pageSize);
 
@@ -117,9 +117,13 @@ async function loadPageWithIndex(viewType, pageNumber) {
     }
 
     grid.innerHTML = "";
-    works.forEach(work => {
-        grid.appendChild(makeCard(work.id, 'user'));
-    });
+    if (works.length === 0 && totalItems === 0) {
+         grid.innerHTML = '<div style="grid-column: 1/-1; text-align: center; padding: 2rem;">データがありません。</div>';
+    } else {
+        works.forEach(work => {
+            grid.appendChild(makeCard(work.id, 'user'));
+        });
+    }
 
     adjustGridMinHeight(grid, pageSize);
     renderNumberedPagination(viewType, pageNumber, totalPages);
@@ -130,16 +134,15 @@ async function fetchAndCacheIndices(viewType) {
     try {
         const snapshot = await get(ref(db, path));
         if (!snapshot.exists()) {
-            // データが無い場合でも空配列をセットしてループを防ぐ
             state.workIndices[viewType] = [];
             return;
         }
         const rawData = snapshot.val();
-        // Firebaseの配列かオブジェクトかに応じて処理
+        
         let sortedIds = [];
         if (Array.isArray(rawData)) {
             sortedIds = rawData;
-        } else {
+        } else if (typeof rawData === 'object' && rawData !== null) {
             // スコアなどの数値でソートされているオブジェクトの場合
             sortedIds = Object.keys(rawData).sort((a, b) => {
                 return rawData[b] - rawData[a];
@@ -235,6 +238,11 @@ function renderLegacyPage(type) {
     }
     
     updateFilterButtonState(grid);
+}
+
+// 互換性のために export function として定義
+export function renderPaginationButtons(containerId, currentPage, totalPages, viewType) {
+    renderLegacyPaginationButtons(containerId, currentPage, totalPages, viewType);
 }
 
 export function renderLegacyPaginationButtons(containerId, currentPage, totalPages, viewType) {
@@ -425,5 +433,3 @@ export async function addWork(url) {
         btn.classList.remove('loading');
     }
 }
-
-export { renderLegacyPaginationButtons as renderPaginationButtons };

@@ -185,7 +185,7 @@ function setupDelegatedEventListeners() {
             const canonicalId = card.dataset.canonicalId;
             if (target.closest('.rating-btn')) {
                 const score = Number(target.closest('.rating-btn.good, .rating-btn.bad').dataset.score);
-                handleVote(workId, score);
+                handleVote(workId, score, dbPath);
             } else if (target.closest('.favorite-btn')) {
                 e.stopPropagation(); toggleFavorite(canonicalId);
             } else if (target.closest('.add-to-list-btn')) {
@@ -270,3 +270,4 @@ function main() {
     initializeDetailsPopup();
 }
 main();
+

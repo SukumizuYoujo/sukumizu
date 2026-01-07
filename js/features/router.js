@@ -5,6 +5,7 @@ import { state } from "../store/state.js";
 import { util } from "../utils/common.js";
 import { renderPage } from "./works.js"; 
 import { renderSkeletons } from "../components/card.js"; 
+// 下位モジュールをインポートして使用するのはOK（循環さえしなければ）
 import { renderMyListsPage, renderPublicListPage, getPublicListData } from "./lists.js";
 
 // --- ビュー切り替え ---
@@ -32,7 +33,7 @@ export function showView(viewName) {
         url.searchParams.delete('view'); url.searchParams.delete('list'); history.pushState({ view: 'main' }, '', url); 
     }
     
-    // ★追加: ホームに戻った時も念のため再描画（空になるのを防ぐ）
+    // ホームに戻った時
     if (viewName === 'main') {
         renderPage('new');
     }

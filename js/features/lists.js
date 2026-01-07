@@ -7,7 +7,7 @@ import { CONSTANTS } from "../config/constants.js";
 import { db } from "../config/firebase.js";
 import { ref, get, child, push, set, remove, update, serverTimestamp } from "https://www.gstatic.com/firebasejs/11.10.0/firebase-database.js";
 import { makeCard, renderSkeletons } from "../components/card.js";
-// router.js の import を削除（循環参照解消）
+// import { showView } from "./router.js";  <-- これを削除して循環参照を断ち切る！
 
 let activePopover = null;
 
@@ -100,7 +100,7 @@ export async function renderMyListsPage() {
 
 // --- 公開リスト描画 ---
 export function renderPublicListPage({ info, items, works }) {
-    // showView('publicList') は router.js 側で呼ぶため削除
+    // showView('publicList') の呼び出しを削除 (router.js側で行うため)
     dom.publicListName.textContent = util.escapeHTML(info.name);
     dom.publicListOwner.textContent = `作成者: ${util.escapeHTML(info.ownerName || '匿名')}`;
     dom.importPublicListBtn.dataset.listId = info.id;
@@ -140,7 +140,7 @@ export async function getPublicListData(listId) {
     return { info: { id: listSnap.key, ...listSnap.val() }, items: items, works: worksForList };
 }
 
-// --- リスト操作系 (そのまま維持) ---
+// --- リスト操作系 ---
 export async function createNewList(name) {
     if (!state.currentUser) { util.showToast('ログインが必要です。'); return null; }
     if (Object.keys(state.myLists).length >= CONSTANTS.LIST_LIMITS.MAX_LISTS) { util.showToast(`作成できるリストは${CONSTANTS.LIST_LIMITS.MAX_LISTS}個までです。`); return null; }

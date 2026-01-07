@@ -2,7 +2,7 @@
 
 // 外部モジュール
 import { GoogleAuthProvider, signInWithPopup, signOut, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/11.10.0/firebase-auth.js";
-import { onValue, ref } from "https://www.gstatic.com/firebasejs/11.10.0/firebase-database.js";
+import { onValue, ref, get, update } from "https://www.gstatic.com/firebasejs/11.10.0/firebase-database.js";
 
 // 内部モジュール
 import { CONSTANTS } from "./config/constants.js";
@@ -372,8 +372,6 @@ main();
 // ==========================================
 // データ移行用コード
 // ==========================================
-import { ref, get, update } from "https://www.gstatic.com/firebasejs/11.10.0/firebase-database.js";
-import { db } from "./config/firebase.js"; // 既存の設定を読み込みます
 
 async function migrateData() {
     console.log("🚀 データ移行を開始します...");

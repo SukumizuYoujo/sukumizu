@@ -2,7 +2,7 @@
 
 // 外部モジュール
 import { GoogleAuthProvider, signInWithPopup, signOut, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/11.10.0/firebase-auth.js";
-import { onValue, ref } from "https://www.gstatic.com/firebasejs/11.10.0/firebase-database.js";
+import { onValue, ref, get, update } from "https://www.gstatic.com/firebasejs/11.10.0/firebase-database.js";
 
 // 内部モジュール
 import { CONSTANTS } from "./config/constants.js";
@@ -372,8 +372,6 @@ main();
 // ==========================================
 // ▼▼▼ Phase 2: リストデータ移行用コード (実行後、削除) ▼▼▼
 // ==========================================
-import { ref, get, update } from "https://www.gstatic.com/firebasejs/11.10.0/firebase-database.js";
-import { db } from "./config/firebase.js";
 
 async function migrateListItems() {
     console.log("🚀 リストデータの移行を開始します...");
@@ -430,3 +428,4 @@ migrateListItems();
 // ==========================================
 // ▲▲▲ データ移行用コード (ここまで) ▲▲▲
 // ==========================================
+

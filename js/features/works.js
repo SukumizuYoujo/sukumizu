@@ -14,7 +14,8 @@ import { updateSortedArrays } from "./core.js";
 // ==========================================================================
 
 export function renderPage(type) {
-    if (type === 'new') {
+    // ★修正: ランキングもインデックス読み込み方式に対応させる
+    if (type === 'new' || type === 'ranking') {
         loadPageWithIndex(type, state.currentPage[type]);
     } else if (type === 'favorites') {
         loadFavoritesPage();
@@ -67,12 +68,15 @@ async function loadFavoritesPage() {
 
 
 // ==========================================================================
-// 3. 新・データ取得ロジック（新着・インデックス方式）
+// 3. 新・データ取得ロジック（新着・ランキング用）
 // ==========================================================================
 
 async function loadPageWithIndex(viewType, pageNumber) {
     const grid = dom.grids[viewType];
     const pageSize = state.pageSize.user;
+
+    // インデックスの初期化チェック
+    if (!state.workIndices) state.workIndices = {};
 
     if (!state.workIndices[viewType] || state.workIndices[viewType].length === 0) {
         renderSkeletons(grid, pageSize);
@@ -126,17 +130,24 @@ async function fetchAndCacheIndices(viewType) {
     try {
         const snapshot = await get(ref(db, path));
         if (!snapshot.exists()) {
+            // データが無い場合でも空配列をセットしてループを防ぐ
             state.workIndices[viewType] = [];
             return;
         }
         const rawData = snapshot.val();
-        const sortedIds = Object.keys(rawData).sort((a, b) => {
-            return rawData[b] - rawData[a];
-        });
+        // Firebaseの配列かオブジェクトかに応じて処理
+        let sortedIds = [];
+        if (Array.isArray(rawData)) {
+            sortedIds = rawData;
+        } else {
+            // スコアなどの数値でソートされているオブジェクトの場合
+            sortedIds = Object.keys(rawData).sort((a, b) => {
+                return rawData[b] - rawData[a];
+            });
+        }
         state.workIndices[viewType] = sortedIds;
     } catch (error) {
         console.error("Index fetch error:", error);
-        util.showToast("リストの取得に失敗しました");
         state.workIndices[viewType] = [];
     }
 }

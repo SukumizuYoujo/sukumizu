@@ -7,7 +7,7 @@ import { CONSTANTS } from "../config/constants.js";
 import { db } from "../config/firebase.js";
 import { ref, get, child, push, set, remove, update, serverTimestamp } from "https://www.gstatic.com/firebasejs/11.10.0/firebase-database.js";
 import { makeCard, renderSkeletons } from "../components/card.js";
-// router.js からの import を削除（循環参照解消）
+// router.js の import を削除（循環参照解消）
 
 let activePopover = null;
 
@@ -63,10 +63,8 @@ export async function renderMyListsPage() {
         dom.mylistsContainer.querySelector('#current-list-name').textContent = util.escapeHTML(list.name);
         const grid = dom.mylistsContainer.querySelector('#current-list-grid');
         
-        // スケルトン表示
         renderSkeletons(grid, itemIds.length || 1);
         
-        // データ不足分の取得（重要）
         const neededWorkIds = itemIds.filter(id => !state.works[id] && !state.adminPicks[id]);
         if (neededWorkIds.length > 0) {
             const workPromises = neededWorkIds.map(workId =>
@@ -84,7 +82,6 @@ export async function renderMyListsPage() {
             grid.innerHTML = '<p style="padding:1rem;">作品がありません</p>';
         } else {
             itemIds.forEach(workId => {
-                // worksかadminPicksにあれば表示
                 if (state.works[workId] || state.adminPicks[workId]) {
                     grid.appendChild(makeCard(workId, 'myList'));
                 }
@@ -103,7 +100,7 @@ export async function renderMyListsPage() {
 
 // --- 公開リスト描画 ---
 export function renderPublicListPage({ info, items, works }) {
-    // showView('publicList'); は削除し、呼び出し元(router.js)で行う
+    // showView('publicList') は router.js 側で呼ぶため削除
     dom.publicListName.textContent = util.escapeHTML(info.name);
     dom.publicListOwner.textContent = `作成者: ${util.escapeHTML(info.ownerName || '匿名')}`;
     dom.importPublicListBtn.dataset.listId = info.id;
@@ -114,7 +111,6 @@ export function renderPublicListPage({ info, items, works }) {
     const sortedItems = Object.entries(items).sort((a, b) => b[1].addedAt - a[1].addedAt);
     
     sortedItems.forEach(([workId]) => {
-        // worksをstateにマージしておく
         if (works[workId] && !state.works[workId]) {
             state.works[workId] = works[workId];
         }
@@ -141,11 +137,10 @@ export async function getPublicListData(listId) {
             worksForList[snap.key] = { id: snap.key, ...snap.val() };
         }
     });
-    
     return { info: { id: listSnap.key, ...listSnap.val() }, items: items, works: worksForList };
 }
 
-// --- リスト操作系 ---
+// --- リスト操作系 (そのまま維持) ---
 export async function createNewList(name) {
     if (!state.currentUser) { util.showToast('ログインが必要です。'); return null; }
     if (Object.keys(state.myLists).length >= CONSTANTS.LIST_LIMITS.MAX_LISTS) { util.showToast(`作成できるリストは${CONSTANTS.LIST_LIMITS.MAX_LISTS}個までです。`); return null; }
@@ -154,7 +149,6 @@ export async function createNewList(name) {
     await set(ref(db, `${CONSTANTS.DB_PATHS.USER_LISTS}/${state.currentUser.uid}/${newListRef.key}`), true);
     return newListRef.key;
 }
-
 export async function deleteList(listId) {
     if (!state.currentUser) return;
     const listName = state.myLists[listId]?.name || 'このリスト';
@@ -163,20 +157,14 @@ export async function deleteList(listId) {
     updates[`${CONSTANTS.DB_PATHS.LISTS}/${listId}`] = null;
     updates[`${CONSTANTS.DB_PATHS.LIST_ITEMS}/${listId}`] = null;
     updates[`${CONSTANTS.DB_PATHS.USER_LISTS}/${state.currentUser.uid}/${listId}`] = null;
-    try {
-        await update(ref(db), updates);
-        util.showToast('リストを削除しました。');
-        if(state.activeListId === listId) { state.activeListId = null; }
+    try { await update(ref(db), updates); util.showToast('リストを削除しました。'); if(state.activeListId === listId) { state.activeListId = null; }
     } catch (error) { util.showToast(`削除エラー: ${error.message}`); }
 }
-
 export async function renameList(listId, newName) {
     if (!state.currentUser || !newName) return;
     const listRef = ref(db, `${CONSTANTS.DB_PATHS.LISTS}/${listId}/name`);
-    try { await set(listRef, newName); util.showToast("リスト名を変更しました。");
-    } catch (error) { util.showToast(`エラー: ${error.message}`); }
+    try { await set(listRef, newName); util.showToast("リスト名を変更しました。"); } catch (error) { util.showToast(`エラー: ${error.message}`); }
 }
-
 export async function importList(listId) {
     if (!state.currentUser) { util.showToast('ログインが必要です。'); return; }
     if (Object.keys(state.myLists).length >= CONSTANTS.LIST_LIMITS.MAX_LISTS) { util.showToast(`作成できるリストは${CONSTANTS.LIST_LIMITS.MAX_LISTS}個までです。`); return; }
@@ -197,7 +185,6 @@ export async function importList(listId) {
         state.activeListId = newListId;
     } catch (error) { util.showToast(error.message || 'リストのインポートに失敗しました。'); }
 }
-
 export async function toggleWorkInList(workId, listId, shouldBeInList) {
     if (!state.currentUser) return false;
     const itemRef = ref(db, `${CONSTANTS.DB_PATHS.LIST_ITEMS}/${listId}/${workId}`);
@@ -212,41 +199,24 @@ export async function toggleWorkInList(workId, listId, shouldBeInList) {
     } else { await remove(itemRef); }
     return true;
 }
-
 export async function removeWorkFromList(workId, listId) {
     if (!state.currentUser) return;
     const itemRef = ref(db, `${CONSTANTS.DB_PATHS.LIST_ITEMS}/${listId}/${workId}`);
-    try { await remove(itemRef); util.showToast("リストから作品を削除しました。");
-    } catch (error) { util.showToast(`削除エラー: ${error.message}`); }
+    try { await remove(itemRef); util.showToast("リストから作品を削除しました。"); } catch (error) { util.showToast(`削除エラー: ${error.message}`); }
 }
-
 export async function toggleFavorite(workId) {
     if (!state.currentUser) return util.showToast('ログインが必要です。');
     const favRef = ref(db, `${CONSTANTS.DB_PATHS.FAVORITES}/${state.currentUser.uid}/${workId}`);
-    
     const card = document.querySelector(`.item[data-canonical-id="${workId}"]`);
     if (card) card.querySelector('.favorite-btn')?.classList.toggle('favorited');
-
-    try {
-        await (state.favorites.has(workId) ? remove(favRef) : set(favRef, serverTimestamp()));
-    } catch (error) {
-        if (card) card.querySelector('.favorite-btn')?.classList.toggle('favorited');
-        util.showToast(`お気に入り操作に失敗しました: ${error.message}`);
-    }
+    try { await (state.favorites.has(workId) ? remove(favRef) : set(favRef, serverTimestamp()));
+    } catch (error) { if (card) card.querySelector('.favorite-btn')?.classList.toggle('favorited'); util.showToast(`お気に入り操作に失敗しました: ${error.message}`); }
 }
-
-// --- UI系（ポップオーバー） ---
 export function openAddToListPopover(workId, button) {
-    if (activePopover) {
-        // 安全に削除
-        try { activePopover.remove(); } catch(e) {}
-        activePopover = null;
-    }
-    
+    if (activePopover) { try { activePopover.remove(); } catch(e){} activePopover = null; }
     const isMobile = window.innerWidth <= 768;
     const popover = document.createElement('div');
     popover.className = 'add-to-list-popover';
-    
     let listHtml = '<ul>';
     if (Object.keys(state.myLists).length > 0) {
         for (const listId in state.myLists) {
@@ -254,58 +224,26 @@ export function openAddToListPopover(workId, button) {
             const isChecked = state.myListItems[listId]?.[workId] ? 'checked' : '';
             listHtml += `<li><label><input type="checkbox" data-list-id="${listId}" ${isChecked}> ${util.escapeHTML(list.name)}</label></li>`;
         }
-    } else {
-        listHtml += '<li>リストがありません</li>';
-    }
+    } else { listHtml += '<li>リストがありません</li>'; }
     listHtml += '</ul>';
     popover.innerHTML = `${listHtml} <form class="new-list-form"><input type="text" placeholder="新規リスト名" required><button type="submit">+</button></form>`;
-
     popover.addEventListener('click', e => e.stopPropagation());
-    
     if (isMobile) {
-        const overlay = document.createElement('div');
-        overlay.className = 'popover-overlay';
-        overlay.appendChild(popover);
-        document.body.appendChild(overlay);
-        activePopover = overlay;
-        // 修正: オーバーレイクリック時の安全な削除処理
-        overlay.addEventListener('click', () => { 
-            if (activePopover && activePopover.parentNode) { 
-                activePopover.parentNode.removeChild(activePopover); 
-                activePopover = null; 
-            } 
-        }, { once: true });
+        const overlay = document.createElement('div'); overlay.className = 'popover-overlay'; overlay.appendChild(popover); document.body.appendChild(overlay); activePopover = overlay;
+        overlay.addEventListener('click', () => { if (activePopover && activePopover.parentNode) { activePopover.parentNode.removeChild(activePopover); activePopover = null; } }, { once: true });
     } else {
-        document.body.appendChild(popover);
-        activePopover = popover;
-        const btnRect = button.getBoundingClientRect();
-        const popoverRect = popover.getBoundingClientRect();
-        let top = window.scrollY + btnRect.bottom + 5;
-        let left = window.scrollX + btnRect.right - popoverRect.width;
+        document.body.appendChild(popover); activePopover = popover;
+        const btnRect = button.getBoundingClientRect(); const popoverRect = popover.getBoundingClientRect();
+        let top = window.scrollY + btnRect.bottom + 5; let left = window.scrollX + btnRect.right - popoverRect.width;
         if (left < 0) { left = window.scrollX + btnRect.left; }
         if (top + popoverRect.height > window.innerHeight + window.scrollY) { top = window.scrollY + btnRect.top - popoverRect.height - 5; }
-        popover.style.left = `${left}px`;
-        popover.style.top = `${top}px`;
-        
-        setTimeout(() => document.addEventListener('click', () => { 
-            if (activePopover && !activePopover.classList.contains('popover-overlay')) { 
-                if (activePopover.parentNode) {
-                    activePopover.parentNode.removeChild(activePopover);
-                }
-                activePopover = null; 
-            } 
-        }, { once: true }), 0);
+        popover.style.left = `${left}px`; popover.style.top = `${top}px`;
+        setTimeout(() => document.addEventListener('click', () => { if (activePopover && !activePopover.classList.contains('popover-overlay')) { if (activePopover.parentNode) { activePopover.parentNode.removeChild(activePopover); } activePopover = null; } }, { once: true }), 0);
     }
-    
     popover.querySelectorAll('input[type="checkbox"]').forEach(cb => cb.addEventListener('change', () => toggleWorkInList(workId, cb.dataset.listId, cb.checked)));
     popover.querySelector('form').addEventListener('submit', async (e) => {
-        e.preventDefault();
-        const input = e.target.querySelector('input');
-        const newListId = await createNewList(input.value);
+        e.preventDefault(); const input = e.target.querySelector('input'); const newListId = await createNewList(input.value);
         if (newListId) await toggleWorkInList(workId, newListId, true);
-        if (activePopover) { 
-             try { activePopover.remove(); } catch(e){}
-             activePopover = null; 
-        }
+        if (activePopover) { try { activePopover.remove(); } catch(e){} activePopover = null; }
     });
 }

@@ -6,9 +6,7 @@ import { CONSTANTS } from "../config/constants.js";
 import { db } from "../config/firebase.js";
 import { ref, onValue, get, child } from "https://www.gstatic.com/firebasejs/11.10.0/firebase-database.js";
 import { updateSortedArrays } from "./core.js";
-// ▼▼▼ 修正: core.js ではなく router.js から読み込む ▼▼▼
-import { refreshAllGrids } from "./router.js";
-import { renderMyListsPage } from "./lists.js";
+// import refresh... は削除
 
 let userListeners = [];
 
@@ -23,7 +21,8 @@ export function subscribeUserData(user) {
             Object.keys(snapshot.val()).forEach(workId => state.favorites.add(workId)); 
         }
         updateSortedArrays();
-        refreshAllGrids();
+        // イベント発火
+        window.dispatchEvent(new CustomEvent('dlsite-share:refresh'));
     });
     userListeners.push(favListener);
 
@@ -49,13 +48,17 @@ export function subscribeUserData(user) {
                 needsRender = true;
                 const itemsListener = onValue(ref(db, `${CONSTANTS.DB_PATHS.LIST_ITEMS}/${l.id}`), itemSnap => {
                     state.myListItems[l.id] = itemSnap.val() || {};
-                    refreshAllGrids();
+                    // イベント発火
+                    window.dispatchEvent(new CustomEvent('dlsite-share:refresh'));
                 });
                 userListeners.push(itemsListener);
             }
         }
+        // マイリスト表示中なら強制リフレッシュイベント
         if (needsRender || removedListIds.length > 0) {
-            if (state.currentView === 'mylists') { renderMyListsPage(); }
+            if (state.currentView === 'mylists') { 
+                window.dispatchEvent(new CustomEvent('dlsite-share:refresh'));
+            }
         }
     });
     userListeners.push(listMetaListener);
@@ -65,7 +68,10 @@ export function unsubscribeUserData() {
     userListeners.forEach(listener => listener());
     userListeners.length = 0;
     state.favorites.clear(); state.myLists = {}; state.myListItems = {};
-    if (state.currentUser === null) { updateSortedArrays(); refreshAllGrids(); }
+    if (state.currentUser === null) { 
+        updateSortedArrays(); 
+        window.dispatchEvent(new CustomEvent('dlsite-share:refresh'));
+    }
 }
 
 export function updateUIforAuthState(user) {

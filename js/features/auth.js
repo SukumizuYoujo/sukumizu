@@ -11,13 +11,11 @@ import { renderMyListsPage } from "./lists.js";
 
 let userListeners = [];
 
-// --- ユーザーデータ同期 ---
 export function subscribeUserData(user) {
     unsubscribeUserData();
     if (!user) return;
     const uid = user.uid;
     
-    // お気に入り同期
     const favListener = onValue(ref(db, `${CONSTANTS.DB_PATHS.FAVORITES}/${uid}`), snapshot => {
         state.favorites.clear();
         if (snapshot.exists()) { 
@@ -28,7 +26,6 @@ export function subscribeUserData(user) {
     });
     userListeners.push(favListener);
 
-    // マイリスト同期
     const listMetaListener = onValue(ref(db, `${CONSTANTS.DB_PATHS.USER_LISTS}/${uid}`), async snapshot => {
         const oldListIds = Object.keys(state.myLists);
         const newListIds = snapshot.exists() ? Object.keys(snapshot.val()) : [];
@@ -63,7 +60,6 @@ export function subscribeUserData(user) {
     userListeners.push(listMetaListener);
 }
 
-// --- 購読解除 ---
 export function unsubscribeUserData() {
     userListeners.forEach(listener => listener());
     userListeners.length = 0;
@@ -71,7 +67,6 @@ export function unsubscribeUserData() {
     if (state.currentUser === null) { updateSortedArrays(); refreshAllGrids(); }
 }
 
-// --- UI状態更新 ---
 export function updateUIforAuthState(user) {
     state.currentUser = user;
     if (user) {

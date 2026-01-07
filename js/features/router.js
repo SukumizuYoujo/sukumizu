@@ -34,7 +34,7 @@ export function showView(viewName) {
     if (viewName === 'mylists') renderMyListsPage();
 }
 
-// --- グリッド一括更新 (core.jsから移動) ---
+// --- グリッド一括更新 ---
 export function refreshAllGrids() {
     const currentView = state.currentView;
     if (currentView === 'main' || currentView === 'publicList') {
@@ -55,7 +55,7 @@ export function handleUrlBasedView() {
     if (listId) {
         getPublicListData(listId)
             .then(data => {
-                showView('publicList'); // ★明示的に切り替え
+                showView('publicList');
                 renderPublicListPage(data);
             })
             .catch(err => { 

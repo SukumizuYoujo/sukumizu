@@ -2,7 +2,6 @@
 
 import { state } from "../store/state.js";
 import { util } from "../utils/common.js";
-// works.js, lists.js への import は削除（循環参照の元凶）
 
 // --- ソート処理 ---
 export function updateSortedArrays() {
@@ -31,4 +30,7 @@ export function updateSortedArrays() {
     state.sortedAdminIds.game = adminPicks.filter(w => util.classifyWork(w) === 'game').map(w => w.id);
 }
 
-// refreshAllGrids は router.js へ移動したため削除しました
+// 画面更新が必要なときはイベントを発火する
+export function triggerRefresh() {
+    window.dispatchEvent(new CustomEvent('dlsite-share:refresh'));
+}

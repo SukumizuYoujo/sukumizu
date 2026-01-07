@@ -5,7 +5,10 @@ import { dom } from "../utils/dom.js";
 import { util } from "../utils/common.js";
 import { CONSTANTS } from "../config/constants.js";
 import { db } from "../config/firebase.js";
-import { ref, get, child, set, remove } from "https://www.gstatic.com/firebasejs/11.10.0/firebase-database.js";
+import { 
+    ref, get, child, set, remove, 
+    query, orderByChild, limitToLast 
+} from "https://www.gstatic.com/firebasejs/11.10.0/firebase-database.js";
 import { makeCard, renderSkeletons } from "../components/card.js";
 import { updateSortedArrays } from "./core.js";
 
@@ -14,9 +17,12 @@ import { updateSortedArrays } from "./core.js";
 // ==========================================================================
 
 export function renderPage(type) {
-    // 新着(new) または ランキング(ranking) はインデックス読み込み方式
-    if (type === 'new' || type === 'ranking') {
+    if (type === 'new') {
+        // 新着はインデックスリスト方式
         loadPageWithIndex(type, state.currentPage[type]);
+    } else if (type === 'ranking') {
+        //  ランキングはスコア順に直接取得
+        loadRankingPage();
     } else if (type === 'favorites') {
         loadFavoritesPage();
     } else {
@@ -25,7 +31,58 @@ export function renderPage(type) {
 }
 
 // ==========================================================================
-// 2. お気に入り専用読み込みロジック
+// 2. ランキング専用読み込みロジック (自動ソート機能)
+// ==========================================================================
+
+async function loadRankingPage() {
+    const grid = dom.grids.ranking;
+    // ランキングは上位20件固定表示とする（ページネーションなし）
+    const limit = 20; 
+    
+    renderSkeletons(grid, limit);
+
+    try {
+        // Firebaseの機能で score の高い順（昇順）に取得し、後で逆転させる
+        const worksRef = ref(db, CONSTANTS.DB_PATHS.WORKS);
+        const rankingQuery = query(worksRef, orderByChild('score'), limitToLast(limit));
+        
+        const snapshot = await get(rankingQuery);
+        
+        if (!snapshot.exists()) {
+            grid.innerHTML = '<div style="grid-column: 1/-1; text-align: center; padding: 2rem;">データがありません。</div>';
+            return;
+        }
+
+        const rankingData = [];
+        snapshot.forEach(childSnap => {
+            const work = { id: childSnap.key, ...childSnap.val() };
+            rankingData.push(work);
+            // キャッシュにも保存しておく
+            state.works[work.id] = work;
+        });
+
+        // 昇順（低い順）で来るので、逆転させて高い順にする
+        rankingData.reverse();
+
+        grid.innerHTML = "";
+        rankingData.forEach(work => {
+            grid.appendChild(makeCard(work.id, 'user'));
+        });
+
+        // ページネーションは非表示にする
+        const container = document.getElementById('rankingPagination');
+        if (container) container.innerHTML = '';
+
+        adjustGridMinHeight(grid, limit);
+
+    } catch (error) {
+        console.error("Ranking fetch error:", error);
+        grid.innerHTML = '<div style="grid-column: 1/-1; text-align: center; padding: 2rem;">読み込みに失敗しました。</div>';
+    }
+}
+
+// ==========================================================================
+// 3. お気に入り専用読み込みロジック
 // ==========================================================================
 
 async function loadFavoritesPage() {
@@ -68,14 +125,13 @@ async function loadFavoritesPage() {
 
 
 // ==========================================================================
-// 3. 新・データ取得ロジック（新着・ランキング用）
+// 4. 新着データ取得ロジック（インデックス方式）
 // ==========================================================================
 
 async function loadPageWithIndex(viewType, pageNumber) {
     const grid = dom.grids[viewType];
     const pageSize = state.pageSize.user;
 
-    // インデックスの初期化チェック
     if (!state.workIndices) state.workIndices = {};
 
     if (!state.workIndices[viewType] || state.workIndices[viewType].length === 0) {
@@ -143,7 +199,6 @@ async function fetchAndCacheIndices(viewType) {
         if (Array.isArray(rawData)) {
             sortedIds = rawData;
         } else if (typeof rawData === 'object' && rawData !== null) {
-            // スコアなどの数値でソートされているオブジェクトの場合
             sortedIds = Object.keys(rawData).sort((a, b) => {
                 return rawData[b] - rawData[a];
             });
@@ -195,7 +250,7 @@ function renderNumberedPagination(viewType, currentPage, totalPages) {
 
 
 // ==========================================================================
-// 4. 既存ロジック（レガシーモード）
+// 5. 既存ロジック（レガシーモード）
 // ==========================================================================
 
 function renderLegacyPage(type) {
@@ -240,7 +295,7 @@ function renderLegacyPage(type) {
     updateFilterButtonState(grid);
 }
 
-// 互換性のために export function として定義
+// 修正: export の競合を解消
 export function renderPaginationButtons(containerId, currentPage, totalPages, viewType) {
     renderLegacyPaginationButtons(containerId, currentPage, totalPages, viewType);
 }
@@ -324,7 +379,7 @@ export function getFilteredIdsForView(type) {
 }
 
 // ==========================================================================
-// 5. 共通・ユーティリティ機能
+// 6. 共通・ユーティリティ機能
 // ==========================================================================
 
 export function adjustGridMinHeight(gridElement, pageSize) {

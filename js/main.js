@@ -43,18 +43,12 @@ function initializeListeners() {
         refreshAllGrids();
     });
 
-    // ▼▼▼ イベントリスナー設定（循環参照回避の要） ▼▼▼
-    
-    // 1. グリッド更新イベント (Auth, Modals等から発火)
     window.addEventListener('dlsite-share:refresh', () => {
         refreshAllGrids();
     });
 
-    // 2. 画面遷移イベント (Lists等から発火)
     window.addEventListener('dlsite-share:change-view', (e) => {
         const { view, params } = e.detail;
-        
-        // パブリックリストなどの特殊な遷移に対応
         if (view === 'publicList' && params?.listId) {
             const url = new URL(window.location);
             url.searchParams.set('view', 'publicList');
@@ -115,6 +109,12 @@ function setupEventListeners() {
     dom.pageSizeSelectors.admin.addEventListener('change', (e) => { state.pageSize.admin = parseInt(e.target.value, 10); localStorage.setItem('pageSizeAdmin', state.pageSize.admin); renderPage('admin_manga'); renderPage('admin_game'); });
     dom.pageSizeSelectors.user.addEventListener('change', (e) => { state.pageSize.user = parseInt(e.target.value, 10); localStorage.setItem('pageSizeUser', state.pageSize.user); renderPage('new'); renderPage('ranking'); });
     dom.pageSizeSelectors.favorites.addEventListener('change', (e) => { state.pageSize.favorites = parseInt(e.target.value, 10); localStorage.setItem('pageSizeFavorites', state.pageSize.favorites); renderPage('favorites'); });
+
+    // ★追加: タブの切り替えリスナー (これが無いとクリックしても読み込まれない)
+    const tabNew = document.getElementById('tab-new');
+    const tabRanking = document.getElementById('tab-ranking');
+    if(tabNew) tabNew.addEventListener('change', () => renderPage('new'));
+    if(tabRanking) tabRanking.addEventListener('change', () => renderPage('ranking'));
 
     dom.modalOverlay.addEventListener("click", (e) => { if (e.target === dom.modalOverlay) dom.modalOverlay.classList.add("hidden"); });
     

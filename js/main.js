@@ -42,13 +42,13 @@ function initializeListeners() {
         refreshAllGrids();
     });
 
-    // ★重要: イベントを受け取る設定を追加
+    // ★イベントリスナー（これが必要です）
     window.addEventListener('dlsite-share:refresh', () => {
         refreshAllGrids();
     });
 }
 
-// --- 以下、既存コード（変更なし） ---
+// --- 以下、変更なし ---
 function initializePageSizeSelectors() {
     const isMobile = window.innerWidth <= 768;
     const deviceType = isMobile ? 'mobile' : 'pc';

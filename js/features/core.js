@@ -29,8 +29,3 @@ export function updateSortedArrays() {
     state.sortedAdminIds.manga = adminPicks.filter(w => util.classifyWork(w) === 'manga').map(w => w.id);
     state.sortedAdminIds.game = adminPicks.filter(w => util.classifyWork(w) === 'game').map(w => w.id);
 }
-
-// 画面更新が必要なときはイベントを発火する
-export function triggerRefresh() {
-    window.dispatchEvent(new CustomEvent('dlsite-share:refresh'));
-}

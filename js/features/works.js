@@ -393,52 +393,50 @@ function updateFilterButtonState(grid) {
     }
 }
 
-// ★★★ 修正・完全版: トランザクション処理を使った安全な投票ロジック ★★★
-export async function handleVote(workId, score) {
-    // データがあるパスを判定 (works or adminPicks)
-    const isWorks = !!state.works[workId];
-    const isAdmin = !!state.adminPicks[workId];
-    
-    // どちらにもなければ終了
-    if (!isWorks && !isAdmin) return;
+// トランザクション処理を使った安全な投票ロジック
+export async function handleVote(workId, score, dbPath) {
+    // パスが指定されていない場合は自動判定（フォールバック）
+    if (!dbPath) {
+        if (state.works[workId]) dbPath = CONSTANTS.DB_PATHS.WORKS;
+        else if (state.adminPicks[workId]) dbPath = CONSTANTS.DB_PATHS.ADMIN_PICKS;
+        else return;
+    }
 
-    const workPath = isWorks ? CONSTANTS.DB_PATHS.WORKS : CONSTANTS.DB_PATHS.ADMIN_PICKS;
-    const workRef = ref(db, `${workPath}/${workId}`);
+    const workRef = ref(db, `${dbPath}/${workId}`);
 
     try {
-        // トランザクションで「現在のスコア」と「誰が投票したか」を整合性を保って更新
         const result = await runTransaction(workRef, (work) => {
-            if (!work) return; // データが存在しない場合
+            if (!work) return; 
 
-            // 初期化
             if (!work.votes) work.votes = {};
             if (typeof work.score !== 'number') work.score = 0;
 
             const currentVote = work.votes[state.clientId] || 0;
 
             if (currentVote === score) {
-                // 【取り消し】同じボタンを再度押した場合
-                work.score -= score;          // スコアを減算
-                delete work.votes[state.clientId]; // 投票記録を削除
+                // 取り消し処理
+                work.score -= score;
+                delete work.votes[state.clientId];
             } else {
-                // 【変更または新規】
-                // 変更の場合: 前回のスコア(currentVote)を取り消し、新しいスコア(score)を加算
-                // 新規の場合: currentVoteは0なので、純粋にscoreが加算される
+                // 新規・変更処理
                 work.score = (work.score - currentVote) + score;
-                work.votes[state.clientId] = score; // 投票記録を上書き
+                work.votes[state.clientId] = score;
             }
 
             return work;
         });
 
-        // トランザクション完了後、ローカルの状態も最新に更新して画面に反映
         if (result.committed) {
             const updatedWork = result.snapshot.val();
-            // キャッシュ更新
-            if (isWorks) state.works[workId] = { id: workId, ...updatedWork };
-            if (isAdmin) state.adminPicks[workId] = { id: workId, ...updatedWork };
+            
+            // 適切なステートを更新
+            if (dbPath === CONSTANTS.DB_PATHS.WORKS) {
+                state.works[workId] = { id: workId, ...updatedWork };
+            } else if (dbPath === CONSTANTS.DB_PATHS.ADMIN_PICKS) {
+                state.adminPicks[workId] = { id: workId, ...updatedWork };
+            }
 
-            // UI更新 (ボタンの色とスコア表示)
+            // UI更新
             const card = document.querySelector(`.item[data-id="${workId}"]`);
             if (card) {
                 const goodBtn = card.querySelector('.rating-btn.good');
@@ -447,11 +445,8 @@ export async function handleVote(workId, score) {
                 
                 const newVote = updatedWork.votes?.[state.clientId] || 0;
                 
-                // ボタンのアクティブ状態更新
                 if (goodBtn) goodBtn.classList.toggle('active', newVote === 1);
                 if (badBtn) badBtn.classList.toggle('active', newVote === -1);
-                
-                // スコア表示更新
                 if (scoreDisplay) scoreDisplay.textContent = updatedWork.score;
             }
         }
@@ -498,3 +493,4 @@ export async function addWork(url) {
         btn.classList.remove('loading');
     }
 }
+

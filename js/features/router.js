@@ -10,14 +10,19 @@ import { renderMyListsPage, renderPublicListPage, getPublicListData } from "./li
 // --- ビュー切り替え ---
 export function showView(viewName) {
     state.currentView = viewName;
+    
+    // DOMの表示切り替え
     Object.keys(dom.views).forEach(key => { 
         dom.views[key].style.display = key === viewName ? 'block' : 'none'; 
     });
+    
+    // ナビゲーションのActive状態更新
     Object.keys(dom.nav).forEach(key => {
         const viewForNav = key === 'home' ? 'main' : (key === 'mylists' ? 'mylists' : key);
         dom.nav[key].classList.toggle('active', viewForNav === viewName || (viewForNav === 'main' && viewName === 'publicList'));
     });
     
+    // URL履歴の更新
     const url = new URL(window.location);
     if (viewName === 'publicList') { 
         /* URLはパブリックリスト読み込み時に設定済み */ 
@@ -27,11 +32,19 @@ export function showView(viewName) {
         url.searchParams.delete('view'); url.searchParams.delete('list'); history.pushState({ view: 'main' }, '', url); 
     }
     
-    if (viewName === 'favorites') {
+    // ★追加: ホームに戻った時も念のため再描画（空になるのを防ぐ）
+    if (viewName === 'main') {
+        renderPage('new');
+    }
+    // お気に入り表示時
+    else if (viewName === 'favorites') {
         if(!state.isInitialDataLoaded.works) renderSkeletons(dom.grids.favorites, state.pageSize.favorites);
         renderPage('favorites');
     }
-    if (viewName === 'mylists') renderMyListsPage();
+    // マイリスト表示時
+    else if (viewName === 'mylists') {
+        renderMyListsPage();
+    }
 }
 
 // --- グリッド一括更新 ---

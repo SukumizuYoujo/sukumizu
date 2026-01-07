@@ -46,6 +46,7 @@ export function showView(viewName) {
         renderPage('admin_manga');
         renderPage('admin_game');
         renderPage('new');
+        renderPage('ranking');
     }
     // お気に入り表示時
     else if (viewName === 'favorites') {

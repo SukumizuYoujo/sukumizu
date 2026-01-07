@@ -6,7 +6,7 @@ import { util } from "../utils/common.js";
 import { CONSTANTS } from "../config/constants.js";
 import { db } from "../config/firebase.js";
 import { ref, push, serverTimestamp } from "https://www.gstatic.com/firebasejs/11.10.0/firebase-database.js";
-// import refreshAllGrids は削除 (循環参照の解消)
+// router.js のインポートは削除
 
 export function openTagFilterModal() {
     dom.modalOverlay.classList.remove("hidden");
@@ -54,14 +54,15 @@ export function openTagFilterModal() {
     modal.querySelector('#tag-panel-reset').onclick = () => { currentEditingTagSet.clear(); renderTagList(); };
     modal.querySelector('#tag-panel-confirm').onclick = () => {
         state.highlightTagIds = new Set(currentHighlightTagIds); state.hideTagIds = new Set(currentHideTagIds);
-        // ★変更: 直接関数を呼ばず、イベントを発信する
+        
+        // ★ 変更: routerの関数を直接呼ばず、イベントを発信してmain.jsに任せる
         window.dispatchEvent(new CustomEvent('dlsite-share:refresh'));
+        
         dom.modalOverlay.classList.add("hidden");
     };
     updateModeButtons(); renderCategoryTabs(); renderTagList();
 }
 
-// --- 他の関数は変更なし ---
 export function openContactModal() {
     dom.modalOverlay.classList.remove("hidden");
     const modal = dom.modalContent;

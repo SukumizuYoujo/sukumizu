@@ -7,7 +7,7 @@ import { CONSTANTS } from "../config/constants.js";
 import { db } from "../config/firebase.js";
 import { 
     ref, get, child, set, remove, 
-    query, orderByChild 
+    query, orderByChild, runTransaction // ★追加
 } from "https://www.gstatic.com/firebasejs/11.10.0/firebase-database.js";
 import { makeCard, renderSkeletons } from "../components/card.js";
 import { updateSortedArrays } from "./core.js";
@@ -17,7 +17,7 @@ import { updateSortedArrays } from "./core.js";
 // ==========================================================================
 
 export function renderPage(type) {
-    // ★修正: ランキングも「新着」と同じ高機能な読み込みロジック(loadPageWithIndex)を使用する
+    // ランキングも「新着」と同じ高機能な読み込みロジック(loadPageWithIndex)を使用する
     if (type === 'new' || type === 'ranking') {
         loadPageWithIndex(type, state.currentPage[type]);
     } else if (type === 'favorites') {
@@ -76,7 +76,7 @@ async function loadFavoritesPage() {
 
 async function loadPageWithIndex(viewType, pageNumber) {
     const grid = dom.grids[viewType];
-    const pageSize = state.pageSize.user; // ユーザーが選択した件数を使用
+    const pageSize = state.pageSize.user;
 
     // インデックスの初期化チェック
     if (!state.workIndices) state.workIndices = {};
@@ -91,17 +91,14 @@ async function loadPageWithIndex(viewType, pageNumber) {
     const totalItems = allIds.length;
     const totalPages = util.calculateTotalPages(totalItems, pageSize);
 
-    // ページ番号の補正
     if (pageNumber < 1) pageNumber = 1;
     if (pageNumber > totalPages && totalPages > 0) pageNumber = totalPages;
     state.currentPage[viewType] = pageNumber;
 
-    // 現在のページに必要なIDを切り出す
     const startIndex = (pageNumber - 1) * pageSize;
     const endIndex = startIndex + pageSize;
     const targetIds = allIds.slice(startIndex, endIndex);
 
-    // データがキャッシュに無ければ取得
     const fetchPromises = targetIds.map(async (id) => {
         if (state.works[id]) return state.works[id];
         try {
@@ -136,13 +133,10 @@ async function loadPageWithIndex(viewType, pageNumber) {
     renderNumberedPagination(viewType, pageNumber, totalPages);
 }
 
-// ★修正: ランキングと新着で取得方法を分岐させる関数
 async function fetchAndCacheIndices(viewType) {
     try {
         if (viewType === 'ranking') {
-            // --- ランキングの場合: 全件をスコア順で取得してIDリストを作る ---
             const worksRef = ref(db, CONSTANTS.DB_PATHS.WORKS);
-            // スコア順に並べ替え（昇順）
             const q = query(worksRef, orderByChild('score'));
             const snapshot = await get(q);
             
@@ -151,15 +145,13 @@ async function fetchAndCacheIndices(viewType) {
                 snapshot.forEach(childSnap => {
                     const work = { id: childSnap.key, ...childSnap.val() };
                     ids.push(work.id);
-                    // ついでにデータもキャッシュしておく（個別取得の手間を省く）
                     state.works[work.id] = work;
                 });
             }
-            // 昇順(低い順)で来るので逆転させて、高い順のIDリストにする
+            // スコアが高い順（降順）にするため反転
             state.workIndices[viewType] = ids.reverse();
 
         } else {
-            // --- 新着の場合: 既存のwork_orders（目次）を取得 ---
             const path = `work_orders/${viewType}`; 
             const snapshot = await get(ref(db, path));
             if (!snapshot.exists()) {
@@ -258,7 +250,7 @@ function renderLegacyPage(type) {
     const paginationContainerId = {
         admin_manga: 'adminMangaPagination',
         admin_game: 'adminGamePagination',
-        ranking: 'rankingPagination', // レガシーモードのフォールバック用
+        ranking: 'rankingPagination',
         favorites: 'favoritesPagination'
     }[type];
 
@@ -269,7 +261,6 @@ function renderLegacyPage(type) {
     updateFilterButtonState(grid);
 }
 
-// exportの重複エラー修正済み
 export function renderPaginationButtons(containerId, currentPage, totalPages, viewType) {
     renderLegacyPaginationButtons(containerId, currentPage, totalPages, viewType);
 }
@@ -402,26 +393,71 @@ function updateFilterButtonState(grid) {
     }
 }
 
+// ★★★ 修正・完全版: トランザクション処理を使った安全な投票ロジック ★★★
 export async function handleVote(workId, score) {
-    const data = state.works[workId] || state.adminPicks[workId];
-    if(!data) return;
+    // データがあるパスを判定 (works or adminPicks)
+    const isWorks = !!state.works[workId];
+    const isAdmin = !!state.adminPicks[workId];
     
-    const card = document.querySelector(`.item[data-id="${workId}"]`);
-    if(card) {
-        const goodBtn = card.querySelector('.rating-btn.good');
-        const badBtn = card.querySelector('.rating-btn.bad');
-        const currentVote = data.votes?.[state.clientId] || 0;
-        const newVote = currentVote === score ? 0 : score;
-        goodBtn.classList.toggle('active', newVote === 1);
-        badBtn.classList.toggle('active', newVote === -1);
-    }
-    
-    const workPath = state.works[workId] ? CONSTANTS.DB_PATHS.WORKS : CONSTANTS.DB_PATHS.ADMIN_PICKS;
-    const voteRef = ref(db, `${workPath}/${workId}/votes/${state.clientId}`);
-    try { 
-        await (data.votes?.[state.clientId] === score ? remove(voteRef) : set(voteRef, score)); 
-    }
-    catch (error) { 
+    // どちらにもなければ終了
+    if (!isWorks && !isAdmin) return;
+
+    const workPath = isWorks ? CONSTANTS.DB_PATHS.WORKS : CONSTANTS.DB_PATHS.ADMIN_PICKS;
+    const workRef = ref(db, `${workPath}/${workId}`);
+
+    try {
+        // トランザクションで「現在のスコア」と「誰が投票したか」を整合性を保って更新
+        const result = await runTransaction(workRef, (work) => {
+            if (!work) return; // データが存在しない場合
+
+            // 初期化
+            if (!work.votes) work.votes = {};
+            if (typeof work.score !== 'number') work.score = 0;
+
+            const currentVote = work.votes[state.clientId] || 0;
+
+            if (currentVote === score) {
+                // 【取り消し】同じボタンを再度押した場合
+                work.score -= score;          // スコアを減算
+                delete work.votes[state.clientId]; // 投票記録を削除
+            } else {
+                // 【変更または新規】
+                // 変更の場合: 前回のスコア(currentVote)を取り消し、新しいスコア(score)を加算
+                // 新規の場合: currentVoteは0なので、純粋にscoreが加算される
+                work.score = (work.score - currentVote) + score;
+                work.votes[state.clientId] = score; // 投票記録を上書き
+            }
+
+            return work;
+        });
+
+        // トランザクション完了後、ローカルの状態も最新に更新して画面に反映
+        if (result.committed) {
+            const updatedWork = result.snapshot.val();
+            // キャッシュ更新
+            if (isWorks) state.works[workId] = { id: workId, ...updatedWork };
+            if (isAdmin) state.adminPicks[workId] = { id: workId, ...updatedWork };
+
+            // UI更新 (ボタンの色とスコア表示)
+            const card = document.querySelector(`.item[data-id="${workId}"]`);
+            if (card) {
+                const goodBtn = card.querySelector('.rating-btn.good');
+                const badBtn = card.querySelector('.rating-btn.bad');
+                const scoreDisplay = card.querySelector('.score-display');
+                
+                const newVote = updatedWork.votes?.[state.clientId] || 0;
+                
+                // ボタンのアクティブ状態更新
+                if (goodBtn) goodBtn.classList.toggle('active', newVote === 1);
+                if (badBtn) badBtn.classList.toggle('active', newVote === -1);
+                
+                // スコア表示更新
+                if (scoreDisplay) scoreDisplay.textContent = updatedWork.score;
+            }
+        }
+
+    } catch (error) {
+        console.error("Vote transaction error:", error);
         util.showToast(`投票エラー: ${error.message}`);
     }
 }

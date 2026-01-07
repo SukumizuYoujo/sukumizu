@@ -5,9 +5,9 @@ import { dom } from "../utils/dom.js";
 import { util } from "../utils/common.js";
 import { CONSTANTS } from "../config/constants.js";
 import { db } from "../config/firebase.js";
-import { ref, get, child, set, remove, update, serverTimestamp } from "https://www.gstatic.com/firebasejs/11.10.0/firebase-database.js";
+import { ref, get, child, set, remove } from "https://www.gstatic.com/firebasejs/11.10.0/firebase-database.js";
 import { makeCard, renderSkeletons } from "../components/card.js";
-import { updateSortedArrays } from "./core.js"; // データの整合性を保つため追加
+import { updateSortedArrays } from "./core.js";
 
 // ==========================================================================
 // 1. ページ読み込みルーティング
@@ -15,29 +15,24 @@ import { updateSortedArrays } from "./core.js"; // データの整合性を保�
 
 export function renderPage(type) {
     if (type === 'new') {
-        // 新着: インデックス分離方式（高速）
         loadPageWithIndex(type, state.currentPage[type]);
     } else if (type === 'favorites') {
-        // お気に入り: 不足データ取得ロジック付き
         loadFavoritesPage();
     } else {
-        // その他（ランキング、管理者、検索結果など）: レガシーモード
         renderLegacyPage(type);
     }
 }
 
 // ==========================================================================
-// 2. お気に入り専用読み込みロジック (今回追加)
+// 2. お気に入り専用読み込みロジック
 // ==========================================================================
 
 async function loadFavoritesPage() {
     const grid = dom.grids.favorites;
     const pageSize = state.pageSize.favorites;
     
-    // とりあえずスケルトン表示
     renderSkeletons(grid, pageSize);
 
-    // 1. お気に入りIDリストを取得
     const favIds = Array.from(state.favorites);
 
     if (favIds.length === 0) {
@@ -45,27 +40,21 @@ async function loadFavoritesPage() {
         return;
     }
 
-    // 2. 手持ちのデータ(state.works)にないIDを特定
     const missingIds = favIds.filter(id => {
-        // 正規化IDへの対応も含めてチェック
         const isCached = state.works[id] || Object.values(state.works).some(w => w.id === id || (w.pageUrl && w.pageUrl.includes(id)));
         return !isCached;
     });
 
-    // 3. 不足しているデータをDBから取得
     if (missingIds.length > 0) {
         try {
             const fetchPromises = missingIds.map(async (id) => {
-                // works/{id} を直接取得
                 const snapshot = await get(child(ref(db), `${CONSTANTS.DB_PATHS.WORKS}/${id}`));
                 if (snapshot.exists()) {
                     const data = { id: snapshot.key, ...snapshot.val() };
-                    state.works[snapshot.key] = data; // キャッシュに保存
+                    state.works[snapshot.key] = data;
                 }
             });
             await Promise.all(fetchPromises);
-            
-            // データが増えたのでソート順などを再計算
             updateSortedArrays();
         } catch (e) {
             console.error("Favorites fetch error:", e);
@@ -73,7 +62,6 @@ async function loadFavoritesPage() {
         }
     }
 
-    // 4. データが揃ったので描画（レガシーロジックを再利用）
     renderLegacyPage('favorites');
 }
 
@@ -205,7 +193,6 @@ function renderLegacyPage(type) {
     const pageSize = isAdmin ? state.pageSize.admin : (isFav ? state.pageSize.favorites : state.pageSize.user);
     const context = isAdmin ? 'admin' : (isFav ? 'favorites' : 'user');
     
-    // updateSortedArrays経由でフィルタリング済みのIDを取得
     const allFilteredIds = getFilteredIdsForView(type);
     
     const totalPages = util.calculateTotalPages(allFilteredIds.length, pageSize);
@@ -416,7 +403,6 @@ export async function addWork(url) {
         util.showToast(result.data.message);
         input.value = "";
         
-        // インデックスリセット
         state.workIndices['new'] = []; 
         renderPage('new');
 

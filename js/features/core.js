@@ -2,7 +2,7 @@
 
 import { state } from "../store/state.js";
 import { util } from "../utils/common.js";
-// works.js, lists.js への import を削除（循環参照解消）
+// works.js, lists.js への import は削除します（循環参照の元凶）
 
 // --- ソート処理 ---
 export function updateSortedArrays() {
@@ -30,5 +30,3 @@ export function updateSortedArrays() {
     state.sortedAdminIds.manga = adminPicks.filter(w => util.classifyWork(w) === 'manga').map(w => w.id);
     state.sortedAdminIds.game = adminPicks.filter(w => util.classifyWork(w) === 'game').map(w => w.id);
 }
-
-// refreshAllGrids は router.js へ移動

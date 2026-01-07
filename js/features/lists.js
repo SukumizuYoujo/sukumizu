@@ -7,7 +7,7 @@ import { CONSTANTS } from "../config/constants.js";
 import { db } from "../config/firebase.js";
 import { ref, get, child, push, set, remove, update, serverTimestamp } from "https://www.gstatic.com/firebasejs/11.10.0/firebase-database.js";
 import { makeCard, renderSkeletons } from "../components/card.js";
-// import { showView } from "./router.js";  <-- これを削除して循環参照を断ち切る！
+// router.js への import を削除（重要！）
 
 let activePopover = null;
 
@@ -100,7 +100,7 @@ export async function renderMyListsPage() {
 
 // --- 公開リスト描画 ---
 export function renderPublicListPage({ info, items, works }) {
-    // showView('publicList') の呼び出しを削除 (router.js側で行うため)
+    // showViewの呼び出しを削除
     dom.publicListName.textContent = util.escapeHTML(info.name);
     dom.publicListOwner.textContent = `作成者: ${util.escapeHTML(info.ownerName || '匿名')}`;
     dom.importPublicListBtn.dataset.listId = info.id;

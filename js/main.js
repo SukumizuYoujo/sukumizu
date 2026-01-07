@@ -13,7 +13,7 @@ import { renderPage, handleVote, addWork, renderPaginationButtons } from "./feat
 import { toggleFavorite, openAddToListPopover, removeWorkFromList, importList } from "./features/lists.js";
 import { openTagFilterModal, openContactModal, openInfoModal, setupImagePreviewListeners, initializeDetailsPopup } from "./features/modals.js";
 import { updateSortedArrays } from "./features/core.js";
-import { showView, handleUrlBasedView, getScrollTargetForView, refreshAllGrids } from "./features/router.js"; // ★変更
+import { showView, handleUrlBasedView, getScrollTargetForView, refreshAllGrids } from "./features/router.js"; // ★変更: core.js -> router.js
 import { updateUIforAuthState, subscribeUserData, unsubscribeUserData } from "./features/auth.js";
 
 // --- リスナー初期化 (Global) ---
@@ -30,7 +30,7 @@ function initializeListeners() {
         });
     });
 
-    // ★重要: 作品全件取得(onValue)を廃止し、初回は新着1ページ目を取得
+    // ★重要: 初期表示のために新着を読み込む
     renderPage('new'); 
 
     // 管理者ピックアップ
@@ -46,7 +46,7 @@ function initializeListeners() {
     });
 }
 
-// --- 以下、既存の main.js の内容を維持 ---
+// --- 以下、既存コード（変更なし） ---
 function initializePageSizeSelectors() {
     const isMobile = window.innerWidth <= 768;
     const deviceType = isMobile ? 'mobile' : 'pc';

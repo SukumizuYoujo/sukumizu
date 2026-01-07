@@ -7,15 +7,18 @@ import { CONSTANTS } from "../config/constants.js";
 import { db } from "../config/firebase.js";
 import { ref, get, child, push, set, remove, update, serverTimestamp } from "https://www.gstatic.com/firebasejs/11.10.0/firebase-database.js";
 import { makeCard, renderSkeletons } from "../components/card.js";
-import { showView } from "./router.js"; // 後ほど作成するcore.jsからインポート
+import { showView } from "./router.js";
 
 let activePopover = null;
 
 // --- マイリストページ描画 ---
 export async function renderMyListsPage() {
     dom.mylistsContainer.innerHTML = `<div class="mylists-sidebar"><h3>マイリスト一覧 (${Object.keys(state.myLists).length}/${CONSTANTS.LIST_LIMITS.MAX_LISTS})</h3><ul id="mylists-sidebar-list"></ul><div class="list-actions"><div class="form-group"><input type="text" id="new-list-name-main" placeholder="新規リスト名"><button id="create-list-btn-main">作成</button></div></div><hr><h3>リストをインポート</h3><div class="list-actions"><div class="form-group"><input type="text" id="import-list-id" placeholder="共有ID"><button id="import-list-btn">追加</button></div></div></div><div class="mylists-content"><h3 id="current-list-name">リストを選択してください</h3><div class="list-actions" id="current-list-actions" style="display:none;"><p>共有ID: <span id="share-id-display"></span></p></div><div id="current-list-grid" class="grid"></div></div>`;
+    
     const listUl = dom.mylistsContainer.querySelector('#mylists-sidebar-list');
     listUl.innerHTML = '';
+    
+    // サイドバーのリスト一覧生成
     Object.values(state.myLists).sort((a, b) => a.createdAt - b.createdAt).forEach(list => {
         const li = document.createElement('li');
         li.dataset.listId = list.id;
@@ -23,12 +26,13 @@ export async function renderMyListsPage() {
         listUl.appendChild(li);
     });
     
-    // イベント設定（DOMが生成された後なのでここで設定）
+    // イベント設定
     listUl.onclick = (e) => {
         const target = e.target;
         const li = target.closest('li[data-list-id]');
         if (!li) return;
         const listId = li.dataset.listId;
+
         if (target.closest('.edit-list-btn')) {
             e.stopPropagation();
             const currentName = state.myLists[listId].name;
@@ -49,36 +53,38 @@ export async function renderMyListsPage() {
             renderMyListsPage();
         }
     };
+
     dom.mylistsContainer.querySelector('#create-list-btn-main').onclick = () => { const input = dom.mylistsContainer.querySelector('#new-list-name-main'); if (input.value) createNewList(input.value).then(() => { input.value = ''; }); };
     dom.mylistsContainer.querySelector('#import-list-btn').onclick = () => { const input = dom.mylistsContainer.querySelector('#import-list-id'); if (input.value) importList(input.value.trim()).then(() => { input.value = ''; }); };
     
+    // 選択中のリスト詳細表示
     if (state.activeListId && state.myLists[state.activeListId]) {
         const list = state.myLists[state.activeListId];
         const listItems = state.myListItems[state.activeListId] || {};
-        const itemIds = Object.keys(listItems).sort((a, b) => listItems[b].addedAt - listItems[a].addedAt);
+        
+        // 追加日順(新しい順)でソート
+        const sortedItems = Object.entries(listItems).sort((a, b) => b[1].addedAt - a[1].addedAt);
         
         dom.mylistsContainer.querySelector('#current-list-name').textContent = util.escapeHTML(list.name);
         const grid = dom.mylistsContainer.querySelector('#current-list-grid');
-        renderSkeletons(grid, itemIds.length || 10);
-        
-        const neededWorkIds = itemIds.filter(id => !state.works[id] && !state.adminPicks[id]);
-        if (neededWorkIds.length > 0) {
-            const workPromises = neededWorkIds.map(workId =>
-                get(child(ref(db), `${CONSTANTS.DB_PATHS.WORKS}/${workId}`)).then(snap => {
-                    if (snap.exists()) {
-                        state.works[snap.key] = { id: snap.key, ...snap.val() };
-                    }
-                })
-            );
-            await Promise.all(workPromises);
-        }
-        
         grid.innerHTML = '';
-        itemIds.forEach(workId => {
-            if (state.works[workId] || state.adminPicks[workId]) {
-                grid.appendChild(makeCard(workId, 'myList'));
+        
+        // ★最適化: 個別fetch廃止。item自体が持っている情報を使ってstate.worksを更新し、カードを作る
+        sortedItems.forEach(([workId, itemData]) => {
+            // リスト内の簡易データをキャッシュとしてstate.worksに登録（まだ無ければ）
+            if (!state.works[workId] && itemData.title) {
+                state.works[workId] = {
+                    id: workId,
+                    title: itemData.title,
+                    coverUrl: itemData.coverUrl,
+                    score: itemData.score || 0,
+                    // タグなどはここには無いが、一覧表示には十分
+                };
             }
+            // データ移行前の古いアイテムへのフォールバックは省略（Step2で移行済み前提）
+            grid.appendChild(makeCard(workId, 'myList'));
         });
+
         const actions = dom.mylistsContainer.querySelector('#current-list-actions');
         actions.style.display = 'block';
         const shareIdSpan = actions.querySelector('#share-id-display');
@@ -90,7 +96,7 @@ export async function renderMyListsPage() {
 }
 
 // --- 公開リスト描画 ---
-export function renderPublicListPage({ info, items, works }) {
+export function renderPublicListPage({ info, items }) {
     showView('publicList');
     dom.publicListName.textContent = util.escapeHTML(info.name);
     dom.publicListOwner.textContent = `作成者: ${util.escapeHTML(info.ownerName || '匿名')}`;
@@ -98,41 +104,40 @@ export function renderPublicListPage({ info, items, works }) {
     const grid = dom.grids.publicList;
     grid.innerHTML = '';
 
-    const allAvailableWorks = { ...state.works, ...state.adminPicks, ...works };
     const sortedItems = Object.entries(items).sort((a, b) => b[1].addedAt - a[1].addedAt);
     
-    sortedItems.forEach(([workId]) => {
-        if (allAvailableWorks[workId]) {
-                grid.appendChild(makeCard(workId, 'publicList'));
+    sortedItems.forEach(([workId, itemData]) => {
+        // ★最適化: ここでも非正規化データを利用
+        if (itemData.title) {
+            state.works[workId] = {
+                id: workId,
+                title: itemData.title,
+                coverUrl: itemData.coverUrl,
+                score: itemData.score || 0
+            };
         }
+        grid.appendChild(makeCard(workId, 'publicList'));
     });
 }
 
+// ★最適化: 以前のように個別にworksを取得する処理を削除
 export async function getPublicListData(listId) {
     const listSnap = await get(child(ref(db), `${CONSTANTS.DB_PATHS.LISTS}/${listId}`));
     if (!listSnap.exists()) throw new Error("指定されたリストは見つかりませんでした。");
 
+    // アイテム（詳細情報込み）を取得
     const itemsSnap = await get(child(ref(db), `${CONSTANTS.DB_PATHS.LIST_ITEMS}/${listId}`));
     const items = itemsSnap.exists() ? itemsSnap.val() : {};
-    const workIds = Object.keys(items);
-
-    const workPromises = workIds.map(workId => get(child(ref(db), `${CONSTANTS.DB_PATHS.WORKS}/${workId}`)));
-    const workSnapshots = await Promise.all(workPromises);
-
-    const worksForList = {};
-    workSnapshots.forEach(snap => {
-        if (snap.exists()) {
-            worksForList[snap.key] = { id: snap.key, ...snap.val() };
-        }
-    });
     
-    return { info: { id: listSnap.key, ...listSnap.val() }, items: items, works: worksForList };
+    // worksの個別fetchは行わず、そのまま返す
+    return { info: { id: listSnap.key, ...listSnap.val() }, items: items };
 }
 
 // --- リスト操作系 ---
 export async function createNewList(name) {
     if (!state.currentUser) { util.showToast('ログインが必要です。'); return null; }
     if (Object.keys(state.myLists).length >= CONSTANTS.LIST_LIMITS.MAX_LISTS) { util.showToast(`作成できるリストは${CONSTANTS.LIST_LIMITS.MAX_LISTS}個までです。`); return null; }
+    
     const newListRef = push(ref(db, CONSTANTS.DB_PATHS.LISTS));
     await set(newListRef, { ownerId: state.currentUser.uid, ownerName: state.currentUser.displayName, name: name.trim(), createdAt: serverTimestamp() });
     await set(ref(db, `${CONSTANTS.DB_PATHS.USER_LISTS}/${state.currentUser.uid}/${newListRef.key}`), true);
@@ -143,10 +148,12 @@ export async function deleteList(listId) {
     if (!state.currentUser) return;
     const listName = state.myLists[listId]?.name || 'このリスト';
     if (!confirm(`「${util.escapeHTML(listName)}」を完全に削除しますか？この操作は取り消せません。`)) return;
+    
     const updates = {};
     updates[`${CONSTANTS.DB_PATHS.LISTS}/${listId}`] = null;
     updates[`${CONSTANTS.DB_PATHS.LIST_ITEMS}/${listId}`] = null;
     updates[`${CONSTANTS.DB_PATHS.USER_LISTS}/${state.currentUser.uid}/${listId}`] = null;
+    
     try {
         await update(ref(db), updates);
         util.showToast('リストを削除しました。');
@@ -164,27 +171,39 @@ export async function renameList(listId, newName) {
 export async function importList(listId) {
     if (!state.currentUser) { util.showToast('ログインが必要です。'); return; }
     if (Object.keys(state.myLists).length >= CONSTANTS.LIST_LIMITS.MAX_LISTS) { util.showToast(`作成できるリストは${CONSTANTS.LIST_LIMITS.MAX_LISTS}個までです。`); return; }
+    
     try {
         const { info, items } = await getPublicListData(listId);
         const newListName = `${info.name} (コピー)`;
         const newListId = await createNewList(newListName);
         if (!newListId) return;
+        
         const itemEntries = Object.entries(items);
         if (itemEntries.length > CONSTANTS.LIST_LIMITS.MAX_ITEMS_PER_LIST) {
             util.showToast(`コピー元リストのアイテム数が上限を超えています。先頭${CONSTANTS.LIST_LIMITS.MAX_ITEMS_PER_LIST}件のみインポートします。`);
             itemEntries.length = CONSTANTS.LIST_LIMITS.MAX_ITEMS_PER_LIST;
         }
+        
         const updates = {};
-        itemEntries.forEach(([workId]) => { updates[`${CONSTANTS.DB_PATHS.LIST_ITEMS}/${newListId}/${workId}`] = { addedAt: serverTimestamp() }; });
+        // インポート時も詳細データをそのままコピーして保存
+        itemEntries.forEach(([workId, data]) => { 
+            updates[`${CONSTANTS.DB_PATHS.LIST_ITEMS}/${newListId}/${workId}`] = { 
+                ...data, // タイトルなどもコピー
+                addedAt: serverTimestamp() 
+            }; 
+        });
+        
         await update(ref(db), updates);
         util.showToast(`「${util.escapeHTML(newListName)}」をインポートしました。`);
         state.activeListId = newListId;
     } catch (error) { util.showToast(error.message || 'リストのインポートに失敗しました。'); }
 }
 
+// ★最適化: リスト追加時に作品詳細データも保存
 export async function toggleWorkInList(workId, listId, shouldBeInList) {
     if (!state.currentUser) return false;
     const itemRef = ref(db, `${CONSTANTS.DB_PATHS.LIST_ITEMS}/${listId}/${workId}`);
+    
     if (shouldBeInList) {
         if (Object.keys(state.myListItems[listId] || {}).length >= CONSTANTS.LIST_LIMITS.MAX_ITEMS_PER_LIST) {
             util.showToast(`リストには${CONSTANTS.LIST_LIMITS.MAX_ITEMS_PER_LIST}件まで登録できます。`);
@@ -192,8 +211,21 @@ export async function toggleWorkInList(workId, listId, shouldBeInList) {
             if (checkbox) checkbox.checked = false;
             return false;
         }
-        await set(itemRef, { addedAt: serverTimestamp() });
-    } else { await remove(itemRef); }
+
+        // 追加する作品のデータをstateから取得
+        const workData = state.works[workId] || state.adminPicks[workId];
+        const saveData = { addedAt: serverTimestamp() };
+        
+        if (workData) {
+            saveData.title = workData.title;
+            saveData.coverUrl = workData.coverUrl;
+            saveData.score = workData.score || 0;
+        }
+
+        await set(itemRef, saveData);
+    } else { 
+        await remove(itemRef); 
+    }
     return true;
 }
 
@@ -271,5 +303,4 @@ export function openAddToListPopover(workId, button) {
         if (newListId) await toggleWorkInList(workId, newListId, true);
         if (activePopover) { activePopover.remove(); activePopover = null; }
     });
-
 }

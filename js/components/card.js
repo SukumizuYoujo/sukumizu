@@ -2,7 +2,10 @@
 
 import { state } from "../store/state.js";
 import { util } from "../utils/common.js";
-import { toggleFavorite, openAddToListPopover, removeWorkFromList, handleVote } from "../features/lists.js"; // 必要な関数があれば適宜インポート調整
+// handleVote は works.js からインポートします
+import { handleVote } from "../features/works.js";
+// リスト関連の関数は lists.js からインポートします
+import { toggleFavorite, openAddToListPopover, removeWorkFromList } from "../features/lists.js";
 
 export function makeCard(workId, context = '') {
     // データ取得 (works または adminPicks から)
@@ -121,7 +124,7 @@ export function makeCard(workId, context = '') {
     return card;
 }
 
-// スケルトン作成 (ここはinnerHTMLでも単純なのでOKだが、念のため統一)
+// スケルトン作成
 export function createSkeletonCard() {
     const card = document.createElement("div");
     card.className = "skeleton-card";

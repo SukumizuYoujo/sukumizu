@@ -1,7 +1,7 @@
 // js/main.js
 
 import { GoogleAuthProvider, signInWithPopup, signOut, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/11.10.0/firebase-auth.js";
-import { onValue, ref, get, update } from "https://www.gstatic.com/firebasejs/11.10.0/firebase-database.js";
+import { onValue, ref } from "https://www.gstatic.com/firebasejs/11.10.0/firebase-database.js";
 
 import { CONSTANTS } from "./config/constants.js";
 import { auth, db } from "./config/firebase.js";
@@ -9,10 +9,11 @@ import { state } from "./store/state.js";
 import { dom } from "./utils/dom.js";
 import { util } from "./utils/common.js";
 import { renderSkeletons } from "./components/card.js";
-import { renderPage, handleVote, addWork, renderPaginationButtons } from "./features/works.js";
+import { renderPage, handleVote, addWork } from "./features/works.js";
 import { toggleFavorite, openAddToListPopover, removeWorkFromList, importList } from "./features/lists.js";
 import { openTagFilterModal, openContactModal, openInfoModal, setupImagePreviewListeners, initializeDetailsPopup } from "./features/modals.js";
 import { updateSortedArrays } from "./features/core.js";
+// routerからは必要な関数を全てインポート
 import { showView, handleUrlBasedView, getScrollTargetForView, refreshAllGrids } from "./features/router.js"; 
 import { updateUIforAuthState, subscribeUserData, unsubscribeUserData } from "./features/auth.js";
 
@@ -42,13 +43,30 @@ function initializeListeners() {
         refreshAllGrids();
     });
 
-    // ★イベントリスナー（これが必要です）
+    // ▼▼▼ イベントリスナー設定（循環参照回避の要） ▼▼▼
+    
+    // 1. グリッド更新イベント (Auth, Modals等から発火)
     window.addEventListener('dlsite-share:refresh', () => {
         refreshAllGrids();
     });
+
+    // 2. 画面遷移イベント (Lists等から発火)
+    window.addEventListener('dlsite-share:change-view', (e) => {
+        const { view, params } = e.detail;
+        
+        // パブリックリストなどの特殊な遷移に対応
+        if (view === 'publicList' && params?.listId) {
+            const url = new URL(window.location);
+            url.searchParams.set('view', 'publicList');
+            url.searchParams.set('list', params.listId);
+            history.pushState({ view: 'publicList' }, '', url);
+            handleUrlBasedView();
+        } else {
+            showView(view);
+        }
+    });
 }
 
-// --- 以下、変更なし ---
 function initializePageSizeSelectors() {
     const isMobile = window.innerWidth <= 768;
     const deviceType = isMobile ? 'mobile' : 'pc';
@@ -68,6 +86,7 @@ function initializePageSizeSelectors() {
         });
     }
 }
+
 function setupCollapsers() {
     document.querySelectorAll('.collapser-header').forEach(header => {
         const content = header.nextElementSibling;
@@ -83,6 +102,7 @@ function setupCollapsers() {
         });
     });
 }
+
 function setupEventListeners() {
     dom.loginBtn.addEventListener('click', () => { const p = new GoogleAuthProvider(); signInWithPopup(auth, p).catch(err => util.showToast(`Login failed: ${err.code}`)); });
     dom.logoutBtn.addEventListener('click', () => signOut(auth));
@@ -155,6 +175,7 @@ function setupEventListeners() {
         e.currentTarget.textContent = isCollapsed ? '▶' : '◀';
     });
 }
+
 function setupDelegatedEventListeners() {
     dom.container.addEventListener('click', (e) => {
         const target = e.target;
@@ -197,6 +218,7 @@ function setupDelegatedEventListeners() {
         }
     });
 }
+
 function main() {
     const savedGridHeightSetting = localStorage.getItem('isGridHeightFixedForMobile');
     state.isGridHeightFixedForMobile = savedGridHeightSetting === null ? true : (savedGridHeightSetting === 'true');

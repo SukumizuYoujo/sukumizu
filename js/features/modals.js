@@ -6,7 +6,7 @@ import { util } from "../utils/common.js";
 import { CONSTANTS } from "../config/constants.js";
 import { db } from "../config/firebase.js";
 import { ref, push, serverTimestamp } from "https://www.gstatic.com/firebasejs/11.10.0/firebase-database.js";
-import { refreshAllGrids } from "./core.js"; // 後ほど作成するcore.jsからインポート
+import { refreshAllGrids } from "./router.js"; // ★変更
 
 // --- タグフィルタモーダル ---
 export function openTagFilterModal() {
@@ -60,22 +60,17 @@ export function openTagFilterModal() {
     updateModeButtons(); renderCategoryTabs(); renderTagList();
 }
 
-// --- お問い合わせモーダル ---
+// --- 他の関数は変更なしのため省略 ---
 export function openContactModal() {
     dom.modalOverlay.classList.remove("hidden");
     const modal = dom.modalContent;
     modal.className = 'modal contact-form';
     modal.innerHTML = `<div class="modal-header">お問い合わせ</div> <form id="contactForm" class="modal-body"> <div class="form-group"> <label for="contactName">お名前<span style="color:red">*</span></label> <input type="text" id="contactName" placeholder="名前またはニックネーム" required> </div> <div class="form-group"> <label for="contactEmail">メール<span style="color:red">*</span></label> <input type="email" id="contactEmail" placeholder="例: info@example.com" required> </div> <div class="form-group"> <label for="contactTitle">タイトル</label> <input type="text" id="contactTitle"> </div> <div class="form-group"> <label for="contactContent">お問い合わせ内容<span style="color:red">*</span></label> <textarea id="contactContent" placeholder="コメントまたはメッセージ" required></textarea> </div> </form> <div class="modal-footer"> <button id="modal-close-btn">閉じる</button> <button id="contact-submit-btn" type="submit" form="contactForm" style="background-color: #28a745; color: white;">送信</button> </div>`;
     modal.querySelector('#modal-close-btn').onclick = () => dom.modalOverlay.classList.add("hidden");
-    
-    // フォーム送信ハンドラ
     modal.querySelector('#contactForm').onsubmit = async (event) => {
-        event.preventDefault();
-        const btn = document.getElementById('contact-submit-btn');
-        const name = document.getElementById('contactName').value.trim();
-        const email = document.getElementById('contactEmail').value.trim();
-        const title = document.getElementById('contactTitle').value.trim();
-        const content = document.getElementById('contactContent').value.trim();
+        event.preventDefault(); const btn = document.getElementById('contact-submit-btn');
+        const name = document.getElementById('contactName').value.trim(); const email = document.getElementById('contactEmail').value.trim();
+        const title = document.getElementById('contactTitle').value.trim(); const content = document.getElementById('contactContent').value.trim();
         if (!name || !email || !content) { return util.showToast("必須項目をすべて入力してください"); }
         btn.disabled = true; btn.textContent = '送信中...';
         const contactData = { name, email, title, content, timestamp: serverTimestamp(), isRead: false };
@@ -83,8 +78,6 @@ export function openContactModal() {
         catch (error) { util.showToast(`送信に失敗しました: ${error.message}`); btn.disabled = false; btn.textContent = '送信'; }
     };
 }
-
-// --- サイト情報モーダル ---
 export function openInfoModal() {
     dom.modalOverlay.classList.remove("hidden");
     const modal = dom.modalContent;
@@ -108,8 +101,6 @@ export function openInfoModal() {
         </div>`;
     modal.querySelector('#modal-close-btn').onclick = () => dom.modalOverlay.classList.add("hidden");
 }
-
-// --- 画像プレビュー ---
 export function setupImagePreviewListeners() {
     const popup = dom.imagePreviewPopup; if (!popup || !dom.container) return;
     dom.container.addEventListener('mouseover', (e) => {
@@ -128,8 +119,6 @@ export function setupImagePreviewListeners() {
         }
     });
 }
-
-// --- 詳細ポップアップ ---
 export function initializeDetailsPopup() {
     const popup = document.getElementById('details-popup');
     if (!popup) return;
@@ -155,9 +144,7 @@ export function initializeDetailsPopup() {
     });
     dom.container.addEventListener('mouseout', (e) => {
         const titleEl = e.target.closest('.title');
-        if (titleEl && e.relatedTarget !== popup) {
-            hideTimeout = setTimeout(() => { popup.style.display = 'none'; }, 200);
-        }
+        if (titleEl && e.relatedTarget !== popup) { hideTimeout = setTimeout(() => { popup.style.display = 'none'; }, 200); }
     });
     popup.addEventListener('mouseover', () => { clearTimeout(hideTimeout); });
     popup.addEventListener('mouseout', () => { hideTimeout = setTimeout(() => { popup.style.display = 'none'; }, 200); });

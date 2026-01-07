@@ -13,7 +13,8 @@ import { renderPage, handleVote, addWork, renderPaginationButtons } from "./feat
 import { toggleFavorite, openAddToListPopover, removeWorkFromList, importList } from "./features/lists.js";
 import { openTagFilterModal, openContactModal, openInfoModal, setupImagePreviewListeners, initializeDetailsPopup } from "./features/modals.js";
 import { updateSortedArrays } from "./features/core.js";
-import { showView, handleUrlBasedView, getScrollTargetForView, refreshAllGrids } from "./features/router.js"; // ★変更: core.js -> router.js
+// ▼▼▼ ここが重要！ refreshAllGrids を router.js から読み込むように変更 ▼▼▼
+import { showView, handleUrlBasedView, getScrollTargetForView, refreshAllGrids } from "./features/router.js"; 
 import { updateUIforAuthState, subscribeUserData, unsubscribeUserData } from "./features/auth.js";
 
 function initializeListeners() {

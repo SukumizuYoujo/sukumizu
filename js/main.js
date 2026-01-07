@@ -368,3 +368,65 @@ function main() {
 
 // アプリケーション起動
 main();
+
+// ==========================================
+// ▼▼▼ Phase 2: リストデータ移行用コード (実行後、削除) ▼▼▼
+// ==========================================
+import { ref, get, update } from "https://www.gstatic.com/firebasejs/11.10.0/firebase-database.js";
+import { db } from "./config/firebase.js";
+
+async function migrateListItems() {
+    console.log("🚀 リストデータの移行を開始します...");
+    
+    // 1. 全てのリストアイテムと作品データを取得
+    const listItemsSnap = await get(ref(db, "listItems"));
+    const worksSnap = await get(ref(db, "works"));
+    
+    if (!listItemsSnap.exists() || !worksSnap.exists()) {
+        console.log("データが見つかりませんでした。");
+        return;
+    }
+
+    const allWorks = worksSnap.val();
+    const updates = {};
+    let count = 0;
+
+    // 2. リストごとにループ
+    listItemsSnap.forEach(listSnap => {
+        const listId = listSnap.key;
+        
+        // アイテムごとにループ
+        listSnap.forEach(itemSnap => {
+            const workId = itemSnap.key;
+            const itemData = itemSnap.val();
+            const workData = allWorks[workId];
+
+            // 作品データが存在し、かつ詳細データがまだリスト側にない場合
+            if (workData && !itemData.title) {
+                // 必要なデータだけをコピー (非正規化)
+                updates[`listItems/${listId}/${workId}`] = {
+                    ...itemData, // addedAtなどを維持
+                    title: workData.title,
+                    coverUrl: workData.coverUrl,
+                    score: Object.values(workData.votes || {}).reduce((a, b) => a + b, 0)
+                };
+                count++;
+            }
+        });
+    });
+
+    // 3. 一括更新
+    if (count > 0) {
+        await update(ref(db), updates);
+        console.log(`✅ 完了! ${count} 件のリストアイテムを詳細化しました。`);
+        alert(`リストデータの移行が完了しました！\n${count}件更新。\nmain.jsのコードを削除してください。`);
+    } else {
+        console.log("更新が必要なデータはありませんでした。");
+        alert("更新対象データはありませんでした。\nmain.jsのコードを削除してください。");
+    }
+}
+
+migrateListItems();
+// ==========================================
+// ▲▲▲ データ移行用コード (ここまで) ▲▲▲
+// ==========================================

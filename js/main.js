@@ -42,13 +42,13 @@ function initializeListeners() {
         refreshAllGrids();
     });
 
-    // ★重要: イベントリスナーを追加
-    // 他のファイルから「更新して」という合図が来たら、ここで実際の更新処理を行う
+    // ★重要: イベントを受け取る設定を追加
     window.addEventListener('dlsite-share:refresh', () => {
         refreshAllGrids();
     });
 }
 
+// --- 以下、既存コード（変更なし） ---
 function initializePageSizeSelectors() {
     const isMobile = window.innerWidth <= 768;
     const deviceType = isMobile ? 'mobile' : 'pc';

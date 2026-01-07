@@ -13,7 +13,6 @@ import { renderPage, handleVote, addWork, renderPaginationButtons } from "./feat
 import { toggleFavorite, openAddToListPopover, removeWorkFromList, importList } from "./features/lists.js";
 import { openTagFilterModal, openContactModal, openInfoModal, setupImagePreviewListeners, initializeDetailsPopup } from "./features/modals.js";
 import { updateSortedArrays } from "./features/core.js";
-// ▼▼▼ ここが重要！ refreshAllGrids を router.js から読み込むように変更 ▼▼▼
 import { showView, handleUrlBasedView, getScrollTargetForView, refreshAllGrids } from "./features/router.js"; 
 import { updateUIforAuthState, subscribeUserData, unsubscribeUserData } from "./features/auth.js";
 
@@ -40,6 +39,12 @@ function initializeListeners() {
         state.adminPicks = newAdminPicks;
         state.isInitialDataLoaded.adminPicks = true;
         updateSortedArrays();
+        refreshAllGrids();
+    });
+
+    // ★重要: イベントリスナーを追加
+    // 他のファイルから「更新して」という合図が来たら、ここで実際の更新処理を行う
+    window.addEventListener('dlsite-share:refresh', () => {
         refreshAllGrids();
     });
 }

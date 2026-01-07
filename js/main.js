@@ -180,26 +180,44 @@ function setupDelegatedEventListeners() {
     dom.container.addEventListener('click', (e) => {
         const target = e.target;
         const card = target.closest('.item');
+        
         if (card) {
             const workId = card.dataset.id;
             const canonicalId = card.dataset.canonicalId;
+            const dbPath = card.dataset.dbPath; // dataset.dbPath (キャメルケース) で取得
+
             if (target.closest('.rating-btn')) {
-                const score = Number(target.closest('.rating-btn.good, .rating-btn.bad').dataset.score);
+                // Good/Badボタン
+                const btn = target.closest('.rating-btn.good, .rating-btn.bad');
+                const score = Number(btn.dataset.score);
+                
+                // デバッグ用ログ
+                console.log(`Vote clicked: ID=${workId}, Score=${score}, Path=${dbPath}`);
+                
                 handleVote(workId, score, dbPath);
             } else if (target.closest('.favorite-btn')) {
-                e.stopPropagation(); toggleFavorite(canonicalId);
+                e.stopPropagation(); 
+                toggleFavorite(canonicalId);
             } else if (target.closest('.add-to-list-btn')) {
-                e.stopPropagation(); openAddToListPopover(canonicalId, target);
+                e.stopPropagation(); 
+                openAddToListPopover(canonicalId, target);
             } else if (target.closest('.remove-from-list-btn')) {
                 e.stopPropagation();
                 const listId = target.dataset.listId;
-                if (confirm(`「${util.escapeHTML(state.myLists[listId]?.name || '')}」からこの作品を削除しますか？`)) { removeWorkFromList(canonicalId, listId); }
+                if (confirm(`「${util.escapeHTML(state.myLists[listId]?.name || '')}」からこの作品を削除しますか？`)) { 
+                    removeWorkFromList(canonicalId, listId); 
+                }
             } else {
+                // カード全体クリック（詳細ページへ）
                 const workData = state.works[workId] || state.adminPicks[workId];
-                if(workData && workData.pageUrl) { window.open(workData.pageUrl, "_blank"); }
+                if(workData && workData.pageUrl) { 
+                    window.open(workData.pageUrl, "_blank"); 
+                }
             }
             return;
         }
+        
+        // ページネーションなどの処理（変更なし）
         const paginationButton = target.closest('.pagination button');
         if (paginationButton && !paginationButton.disabled) {
             const paginationContainer = target.closest('.pagination');
@@ -270,4 +288,5 @@ function main() {
     initializeDetailsPopup();
 }
 main();
+
 

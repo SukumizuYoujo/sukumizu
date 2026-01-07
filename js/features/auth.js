@@ -6,7 +6,8 @@ import { CONSTANTS } from "../config/constants.js";
 import { db } from "../config/firebase.js";
 import { ref, onValue, get, child } from "https://www.gstatic.com/firebasejs/11.10.0/firebase-database.js";
 import { updateSortedArrays } from "./core.js";
-// import refresh... は削除
+// import refreshAllGrids は削除しました
+import { renderMyListsPage } from "./lists.js";
 
 let userListeners = [];
 
@@ -15,17 +16,19 @@ export function subscribeUserData(user) {
     if (!user) return;
     const uid = user.uid;
     
+    // お気に入り同期
     const favListener = onValue(ref(db, `${CONSTANTS.DB_PATHS.FAVORITES}/${uid}`), snapshot => {
         state.favorites.clear();
         if (snapshot.exists()) { 
             Object.keys(snapshot.val()).forEach(workId => state.favorites.add(workId)); 
         }
         updateSortedArrays();
-        // イベント発火
+        // ★変更: 直接関数を呼ばず、イベントを発信する
         window.dispatchEvent(new CustomEvent('dlsite-share:refresh'));
     });
     userListeners.push(favListener);
 
+    // マイリスト同期
     const listMetaListener = onValue(ref(db, `${CONSTANTS.DB_PATHS.USER_LISTS}/${uid}`), async snapshot => {
         const oldListIds = Object.keys(state.myLists);
         const newListIds = snapshot.exists() ? Object.keys(snapshot.val()) : [];
@@ -48,15 +51,15 @@ export function subscribeUserData(user) {
                 needsRender = true;
                 const itemsListener = onValue(ref(db, `${CONSTANTS.DB_PATHS.LIST_ITEMS}/${l.id}`), itemSnap => {
                     state.myListItems[l.id] = itemSnap.val() || {};
-                    // イベント発火
+                    // イベント発信
                     window.dispatchEvent(new CustomEvent('dlsite-share:refresh'));
                 });
                 userListeners.push(itemsListener);
             }
         }
-        // マイリスト表示中なら強制リフレッシュイベント
         if (needsRender || removedListIds.length > 0) {
             if (state.currentView === 'mylists') { 
+                // ★変更: イベント発信
                 window.dispatchEvent(new CustomEvent('dlsite-share:refresh'));
             }
         }
@@ -70,6 +73,7 @@ export function unsubscribeUserData() {
     state.favorites.clear(); state.myLists = {}; state.myListItems = {};
     if (state.currentUser === null) { 
         updateSortedArrays(); 
+        // ★変更: イベント発信
         window.dispatchEvent(new CustomEvent('dlsite-share:refresh'));
     }
 }
